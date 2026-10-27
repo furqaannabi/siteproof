@@ -112,7 +112,8 @@ export interface Claim {
    */
   item: ItemKind | "not_countable";
   qty: number;
-  unit: string;
+  /** null where the document states no unit ("Windows complete: 12"). Never filled in. */
+  unit: string | null;
   room_id: string | null;
   source_quote: string;
   quote_verified: boolean;

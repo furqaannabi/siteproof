@@ -151,7 +151,8 @@ model Claim {
   doc_id         String
   item           ClaimItem
   qty            Int
-  unit           String
+  /// null where the document states no unit. Never filled in.
+  unit           String?
   room_id        String?
   /// The document's line, word for word. Untrusted text: never rendered as markup.
   source_quote   String

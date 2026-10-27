@@ -14,7 +14,7 @@ Document { id, project_id, flat_id|null, kind: "demand_letter"|"invoice"|"boq",
            status: uploaded|processing|done|failed }                    // null flat = whole project (a BOQ)
 Segment { clip_id, room_id|null, t_start, t_end, full_sweep: bool }     // null room = "unplaced"
 ItemKind = "window" | "door"                                            // what v1 can count
-Claim   { id, doc_id, item: ItemKind|"not_countable", qty, unit, room_id|null, source_quote, quote_verified: bool }
+Claim   { id, doc_id, item: ItemKind|"not_countable", qty, unit|null, room_id|null, source_quote, quote_verified: bool }
 Detection { clip_id, room_id, item: ItemKind, track_id, best_frame_url, mask_url }
 Result  { claim_id, counted, outcome: "verified"|"short"|"not_seen", room_covered: bool,
           evidence: [frame_url], note }
@@ -40,6 +40,7 @@ Result  { claim_id, counted, outcome: "verified"|"short"|"not_seen", room_covere
 - **`Segment.full_sweep`** is true only for one continuous stretch that starts at the room's QR tag and pans the whole room once in one direction, without panning back. It is what the coverage rule reads.
 - **`Claim.item` and `Detection.item` are keys from `ItemKind`, never a document's wording** — that lives in `source_quote`. So a claim and its detections always join; free text would miss the join, read as 0, and in a covered room become a false Short. How an item becomes a SAM prompt is the pipeline's business.
 - **A `"not_countable"` claim has no `Result`.** It is not checked in this version, and the report shows it in its own neutral style — never as Not seen yet, because no footage will clear it. A claim that asks for more than the BOQ holds also gets no `Result`, and goes to a person with both quotes.
+- **`Claim.unit` is null where the document states no unit**, as a demand letter's "Windows complete: 12" does. It is never filled in (a "nos" the document never printed could not be told apart from one it did); show no unit, never the text "null". The engine compares counts and never reads it.
 - **`Claim.quote_verified`** is set by code, not by a model: it is true only when `source_quote` appears in the source document word for word. A claim with `quote_verified: false` is an unverified claim and is never shown as a number.
 - **`Detection.track_id`** is SAM's identity for one object within one clip. Objects are counted, not appearances.
 - **`Result.counted`** is the highest count from any single clip for that room and item. Merging the same object across clips is a stretch goal.
@@ -66,3 +67,4 @@ Flag these to Furqaan rather than deciding them in code:
 | Recorded from the team plan, as agreed on the night of 26 October | 27 October 2026 | William |
 | `Flat` spelled out and `Room.flat` confirmed as an id; `Document` and `GET /documents/:id/status` added; `Clip.captured_at` may be null ([ADR](decisions/2026-10-27-contract-flat-document-and-capture-time.md)) | 27 October 2026 | Furqaan |
 | `ItemKind` added; `Claim.item` and `Detection.item` draw from it ([ADR](decisions/2026-10-27-claim-item-is-a-closed-vocabulary-not-the-boq-wording.md)). Approved William's ADRs on the closed vocabulary, the demand letter judged against the BOQ as a ceiling, and refusing unreadable input in the gap-request voice | 27 October 2026 | Furqaan |
+| `Claim.unit` may be null, where the document states no unit — found running real Muse Spark output on a demand letter | 27 October 2026 | Furqaan |

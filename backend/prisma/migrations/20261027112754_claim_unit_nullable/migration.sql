@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Claim" ALTER COLUMN "unit" DROP NOT NULL;

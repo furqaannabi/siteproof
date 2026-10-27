@@ -43,7 +43,7 @@ try {
   console.log(`${pdf}: ${pages} page(s), ${claims.length} claim(s), ${rejected.length} rejected, in ${seconds} s\n`);
   for (const c of claims) {
     const verified = c.quote_verified ? "verified  " : "UNVERIFIED";
-    console.log(`${verified} ${c.item.padEnd(13)} ${String(c.qty).padStart(4)} ${c.unit.padEnd(4)} ${roomName(c.room_id).padEnd(12)} "${c.source_quote}"`);
+    console.log(`${verified} ${c.item.padEnd(13)} ${String(c.qty).padStart(4)} ${(c.unit ?? "").padEnd(4)} ${roomName(c.room_id).padEnd(12)} "${c.source_quote}"`);
   }
   for (const r of rejected) console.log(`REJECTED   entry ${r.index}: ${r.reason}`);
 
