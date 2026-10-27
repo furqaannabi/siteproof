@@ -1,0 +1,164 @@
+.created {
+  border: 2px solid var(--verified);
+  padding: 12px 16px;
+  background: var(--panel);
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px 48px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 1 460px;
+}
+
+.steps li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+}
+
+.steps a {
+  color: var(--ink);
+}
+
+.steps li[data-done="true"] a {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.stepNumber {
+  flex: 0 0 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  border: 2px solid var(--panel-border);
+}
+
+.steps li[data-done="true"] .stepNumber {
+  background: var(--verified);
+  border-color: var(--verified);
+  color: var(--ground);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.tagsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tagsSection > p {
+  margin: 0;
+}
+
+.flatHeading {
+  margin: 8px 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.tags {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.tag {
+  border: 2px solid var(--panel-border);
+  background: #fff;
+  color: #1e1d1a;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  break-inside: avoid;
+}
+
+.qr {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #5c5850;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #5c5850;
+}
+
+.tagLabel {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.tagCode {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: #5c5850;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 900px) {
+  .columns {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.placed {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Printing this page prints the tag sheet only. */
+@media print {
+  .created,
+  .top,
+  .columns,
+  .tagsSection > p,
+  .tagsSection button {
+    display: none;
+  }
+
+  .tags {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .qr {
+    width: 45mm;
+    height: 45mm;
+  }
+}
