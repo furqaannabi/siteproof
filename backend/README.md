@@ -2,7 +2,12 @@
 
 Hono on Bun, TypeScript. PostgreSQL through Prisma. A jobs table in Postgres, run by this same service; a job is written in the same transaction as the change it belongs to.
 
-Not scaffolded in this commit: the service skeleton and the Prisma schema are Furqaan's call as lead.
+```bash
+pnpm --filter @siteproof/backend dev    # reads ../.env, serves on PORT (default 4000)
+curl localhost:4000/health
+```
+
+`src/app.ts` is the Hono app, kept apart from `src/index.ts` (the Bun entry) so tests can call `app.request()` without a port. `src/pipeline/` holds the pipeline steps, one module each; `pnpm --filter @siteproof/backend test` runs their tests (ffmpeg and ffprobe must be on the PATH). The Prisma schema and the jobs table are not written yet.
 
 | Part | Owner |
 | --- | --- |
