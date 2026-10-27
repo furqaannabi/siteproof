@@ -11,7 +11,7 @@ pnpm --filter @siteproof/backend dev    # reads backend/.env, serves on PORT (de
 curl localhost:4000/health
 ```
 
-`src/app.ts` is the Hono app, kept apart from `src/index.ts` (the Bun entry) so tests can call `app.request()` without a port. `src/pipeline/` holds the pipeline steps, one module each; `pnpm --filter @siteproof/backend test` runs their tests (ffmpeg and ffprobe must be on the PATH). `src/db.ts` is the one Prisma client (Prisma 7, through the `pg` driver adapter). The schema in `prisma/schema.prisma` has no models yet; the jobs table is not written yet.
+`src/app.ts` is the Hono app, kept apart from `src/index.ts` (the Bun entry) so tests can call `app.request()` without a port. `src/pipeline/` holds the pipeline steps, one module each; `pnpm --filter @siteproof/backend test` runs their tests (ffmpeg, ffprobe and poppler's `pdftotext` must be on the PATH: `brew install ffmpeg poppler`; the deploy container needs them too). `src/db.ts` is the one Prisma client (Prisma 7, through the `pg` driver adapter). The schema in `prisma/schema.prisma` has no models yet; the jobs table is not written yet.
 
 | Part | Owner |
 | --- | --- |
