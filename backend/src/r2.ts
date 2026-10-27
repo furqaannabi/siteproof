@@ -29,4 +29,8 @@ export const r2Files = {
   async put(key: string, bytes: Uint8Array, contentType: string): Promise<void> {
     await r2().write(key, bytes, { type: contentType });
   },
+
+  async get(key: string): Promise<Uint8Array> {
+    return new Uint8Array(await r2().file(key).arrayBuffer());
+  },
 };

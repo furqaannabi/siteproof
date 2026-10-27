@@ -42,6 +42,8 @@ export class MuseSparkError extends Error {
   constructor(
     readonly code: "bad_image" | "request_failed" | "incomplete" | "refused" | "empty",
     message: string,
+    /** The HTTP status, for a request_failed that got one: a 400 is not worth retrying, a 503 is. */
+    readonly status?: number,
   ) {
     super(message);
     this.name = "MuseSparkError";
@@ -98,7 +100,7 @@ export async function askMuseSpark(request: ExtractionRequest, config: MuseSpark
       max_output_tokens: MAX_OUTPUT_TOKENS,
     }),
   });
-  if (!res.ok) throw new MuseSparkError("request_failed", `Muse Spark request failed with HTTP ${res.status}`);
+  if (!res.ok) throw new MuseSparkError("request_failed", `Muse Spark request failed with HTTP ${res.status}`, res.status);
 
   const answer = Answer.safeParse(await res.json().catch(() => null));
   if (!answer.success) throw new MuseSparkError("request_failed", "Muse Spark's answer was not a response object");
