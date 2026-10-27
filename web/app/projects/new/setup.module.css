@@ -1,0 +1,83 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rooms {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.rooms p {
+  margin: 0;
+}
+
+.roomRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.roomRow > label {
+  flex: 1 1 auto;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1.5px solid var(--rule);
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.chip:disabled {
+  opacity: 0.5;
+}
+
+/* On a phone the main action stays in reach of a thumb. */
+.submitBar {
+  position: sticky;
+  bottom: 0;
+  padding: 12px 0;
+  background: var(--ground);
+  border-top: 1px solid var(--rule);
+}
+
+.submitBar button {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .submitBar {
+    position: static;
+    border-top: 0;
+    background: transparent;
+  }
+
+  .submitBar button {
+    width: auto;
+  }
+}
