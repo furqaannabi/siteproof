@@ -171,7 +171,7 @@ Indie entries are judged on creativity, technical ambition, and whether it works
 ## 16. Still open (do not assume)
 
 - The official Indie-track rules on team size and student conditions (William, 26 Oct).
-- Measured SAM 3.1 and Muse Spark rate limits and cost per minute of video (Furqaan, 26 Oct).
+- ~~Measured SAM 3.1 and Muse Spark rate limits and cost per minute of video (Furqaan, 26 Oct).~~ Checked 27 Oct; the numbers are in CLAUDE.md under the tech stack.
 - Whether the SAM spike passes its go/no-go on shaky footage (Furqaan, evening of 27 Oct).
 - ~~S3 or R2 for clips, frames and masks~~ — R2, private ([decided 27 Oct](decisions/2026-10-27-cloudflare-r2-for-clips-frames-and-masks.md)). The backend host; auth for the builder view.
 - The tolerance used by the comparison engine, and whether the plan (BOQ) quantity or the demand-letter quantity wins when they disagree.

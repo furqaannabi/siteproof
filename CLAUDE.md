@@ -109,7 +109,15 @@ These are the product. Do not re-open them, and do not write code that bends the
 | Schema validation | Zod, on every API request body and every model response |
 | Package manager and layout | pnpm workspace: `web/`, `backend/`, `contract/` |
 
-**Unverified at the time of writing:** the exact model names, rate limits and cost per minute of video on Meta's Model API. The plan says to check them against the Model API docs at kickoff. Do not assume a limit; if the agent needs one, ask Furqaan for the measured number.
+**Checked on 27 October 2026** against [Meta's Model API docs](https://dev.meta.ai/docs/pricing-rate-limits) and our own account. Base URL `https://api.meta.ai/v1`, bearer-token auth. Prices change: recheck the docs before relying on a number for anything larger than a test.
+
+| Model id | Price | Limits |
+| --- | --- | --- |
+| `sam-3.1` | $0.20 per 1,000 video frames (every frame of the clip, at least 50 per request); $2.50 per 1,000 images | 3,000 requests/min. Up to 15,000 frames (~10 min) per request, 16 objects per frame. MP4 or MOV in H.264, H.265 or MPEG-4; WebM and VP9 are rejected |
+| `muse-spark-1.3` | $1.25 per million input tokens, $4.25 per million output | 3,000 requests/min, 4,000,000 tokens/min |
+| `muse-voice-transcribe-1.0` | $0.18 per hour of audio | 256 concurrent streams |
+
+**Never use a `-contributor` model** (such as `muse-spark-1.3-contributor`). It is cheaper because Meta may train on what it is sent, and we send real site footage and buyers' documents.
 
 **Not yet decided.** Present 2–3 options, the human chooses, it gets an ADR, then it is filled in here:
 
