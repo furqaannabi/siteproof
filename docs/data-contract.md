@@ -51,6 +51,8 @@ Flag these to Furqaan rather than deciding them in code:
 - ~~**`Room.flat`** is a flat id in the type as written.~~ Settled 27 Oct: it is the flat's id.
 - `Claim.qty` / `Result.counted` units: whole objects for windows and doors in the MVP. Area items (tiles, plaster, paint) are post-hackathon and will need a unit on the count.
 - There is no shape yet for a **gap request** or a **query letter**, only the endpoints that produce them. Apurva and Furqaan to agree what comes back.
+- **A claim that is not countable in v1 has no `Result` row**, and none of the three outcomes means "not checked". Needs confirming, and it needs a third visual state in the report view: a claim with no result, distinct from Not seen yet. See [Claim.item is a closed vocabulary](decisions/2026-10-27-claim-item-is-a-closed-vocabulary-not-the-boq-wording.md).
+- **`ItemKind`**, the closed vocabulary `Claim.item` and `Detection.item` draw from, is proposed but not yet in `contract/src/index.ts` — Furqaan to approve the type before it lands.
 - The **tolerance** the comparison engine applies, and whether the BOQ quantity or the demand-letter quantity wins when they disagree.
 
 ## Revision

@@ -92,6 +92,8 @@ Inputs: clips · demand letter · BOQ
 - Weekly timelines and hidden-work records
 - Bank integrations for stage releases
 - Hands-free capture with smart glasses
+- Photos kept as attached context on a room, shown in the report but never counted
+- OCR for scanned and photographed documents
 
 ## 9. Demo story (2 minutes)
 
