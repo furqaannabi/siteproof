@@ -7,8 +7,11 @@
 ## Shapes
 
 ```
-Project { id, name, builder, flats[] }        Room { id, flat, name, qr_code }
-Clip    { id, project_id, url, captured_at, status: uploaded|processing|done|failed }
+Project { id, name, builder, flats[] }        Flat { id, name }
+Room    { id, flat, name, qr_code }           // flat = the flat's id
+Clip    { id, project_id, url, captured_at|null, status: uploaded|processing|done|failed }
+Document { id, project_id, flat_id|null, kind: "demand_letter"|"invoice"|"boq",
+           status: uploaded|processing|done|failed }                    // null flat = whole project (a BOQ)
 Segment { clip_id, room_id|null, t_start, t_end, full_sweep: bool }     // null room = "unplaced"
 Claim   { id, doc_id, item, qty, unit, room_id|null, source_quote, quote_verified: bool }
 Detection { clip_id, room_id, item, track_id, best_frame_url, mask_url }
@@ -24,11 +27,14 @@ Result  { claim_id, counted, outcome: "verified"|"short"|"not_seen", room_covere
 | `POST /clips` | Register a clip and hand back a presigned upload URL | William |
 | `POST /documents` | Upload a demand letter, invoice or BOQ for extraction | William |
 | `GET /clips/:id/status` | `uploaded` → `processing` → `done` / `failed`, for the upload UI to poll | William |
+| `GET /documents/:id/status` | The `Document`, with the same statuses, so the UI can tell "still reading" from "done" from "failed". Its claims arrive in the report | William |
 | `GET /projects/:id/report` | The report: claims, counts, results, evidence frames. No login needed for the buyer/bank view | Apurva |
 | `POST /rooms/:id/request-footage` | Create a gap request from the coverage map | Apurva |
 
 ## What the shapes mean, and the rules attached to them
 
+- **`Clip.captured_at` is null when the file carries no capture time** — WhatsApp may strip it. It is never filled in with the upload time; show it as "capture time unknown", never as a date.
+- **`Document.flat_id` is null for a document that covers the whole project**, such as a BOQ. A demand letter or invoice bills one flat. Where the file is stored stays server-side and is never in the contract.
 - **`Segment.room_id` is null for an unplaced segment** — a part of a clip that passed no room tag. Unplaced segments are stored, but are never used for a per-room claim.
 - **`Segment.full_sweep`** is true only for one continuous stretch that starts at the room's QR tag and pans the whole room once in one direction, without panning back. It is what the coverage rule reads.
 - **`Claim.quote_verified`** is set by code, not by a model: it is true only when `source_quote` appears in the source document word for word. A claim with `quote_verified: false` is an unverified claim and is never shown as a number.
@@ -41,8 +47,8 @@ Result  { claim_id, counted, outcome: "verified"|"short"|"not_seen", room_covere
 
 Flag these to Furqaan rather than deciding them in code:
 
-- **`Flat`** is implied by `Project.flats[]` but never spelled out. `contract/src/index.ts` records it as `{ id, name }`; confirm with Furqaan before anything depends on more.
-- **`Room.flat`** is a flat id in the type as written. Confirm it is an id and not a name.
+- ~~**`Flat`** is implied by `Project.flats[]` but never spelled out.~~ Settled 27 Oct: `{ id, name }`.
+- ~~**`Room.flat`** is a flat id in the type as written.~~ Settled 27 Oct: it is the flat's id.
 - `Claim.qty` / `Result.counted` units: whole objects for windows and doors in the MVP. Area items (tiles, plaster, paint) are post-hackathon and will need a unit on the count.
 - There is no shape yet for a **gap request** or a **query letter**, only the endpoints that produce them. Apurva and Furqaan to agree what comes back.
 - The **tolerance** the comparison engine applies, and whether the BOQ quantity or the demand-letter quantity wins when they disagree.
@@ -52,3 +58,4 @@ Flag these to Furqaan rather than deciding them in code:
 | Change | When | By |
 | --- | --- | --- |
 | Recorded from the team plan, as agreed on the night of 26 October | 27 October 2026 | William |
+| `Flat` spelled out and `Room.flat` confirmed as an id; `Document` and `GET /documents/:id/status` added; `Clip.captured_at` may be null ([ADR](decisions/2026-10-27-contract-flat-document-and-capture-time.md)) | 27 October 2026 | Furqaan |

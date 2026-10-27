@@ -18,10 +18,7 @@ export type ClipStatus = "uploaded" | "processing" | "done" | "failed";
  */
 export type Outcome = "verified" | "short" | "not_seen";
 
-/**
- * One flat in a project. Implied by `Project.flats[]` in the contract but never
- * spelled out there — confirm with Furqaan before anything depends on more fields.
- */
+/** One flat in a project. `name` is for display, such as "302"; `id` is the key. */
 export interface Flat {
   id: string;
   name: string;
@@ -49,7 +46,27 @@ export interface Clip {
   id: string;
   project_id: string;
   url: string;
-  captured_at: string;
+  /**
+   * null when the file carries no capture time (WhatsApp may strip it). Never the
+   * upload time: show null as "capture time unknown", never as a date.
+   */
+  captured_at: string | null;
+  status: ClipStatus;
+}
+
+export type DocumentKind = "demand_letter" | "invoice" | "boq";
+
+/**
+ * One uploaded demand letter, invoice or BOQ. Its claims arrive in the report.
+ * Where the file is stored stays server-side and is never part of the contract.
+ */
+export interface Document {
+  id: string;
+  project_id: string;
+  /** null for a document that covers the whole project, such as a BOQ. */
+  flat_id: string | null;
+  kind: DocumentKind;
+  /** The same lifecycle as a clip: uploaded → processing → done / failed. */
   status: ClipStatus;
 }
 
@@ -130,6 +147,8 @@ export const api = {
   createDocument: () => "/documents",
   /** Poll a clip through uploaded → processing → done / failed. */
   clipStatus: (clipId: string) => `/clips/${clipId}/status`,
+  /** Poll a document through uploaded → processing → done / failed. */
+  documentStatus: (documentId: string) => `/documents/${documentId}/status`,
   /** The report. No login needed for the buyer/bank view. */
   projectReport: (projectId: string) => `/projects/${projectId}/report`,
   /** Create a gap request from the coverage map. */
