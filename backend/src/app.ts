@@ -6,6 +6,8 @@
  */
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { checkReadablePdf } from "./documents/read-pdf";
+import { r2Files } from "./r2";
 import { prismaDocumentStore } from "./routes/document-store";
 import { documentRoutes } from "./routes/documents";
 import { prismaProjectStore } from "./routes/project-store";
@@ -27,7 +29,7 @@ app.use(
 app.get("/health", (c) => c.json({ ok: true }));
 
 app.route("/", projectRoutes(prismaProjectStore));
-app.route("/", documentRoutes(prismaDocumentStore));
+app.route("/", documentRoutes({ store: prismaDocumentStore, files: r2Files, checkReadable: checkReadablePdf }));
 
 app.notFound((c) => c.json({ error: "not_found" }, 404));
 

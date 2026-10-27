@@ -1,4 +1,5 @@
-import { mkdir, readdir } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 /**
@@ -91,4 +92,20 @@ export async function renderPageImages(pdfPath: string, outDir: string): Promise
     .filter((name) => name.endsWith(".png"))
     .sort()
     .map((name) => join(outDir, name));
+}
+
+/**
+ * Throws a DocumentError unless every page of the PDF in `bytes` has a text layer.
+ * pdftotext reads from disk, so the bytes go to a private temporary folder that is
+ * removed whatever happens.
+ */
+export async function checkReadablePdf(bytes: Uint8Array): Promise<void> {
+  const dir = await mkdtemp(join(tmpdir(), "siteproof-upload-"));
+  try {
+    const path = join(dir, "upload.pdf");
+    await Bun.write(path, bytes);
+    await readDocumentText(path);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 }
