@@ -36,7 +36,7 @@ export class ExtractionError extends Error {
   }
 }
 
-export type RejectReason = "unknown_item" | "no_quantity" | "missing_quote" | "bad_shape";
+export type RejectReason = "unknown_item" | "no_quantity" | "no_unit" | "missing_quote" | "bad_shape";
 
 /** Where and why one entry could not be read. Carries no document text: it gets logged. */
 export interface RejectedLine {
@@ -99,6 +99,10 @@ function reasonFor(issues: readonly z.core.$ZodIssue[]): RejectReason {
       return "unknown_item";
     case "qty":
       return "no_quantity";
+    // Named on its own: lost in bad_shape, a missing unit looked like garbled output
+    // and hid that "Windows complete: 12" was being thrown away.
+    case "unit":
+      return "no_unit";
     case "source_quote":
       return "missing_quote";
     default:

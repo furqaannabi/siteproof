@@ -1,3 +1,6 @@
+import { mkdir, readdir } from "node:fs/promises";
+import { join } from "node:path";
+
 /**
  * Reads a PDF's text layer with `pdftotext -layout`.
  *
@@ -58,4 +61,34 @@ export async function readDocumentText(pdfPath: string): Promise<DocumentText> {
   }
 
   return { text, pages: pageTexts.length };
+}
+
+// Enough for 9.5 pt table text to stay legible to the model; an A4 page comes out
+// about 1240 x 1750 pixels.
+const PAGE_DPI = 150;
+
+/**
+ * Renders every page of a PDF to a PNG, for Muse Spark to read the table layout
+ * from. Returns the image paths in page order.
+ *
+ * @param outDir Must be empty or not exist yet. A page left over from another
+ *   document must never be sent as this one's, so a folder with files in it is
+ *   refused rather than cleared: deleting the caller's files is not ours to do.
+ */
+export async function renderPageImages(pdfPath: string, outDir: string): Promise<string[]> {
+  await mkdir(outDir, { recursive: true });
+  if ((await readdir(outDir)).length > 0) throw new Error("page folder is not empty");
+
+  const proc = Bun.spawn(["pdftoppm", "-png", "-r", String(PAGE_DPI), pdfPath, join(outDir, "page")], {
+    stdout: "ignore",
+    stderr: "pipe",
+  });
+  const [, code] = await Promise.all([new Response(proc.stderr).text(), proc.exited]);
+  if (code !== 0) throw new DocumentError("unreadable", "This file could not be read as a PDF.");
+
+  // pdftoppm pads page numbers to the same width, so a plain sort is page order.
+  return (await readdir(outDir))
+    .filter((name) => name.endsWith(".png"))
+    .sort()
+    .map((name) => join(outDir, name));
 }

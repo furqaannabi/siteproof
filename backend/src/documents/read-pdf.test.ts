@@ -2,7 +2,7 @@ import { afterAll, beforeAll, expect, test } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { readDocumentText } from "./read-pdf";
+import { readDocumentText, renderPageImages } from "./read-pdf";
 
 // Fixtures are written by hand, never real documents: the repo is public.
 let dir: string;
@@ -135,4 +135,23 @@ test("an error never carries the file's path", async () => {
   const error = await readDocumentText(path).catch((e: Error) => e);
 
   expect(String((error as Error).message)).not.toContain("flat-302");
+});
+
+test("each page is rendered to a PNG, in page order", async () => {
+  const pdf = await writePdf("render.pdf", [BOQ_PAGE, BOQ_PAGE]);
+
+  const images = await renderPageImages(pdf, join(dir, "render-pages"));
+
+  expect(images).toHaveLength(2);
+  expect(images.every((p) => p.endsWith(".png"))).toBe(true);
+  expect(images).toEqual([...images].sort());
+});
+
+test("pages left in the folder from another document never come back as this one's", async () => {
+  const outDir = join(dir, "reused-pages");
+  await renderPageImages(await writePdf("first.pdf", [BOQ_PAGE, BOQ_PAGE]), outDir);
+
+  const render = renderPageImages(await writePdf("second.pdf", [BOQ_PAGE]), outDir);
+
+  await expect(render).rejects.toThrow("page folder is not empty");
 });

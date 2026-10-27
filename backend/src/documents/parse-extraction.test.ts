@@ -157,3 +157,39 @@ test("two rooms sharing a name leave the claim unplaced: a guess would attach ev
 
   expect(claims[0]!.room_id).toBeNull();
 });
+
+test("an empty unit is rejected and named as a unit problem, not lost in bad_shape", () => {
+  const { claims, rejected } = parseExtraction(response({ ...DOOR, unit: "" }), context);
+
+  expect(claims).toEqual([]);
+  expect(rejected).toEqual([{ index: 0, reason: "no_unit" }]);
+});
+
+// The two entries exactly as Muse Spark returned them for the sample demand letter
+// on 27 October. The letter states no unit, so the model rightly says null.
+const LETTER = [
+  "We are pleased to inform you that the following works in Flat 302 have been completed:",
+  "        Windows complete: 12",
+  "        Doors complete: 5",
+].join("\n");
+const LETTER_ANSWER = response(
+  { item: "window", qty: 12, unit: null, room: null, source_quote: "Windows complete: 12" },
+  { item: "door", qty: 5, unit: null, room: null, source_quote: "Doors complete: 5" },
+);
+
+// KNOWN BUG, held open until `Claim.unit` is nullable in the contract (asked of
+// Furqaan, 27 October). Today the contract types unit as a string, so these claims
+// are rejected as no_unit and the demand letter's headline claims never arrive.
+// When the contract changes this starts failing: make unit nullable in lineSchema
+// and change `test.failing` to `test`.
+test.failing("a demand letter's counts with no unit become claims, not rejected lines", () => {
+  const { claims, rejected } = parseExtraction(LETTER_ANSWER, { documentText: LETTER, rooms: ROOMS });
+
+  expect(rejected).toEqual([]);
+  // unknown[][], because today's Claim type says unit is never null; that is the bug.
+  const rows: unknown[][] = claims.map((c) => [c.item, c.qty, c.unit, c.quote_verified]);
+  expect(rows).toEqual([
+    ["window", 12, null, true],
+    ["door", 5, null, true],
+  ]);
+});

@@ -60,9 +60,45 @@ export interface ExtractedLine {
 export interface ExtractionRequest {
   /** The instructions and the delimited document text. */
   prompt: string;
-  /** Page images, for reading the table's layout only. */
+  /** Paths to the page images (PNG or JPEG), for reading the table's layout only. */
   pageImages: readonly string[];
+  /** The JSON schema the answer is held to, in Muse Spark's strict mode. */
+  responseSchema: object;
 }
+
+const nullable = (type: "integer" | "string") => ({ anyOf: [{ type }, { type: "null" }] });
+
+/**
+ * The shape rule 1 to 9 of the prompt describe, as a schema Muse Spark is held to.
+ *
+ * Strict mode rejects with a 400 any object that allows extra keys or leaves a key
+ * out of `required`, so every object here does both. Nullable fields use `anyOf`,
+ * which strict mode supports below the root. This is deliberately looser than the
+ * parser: a null `qty` is the model being honest that a line states none, and the
+ * parser is what turns that into a rejected line, never a zero.
+ */
+const RESPONSE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["claims"],
+  properties: {
+    claims: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["item", "qty", "unit", "room", "source_quote"],
+        properties: {
+          item: { type: "string", enum: [...COUNTABLE, "not_countable"] },
+          qty: nullable("integer"),
+          unit: nullable("string"),
+          room: nullable("string"),
+          source_quote: { type: "string" },
+        },
+      },
+    },
+  },
+} as const;
 
 export interface ExtractionInput {
   /** The document as `pdftotext -layout` rendered it. Never text a model produced. */
@@ -92,7 +128,7 @@ Return JSON of this shape and nothing else:
 
 Rules:
 
-1. Return one entry for every line of the document that states a quantity. Do not skip a line, merge two lines, or summarise. A line you cannot categorise is "not_countable", not an omission.
+1. Return one entry for every line of the document that states a quantity of work or materials, such as a number of windows or an area of plaster. Amounts of money, percentages, dates and periods of time are not quantities of work: leave those lines out. Do not skip a line that does state one, merge two lines, or summarise. A line you cannot categorise is "not_countable", not an omission.
 2. "item" is one of ${COUNTABLE.map((k) => `"${k}"`).join(" or ")}, or "not_countable". Never any other value. Plastering, tiling, paint, electrical and plumbing are all "not_countable" in this version.
 3. "source_quote" is exactly ONE line of the text between ${OPEN} and ${CLOSE}, copied character for character from its first non-space character to its last. Never join two lines into one quote. Never change spacing, punctuation or capitalisation. Never quote anything that is not in that text — in particular, never quote from the page images.
 4. Where a description wraps onto a second line, quote the line that carries the quantity.
@@ -106,5 +142,5 @@ ${OPEN}
 ${documentText}
 ${CLOSE}`;
 
-  return { prompt, pageImages };
+  return { prompt, pageImages, responseSchema: RESPONSE_SCHEMA };
 }

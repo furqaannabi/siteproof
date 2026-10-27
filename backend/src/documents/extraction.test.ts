@@ -50,3 +50,29 @@ test("the page images are passed through for layout, not folded into the prompt"
   expect(pageImages).toEqual(["page-1.jpg"]);
   expect(prompt).not.toContain("page-1.jpg");
 });
+
+/** Every object in a JSON schema, depth first. */
+function objectsIn(schema: unknown): Record<string, unknown>[] {
+  if (typeof schema !== "object" || schema === null) return [];
+  const node = schema as Record<string, unknown>;
+  const own = node.type === "object" ? [node] : [];
+  return [...own, ...Object.values(node).flatMap(objectsIn)];
+}
+
+test("the response schema keeps to strict mode's rules, which the API enforces with a 400", () => {
+  const { responseSchema } = buildExtractionRequest(input);
+
+  const objects = objectsIn(responseSchema);
+  expect(objects.length).toBeGreaterThan(1);
+  for (const object of objects) {
+    expect(object.additionalProperties).toBe(false);
+    expect([...(object.required as string[])].sort()).toEqual(Object.keys(object.properties as object).sort());
+  }
+});
+
+test("the response schema offers the countable kinds and not_countable, and nothing else", () => {
+  const { responseSchema } = buildExtractionRequest(input);
+
+  const items = JSON.stringify(responseSchema).match(/"enum":\[([^\]]*)\]/)?.[1];
+  expect(items).toBe([...COUNTABLE, "not_countable"].map((k) => `"${k}"`).join(","));
+});
