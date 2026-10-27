@@ -1,0 +1,21 @@
+# web — the SiteProof app
+
+**Owner: Apurva.** Next.js on Vercel.
+
+Not scaffolded in this commit on purpose: the Next.js app, auth, the design system and the page wireframes are Apurva's, and were started on 26 October. Scaffold it here with `pnpm create next-app .` from this folder, or move an existing scaffold in.
+
+What lives here, per the plan:
+
+- Project, flat and room setup
+- Upload UI and processing status (polls `GET /clips/:id/status`)
+- The report view: claims, counts, annotated frames with mask overlays, outcome badges
+- Builder and buyer/bank views. **The buyer/bank report needs no login**
+- Gap requests from the coverage map
+- Mobile layout and polish — builders are on their phones, on a site, in sunlight
+
+Rules that apply here:
+
+- Import shapes from `@siteproof/contract`. Never write an API path in a component; use the `api` helpers. Next.js needs `transpilePackages: ["@siteproof/contract"]` in `next.config.ts`, since the contract ships as TypeScript source.
+- Never round **Not seen yet** up to **Verified**, in copy or in a badge.
+- Every count shown links to its frames. No evidence, no number.
+- Never show a citation the backend has not marked as re-checked.

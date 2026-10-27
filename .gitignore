@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Env — never commit a real one. `.env.example` carries names only.
+.env
+.env.*
+!.env.example
+
+# Builds
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# Site footage, documents and pipeline output.
+# The repo is public and the footage shows real sites, people and neighbouring
+# properties. Clips and real documents never get committed; fixtures are frames
+# chosen on purpose, committed under their own path on purpose.
+footage/
+clips/
+*.mp4
+*.mov
+*.MP4
+*.MOV
+frames/
+masks/
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# Tooling and OS
+.DS_Store
+.vercel/
+.turbo/
+coverage/
+*.log
