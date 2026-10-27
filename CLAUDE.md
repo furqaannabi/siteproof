@@ -105,7 +105,7 @@ These are the product. Do not re-open them, and do not write code that bends the
 | Video | FFmpeg: frame sampling at 1–2 fps, clips capped to control cost |
 | Room placement | Printed QR tag per room at the doorway, decoded from sampled frames. Our own code |
 | Data | PostgreSQL through Prisma |
-| Clips, frames, masks | S3 or R2, private, access through short-lived presigned URLs |
+| Clips, frames, masks | Cloudflare R2, a private bucket, access only through short-lived presigned URLs ([ADR](docs/decisions/2026-10-27-cloudflare-r2-for-clips-frames-and-masks.md)) |
 | Schema validation | Zod, on every API request body and every model response |
 | Package manager and layout | pnpm workspace: `web/`, `backend/`, `contract/` |
 
@@ -115,7 +115,6 @@ These are the product. Do not re-open them, and do not write code that bends the
 
 | Decision | Owner |
 | --- | --- |
-| S3 or Cloudflare R2 for clips, frames and masks | Furqaan |
 | Backend hosting | Furqaan |
 | Auth for the builder view (the buyer/bank report needs no login) | Apurva + Furqaan |
 

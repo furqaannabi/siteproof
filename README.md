@@ -64,7 +64,7 @@ The backend runs on Bun, the frontend on Node; `web/` is not scaffolded yet (see
 | API and jobs | Hono on Bun, TypeScript, a jobs table in Postgres |
 | Video | FFmpeg frame sampling, QR decoding |
 | Data | PostgreSQL through Prisma |
-| Clips, frames, masks | S3 or R2, private, presigned URLs only |
+| Clips, frames, masks | Cloudflare R2, private, presigned URLs only |
 
 ## Not written yet
 
