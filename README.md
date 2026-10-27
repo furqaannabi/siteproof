@@ -47,10 +47,11 @@ The full product brief is in [docs/PRODUCT.md](docs/PRODUCT.md).
 
 ```bash
 pnpm install
-cp .env.example .env   # then fill it in — .env is gitignored, and this repo is public
+cp backend/.env.example backend/.env   # then fill it in — .env is gitignored, and this repo is public
+pnpm --filter @siteproof/backend dev
 ```
 
-`web/` and `backend/` are not scaffolded yet; their owners set them up (see [the decision record](docs/decisions/2026-10-27-repo-layout-and-package-manager.md)). The backend runs on Bun, the frontend on Node. Postgres and object storage credentials go in `.env`, never in code.
+The backend runs on Bun, the frontend on Node; `web/` is not scaffolded yet (see [the decision record](docs/decisions/2026-10-27-repo-layout-and-package-manager.md)). Model API keys, Postgres and object storage credentials go in `backend/.env`, never in code.
 
 ## Stack
 

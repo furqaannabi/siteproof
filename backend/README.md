@@ -3,7 +3,8 @@
 Hono on Bun, TypeScript. PostgreSQL through Prisma. A jobs table in Postgres, run by this same service; a job is written in the same transaction as the change it belongs to.
 
 ```bash
-pnpm --filter @siteproof/backend dev    # reads ../.env, serves on PORT (default 4000)
+cp backend/.env.example backend/.env    # then fill it in — gitignored, and this repo is public
+pnpm --filter @siteproof/backend dev    # reads backend/.env, serves on PORT (default 4000)
 curl localhost:4000/health
 ```
 
