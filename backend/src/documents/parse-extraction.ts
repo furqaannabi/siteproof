@@ -51,7 +51,9 @@ const lineSchema = z.object({
   // A real number, never a string. "8" is the model paraphrasing, and coercing it
   // would mean accepting "8 nos" and "about 8" next.
   qty: z.number().int().nonnegative(),
-  unit: z.string().min(1),
+  // null where the document states no unit, as "Windows complete: 12" does. An
+  // empty string is still rejected: that is the model saying nothing, not none.
+  unit: z.string().min(1).nullable(),
   room: z.string().min(1).nullable(),
   source_quote: z.string().min(1),
 });
