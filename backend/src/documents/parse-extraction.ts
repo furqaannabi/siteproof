@@ -21,7 +21,8 @@
  * this function's.
  */
 import { z } from "zod";
-import { COUNTABLE, type ItemKind } from "./extraction";
+import type { Claim } from "@siteproof/contract";
+import { COUNTABLE } from "./extraction";
 import { verifyQuote } from "./quote-check";
 
 /** The response was not usable as a whole. */
@@ -58,16 +59,13 @@ const lineSchema = z.object({
 /** Only the outer shape. Each entry is parsed on its own so one bad line keeps the rest. */
 const envelopeSchema = z.object({ claims: z.array(z.unknown()) });
 
-export interface ParsedClaim {
-  item: ItemKind | "not_countable";
-  qty: number;
-  unit: string;
-  /** null where the line named no room we know: the claim is unplaced, not wrong. */
-  room_id: string | null;
-  source_quote: string;
-  /** Set here by checking the document, never by the model. */
-  quote_verified: boolean;
-}
+/**
+ * A claim exactly as the contract defines it, before it is stored: the database
+ * assigns `id` and the job that read the document supplies `doc_id`. `room_id` is
+ * null where the line named no room we know, so the claim is unplaced rather than
+ * wrong, and `quote_verified` is set here by checking the document, never by the model.
+ */
+export type ParsedClaim = Omit<Claim, "id" | "doc_id">;
 
 export interface ParseContext {
   /** The document as `pdftotext -layout` rendered it. Never text a model produced. */

@@ -2,7 +2,7 @@
 
 **Date:** 27 October 2026
 **Decided by:** William
-**Status:** Accepted — affects the comparison engine, so Furqaan to agree
+**Status:** Accepted — approved by Furqaan, 27 October 2026
 
 ## Context
 

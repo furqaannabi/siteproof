@@ -2,7 +2,7 @@
 
 **Date:** 27 October 2026
 **Decided by:** William
-**Status:** Accepted — needs Furqaan's and Apurva's agreement, since it touches the pipeline and the report UI
+**Status:** Accepted — approved by Furqaan, 27 October 2026; Apurva's upload copy still to match it
 
 ## Context
 

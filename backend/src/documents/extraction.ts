@@ -23,13 +23,19 @@
  *     it read the whole BOQ rather than the lines that suited it.
  */
 
-/**
- * What SiteProof can count in v1. Proposed for `contract/` and awaiting Furqaan's
- * approval, so it lives here meanwhile and moves without changing this file's use of it.
- */
-export const COUNTABLE = ["window", "door"] as const;
+import type { ItemKind } from "@siteproof/contract";
 
-export type ItemKind = (typeof COUNTABLE)[number];
+/**
+ * The contract's `ItemKind` as a runtime list, for the prompt and the response
+ * schema. The contract exports only the type, so the list lives here, checked
+ * against it in both directions.
+ */
+export const COUNTABLE = ["window", "door"] as const satisfies readonly ItemKind[];
+
+// Fails to compile if the contract gains a kind this list is missing: the model
+// would never be offered it, and every such line would come back not countable.
+type EveryKindListed<Missing extends never> = Missing;
+export type _CountableCoversContract = EveryKindListed<Exclude<ItemKind, (typeof COUNTABLE)[number]>>;
 
 /**
  * One line as the model returns it.

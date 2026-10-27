@@ -2,7 +2,7 @@
 
 **Date:** 27 October 2026
 **Decided by:** William
-**Status:** Proposed — `contract/` is Furqaan's, so this needs his approval before the type lands
+**Status:** Accepted — approved by Furqaan as contract owner, 27 October 2026; `ItemKind` is in `contract/`
 
 ## Context
 
