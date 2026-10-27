@@ -53,7 +53,7 @@ Flag these to Furqaan rather than deciding them in code:
 - There is no shape yet for a **gap request** or a **query letter**, only the endpoints that produce them. Apurva and Furqaan to agree what comes back.
 - **A claim that is not countable in v1 has no `Result` row**, and none of the three outcomes means "not checked". Needs confirming, and it needs a third visual state in the report view: a claim with no result, distinct from Not seen yet. See [Claim.item is a closed vocabulary](decisions/2026-10-27-claim-item-is-a-closed-vocabulary-not-the-boq-wording.md).
 - **`ItemKind`**, the closed vocabulary `Claim.item` and `Detection.item` draw from, is proposed but not yet in `contract/src/index.ts` — Furqaan to approve the type before it lands.
-- The **tolerance** the comparison engine applies, and whether the BOQ quantity or the demand-letter quantity wins when they disagree.
+- The **tolerance** the comparison engine applies. ~~And whether the BOQ quantity or the demand-letter quantity wins when they disagree.~~ Settled 27 Oct: the demand letter is judged and the BOQ is a ceiling ([ADR](decisions/2026-10-27-the-demand-letter-is-judged-and-the-boq-is-a-ceiling.md)). The engine needs the plan quantity per item and room, which the document side supplies.
 
 ## Revision
 
