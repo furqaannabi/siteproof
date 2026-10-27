@@ -10,6 +10,8 @@
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "db:up": "docker compose up -d --wait",
+    "db:down": "docker compose down"
   }
 }

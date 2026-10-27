@@ -4,11 +4,14 @@ Hono on Bun, TypeScript. PostgreSQL through Prisma. A jobs table in Postgres, ru
 
 ```bash
 cp backend/.env.example backend/.env    # then fill it in — gitignored, and this repo is public
+pnpm db:up                              # local Postgres from compose.yaml (needs Docker)
+pnpm --filter @siteproof/backend db:generate   # the Prisma client, into src/generated/ (gitignored)
+pnpm --filter @siteproof/backend db:migrate    # apply prisma/schema.prisma to the database
 pnpm --filter @siteproof/backend dev    # reads backend/.env, serves on PORT (default 4000)
 curl localhost:4000/health
 ```
 
-`src/app.ts` is the Hono app, kept apart from `src/index.ts` (the Bun entry) so tests can call `app.request()` without a port. `src/pipeline/` holds the pipeline steps, one module each; `pnpm --filter @siteproof/backend test` runs their tests (ffmpeg and ffprobe must be on the PATH). The Prisma schema and the jobs table are not written yet.
+`src/app.ts` is the Hono app, kept apart from `src/index.ts` (the Bun entry) so tests can call `app.request()` without a port. `src/pipeline/` holds the pipeline steps, one module each; `pnpm --filter @siteproof/backend test` runs their tests (ffmpeg and ffprobe must be on the PATH). `src/db.ts` is the one Prisma client (Prisma 7, through the `pg` driver adapter). The schema in `prisma/schema.prisma` has no models yet; the jobs table is not written yet.
 
 | Part | Owner |
 | --- | --- |

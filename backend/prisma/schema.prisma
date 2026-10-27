@@ -1,0 +1,11 @@
+// The SiteProof database. Models follow the data contract (docs/data-contract.md);
+// a model here is never wider than the contract without Furqaan's say.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

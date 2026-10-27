@@ -1,0 +1,26 @@
+# Local Postgres for development. Not how anything is hosted: that decision is open.
+#
+#   pnpm db:up     start it and wait until it accepts connections
+#   pnpm db:down   stop it (the data volume is kept)
+#
+# Bound to 127.0.0.1 only. The defaults are for a local throwaway database; set
+# POSTGRES_PASSWORD in your shell to override them.
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-siteproof}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-siteproof}
+      POSTGRES_DB: ${POSTGRES_DB:-siteproof}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  db-data:

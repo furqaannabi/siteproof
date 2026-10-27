@@ -30,6 +30,7 @@ masks/
 # Prisma
 prisma/*.db
 prisma/*.db-journal
+backend/src/generated/
 
 # Tooling and OS
 .DS_Store
