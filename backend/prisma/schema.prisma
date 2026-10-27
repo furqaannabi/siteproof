@@ -1,5 +1,12 @@
 // The SiteProof database. Models follow the data contract (docs/data-contract.md);
 // a model here is never wider than the contract without Furqaan's say.
+//
+// Field names are the contract's, snake_case, so a row maps to a contract shape
+// field for field. Where the contract carries a URL (Clip.url, Detection's frame and
+// mask, Result.evidence) the database holds the R2 object key instead: URLs are
+// presigned when they are read, and a key is never sent, logged or shown.
+//
+// Ids are random UUIDs, never sequential: an id in a URL must not be guessable.
 
 generator client {
   provider = "prisma-client"
@@ -8,4 +15,204 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum ClipStatus {
+  uploaded
+  processing
+  done
+  failed
+}
+
+enum DocumentKind {
+  demand_letter
+  invoice
+  boq
+}
+
+/// The contract's ItemKind: what this version can count.
+enum ItemKind {
+  window
+  door
+}
+
+/// Claim.item: an ItemKind, or a line this version cannot count.
+enum ClaimItem {
+  window
+  door
+  not_countable
+}
+
+enum Outcome {
+  verified
+  short
+  not_seen
+}
+
+enum JobStatus {
+  queued
+  running
+  done
+  failed
+}
+
+model Project {
+  id         String   @id @default(uuid())
+  name       String
+  builder    String
+  created_at DateTime @default(now())
+
+  flats     Flat[]
+  clips     Clip[]
+  documents Document[]
+}
+
+model Flat {
+  id         String @id @default(uuid())
+  project_id String
+  name       String
+
+  project   Project    @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  rooms     Room[]
+  documents Document[]
+
+  @@index([project_id])
+}
+
+/// Room.flat in the contract is `flat_id` here.
+model Room {
+  id      String @id @default(uuid())
+  flat_id String
+  name    String
+  /// What the printed tag decodes to. Unique, so a decoded tag names exactly one room.
+  qr_code String @unique
+
+  flat       Flat        @relation(fields: [flat_id], references: [id], onDelete: Cascade)
+  segments   Segment[]
+  claims     Claim[]
+  detections Detection[]
+
+  @@index([flat_id])
+}
+
+model Clip {
+  id          String     @id @default(uuid())
+  project_id  String
+  /// The R2 object key. Never in a response, never logged, never shown.
+  object_key  String     @unique
+  /// null when the file carries no capture time. Never the upload time.
+  captured_at DateTime?
+  status      ClipStatus @default(uploaded)
+  created_at  DateTime   @default(now())
+
+  project    Project     @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  segments   Segment[]
+  detections Detection[]
+
+  @@index([project_id])
+}
+
+model Document {
+  id         String       @id @default(uuid())
+  project_id String
+  /// null for a document that covers the whole project, such as a BOQ.
+  flat_id    String?
+  kind       DocumentKind
+  status     ClipStatus   @default(uploaded)
+  /// The R2 object key. Never in a response, never logged, never shown.
+  object_key String       @unique
+  created_at DateTime     @default(now())
+
+  project Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  flat    Flat?   @relation(fields: [flat_id], references: [id], onDelete: Cascade)
+  claims  Claim[]
+
+  @@index([project_id])
+}
+
+/// The part of a clip that belongs to one room. A null room_id is unplaced.
+model Segment {
+  id         String  @id @default(uuid())
+  clip_id    String
+  room_id    String?
+  t_start    Float
+  t_end      Float
+  full_sweep Boolean
+
+  clip Clip  @relation(fields: [clip_id], references: [id], onDelete: Cascade)
+  room Room? @relation(fields: [room_id], references: [id], onDelete: Cascade)
+
+  @@index([clip_id])
+  @@index([room_id])
+}
+
+model Claim {
+  id             String    @id @default(uuid())
+  doc_id         String
+  item           ClaimItem
+  qty            Int
+  unit           String
+  room_id        String?
+  /// The document's line, word for word. Untrusted text: never rendered as markup.
+  source_quote   String
+  /// Set by code, never by a model.
+  quote_verified Boolean
+
+  document Document @relation(fields: [doc_id], references: [id], onDelete: Cascade)
+  room     Room?    @relation(fields: [room_id], references: [id], onDelete: Cascade)
+  result   Result?
+
+  @@index([doc_id])
+  @@index([room_id])
+}
+
+/// One object SAM tracked within one clip.
+model Detection {
+  id             String   @id @default(uuid())
+  clip_id        String
+  room_id        String
+  item           ItemKind
+  track_id       String
+  /// R2 object keys; the contract's best_frame_url and mask_url are presigned from these.
+  best_frame_key String
+  mask_key       String
+
+  clip Clip @relation(fields: [clip_id], references: [id], onDelete: Cascade)
+  room Room @relation(fields: [room_id], references: [id], onDelete: Cascade)
+
+  @@unique([clip_id, item, track_id])
+  @@index([room_id, item])
+}
+
+/// One claim's outcome, from deterministic comparison only. A claim with no Result
+/// was not checked: not countable, or more than the BOQ holds.
+model Result {
+  claim_id      String   @id
+  counted       Int
+  outcome       Outcome
+  room_covered  Boolean
+  /// R2 object keys of the evidence frames; presigned into Result.evidence on read.
+  evidence_keys String[]
+  note          String?
+
+  claim Claim @relation(fields: [claim_id], references: [id], onDelete: Cascade)
+}
+
+/// Pipeline work. Internal to the backend, not part of the contract.
+/// See docs/decisions/2026-10-27-jobs-table.md.
+model Job {
+  id              String    @id @default(uuid())
+  kind            String
+  /// Ids only: never a presigned URL, an object key, or document text.
+  payload         Json
+  status          JobStatus @default(queued)
+  attempts        Int       @default(0)
+  max_attempts    Int       @default(3)
+  run_after       DateTime  @default(now())
+  locked_at       DateTime?
+  /// A short code only, never a message that could carry a URL or document text.
+  last_error_code String?
+  created_at      DateTime  @default(now())
+
+  @@index([status, run_after])
 }
