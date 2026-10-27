@@ -70,6 +70,6 @@ The backend runs on Bun, the frontend on Node; `web/` is not scaffolded yet (see
 
 Owned, dated, and deliberately not faked here:
 
-- **Try it** — the deployed URL and the steps to run the demo project (Apurva, by 31 October)
+- **Try it** — the frontend is deployed at [siteproof-alpha.vercel.app](https://siteproof-alpha.vercel.app), still a bare skeleton; the demo project and the steps to run it are to come (Apurva, by 31 October)
 - **Accuracy** — SAM counts against hand counts on 15–20 labelled clips (William and Furqaan, by 31 October)
 - **Who it's for** — the pitch section (William, by 31 October)

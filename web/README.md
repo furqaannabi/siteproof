@@ -9,6 +9,8 @@ cp web/.env.example web/.env.local      # NEXT_PUBLIC_API_URL=http://localhost:4
 pnpm --filter @siteproof/web dev        # http://localhost:3000
 ```
 
+Deployed on Vercel at [siteproof-alpha.vercel.app](https://siteproof-alpha.vercel.app). The backend only answers browser calls from origins listed in its `WEB_ORIGINS`, which includes this one and `http://localhost:3000`; a Vercel preview URL is refused until it is added there.
+
 `cacheComponents` and `partialPrefetching` are on because they are the template's defaults, not a decision. `AGENTS.md` is written by `next dev` itself and points coding agents at the docs bundled with this Next version.
 
 What lives here, per the plan:

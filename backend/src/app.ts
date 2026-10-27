@@ -5,8 +5,20 @@
  * opening a port. Routes are added one at a time, against `@siteproof/contract`.
  */
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 
 export const app = new Hono();
+
+// Only the sites listed in WEB_ORIGINS may call the API from a browser. With none
+// listed, every site is refused: deny by default.
+app.use(
+  cors({
+    origin: (origin) => {
+      const allowed = (process.env.WEB_ORIGINS ?? "").split(",").map((o) => o.trim()).filter(Boolean);
+      return allowed.includes(origin) ? origin : null;
+    },
+  }),
+);
 
 app.get("/health", (c) => c.json({ ok: true }));
 
