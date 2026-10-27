@@ -2,7 +2,14 @@
 
 **Owner: Apurva.** Next.js on Vercel.
 
-Not scaffolded in this commit on purpose: the Next.js app, auth, the design system and the page wireframes are Apurva's, and were started on 26 October. Scaffold it here with `pnpm create next-app .` from this folder, or move an existing scaffold in.
+A bare Next.js 16 skeleton (`create-next-app --empty`, App Router, TypeScript), wired to `@siteproof/contract` and nothing else. Styling, linting, auth, the design system and every page are Apurva's to choose.
+
+```bash
+cp web/.env.example web/.env.local      # NEXT_PUBLIC_API_URL=http://localhost:4000
+pnpm --filter @siteproof/web dev        # http://localhost:3000
+```
+
+`cacheComponents` and `partialPrefetching` are on because they are the template's defaults, not a decision. `AGENTS.md` is written by `next dev` itself and points coding agents at the docs bundled with this Next version.
 
 What lives here, per the plan:
 
