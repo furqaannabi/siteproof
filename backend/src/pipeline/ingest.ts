@@ -13,8 +13,9 @@ import { join } from "node:path";
 const CLIP_CAP_SECONDS = 60;
 
 /**
- * A clip that cannot be ingested. `message` is plain language a builder can act on;
- * it never carries a path, a URL or ffmpeg's own output.
+ * A clip that cannot be ingested. `message` is plain language a builder can act on,
+ * in the gap-request voice: what to send instead, never "invalid file". It never
+ * carries a path, a URL or ffmpeg's own output.
  */
 export class IngestError extends Error {
   constructor(
@@ -60,17 +61,17 @@ async function run(cmd: string[]): Promise<string> {
 export async function ingestClip(clip: string, { fps, outDir }: IngestOptions): Promise<IngestedClip> {
   const raw = JSON.parse(
     await run(["ffprobe", "-v", "error", "-print_format", "json", "-show_format", "-show_streams", clip]).catch(() => {
-      throw new IngestError("unreadable", "This file could not be read as a video");
+      throw new IngestError("unreadable", "This file won't play as a video — send the clip again from your phone's gallery.");
     }),
   );
   const video = raw.streams.find((s: { codec_type: string }) => s.codec_type === "video");
-  if (!video) throw new IngestError("no_video", "This file has no video in it");
+  if (!video) throw new IngestError("no_video", "This file has no picture in it — send the video clip itself.");
 
   // ffprobe reads a still image as a video of one frame. A photo has no sweep and no
   // trustworthy capture time, so it must never reach counting.
   const format = String(raw.format.format_name);
   if (format === "image2" || format.endsWith("_pipe")) {
-    throw new IngestError("photo", "This is a photo; send a video clip");
+    throw new IngestError("photo", "Photos can't be counted — 5 seconds of video from the room tag will clear this room.");
   }
 
   // The video track's own length: the file's length is its longest track, and on
@@ -79,7 +80,7 @@ export async function ingestClip(clip: string, { fps, outDir }: IngestOptions): 
   if (duration_s > CLIP_CAP_SECONDS) {
     throw new IngestError(
       "too_long",
-      `Clip is ${Math.ceil(duration_s)} s; send clips of ${CLIP_CAP_SECONDS} s or less`,
+      `This clip is ${Math.ceil(duration_s)} s — send it as clips of ${CLIP_CAP_SECONDS} s or less, each starting at a room tag.`,
     );
   }
 
@@ -102,7 +103,7 @@ export async function ingestClip(clip: string, { fps, outDir }: IngestOptions): 
   // 0 with fewer frames. Fewer frames than the duration promises is never a shorter
   // clip: it is footage missing without a word, and it also catches a silent zero.
   if (names.length < Math.floor(duration_s * fps)) {
-    throw new IngestError("incomplete", "This clip is incomplete; upload it again");
+    throw new IngestError("incomplete", "This clip didn't finish uploading — send it again.");
   }
 
   return {

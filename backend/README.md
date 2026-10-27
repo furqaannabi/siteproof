@@ -5,7 +5,7 @@ Hono on Bun, TypeScript. PostgreSQL through Prisma. A jobs table in Postgres, ru
 ```bash
 cp backend/.env.example backend/.env    # then fill it in — gitignored, and this repo is public
 pnpm db:up                              # local Postgres from compose.yaml (needs Docker)
-pnpm --filter @siteproof/backend db:generate   # the Prisma client, into src/generated/ (gitignored)
+pnpm --filter @siteproof/backend db:generate   # rebuild the Prisma client after a schema change (pnpm install also runs it)
 pnpm --filter @siteproof/backend db:migrate    # apply prisma/schema.prisma to the database
 pnpm --filter @siteproof/backend dev    # reads backend/.env, serves on PORT (default 4000)
 curl localhost:4000/health

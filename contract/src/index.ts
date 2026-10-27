@@ -18,6 +18,13 @@ export type ClipStatus = "uploaded" | "processing" | "done" | "failed";
  */
 export type Outcome = "verified" | "short" | "not_seen";
 
+/**
+ * What SiteProof can count in this version. A claim's item and a detection's item
+ * are both one of these, so they always join: wording never reaches the comparison.
+ * How each becomes a SAM prompt is the pipeline's business, not the contract's.
+ */
+export type ItemKind = "window" | "door";
+
 /** One flat in a project. `name` is for display, such as "302"; `id` is the key. */
 export interface Flat {
   id: string;
@@ -98,7 +105,12 @@ export interface Segment {
 export interface Claim {
   id: string;
   doc_id: string;
-  item: string;
+  /**
+   * A key from the closed vocabulary, never the document's wording, which lives in
+   * `source_quote`. `"not_countable"` claims get no `Result`: they are not checked in
+   * this version, and must never be shown as Not seen yet.
+   */
+  item: ItemKind | "not_countable";
   qty: number;
   unit: string;
   room_id: string | null;
@@ -113,7 +125,7 @@ export interface Claim {
 export interface Detection {
   clip_id: string;
   room_id: string;
-  item: string;
+  item: ItemKind;
   track_id: string;
   best_frame_url: string;
   mask_url: string;

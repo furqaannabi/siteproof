@@ -48,7 +48,7 @@ test("a clip over the 60 s cap is rejected with a clear error, not cut short", a
 
   const ingest = ingestClip(clip, { fps: 1, outDir: join(dir, "long") });
 
-  await expect(ingest).rejects.toMatchObject({ code: "too_long", message: "Clip is 61 s; send clips of 60 s or less" });
+  await expect(ingest).rejects.toMatchObject({ code: "too_long", message: "This clip is 61 s — send it as clips of 60 s or less, each starting at a room tag." });
 });
 
 test("a file that is not a video is rejected with a clear error, not a crash", async () => {
@@ -57,7 +57,7 @@ test("a file that is not a video is rejected with a clear error, not a crash", a
 
   const ingest = ingestClip(clip, { fps: 1, outDir: join(dir, "letter") });
 
-  await expect(ingest).rejects.toMatchObject({ code: "unreadable", message: "This file could not be read as a video" });
+  await expect(ingest).rejects.toMatchObject({ code: "unreadable", message: "This file won't play as a video — send the clip again from your phone's gallery." });
 });
 
 test("an audio-only file is rejected with a clear error, not a silent zero", async () => {
@@ -66,7 +66,7 @@ test("an audio-only file is rejected with a clear error, not a silent zero", asy
 
   const ingest = ingestClip(clip, { fps: 1, outDir: join(dir, "voice-note") });
 
-  await expect(ingest).rejects.toMatchObject({ code: "no_video", message: "This file has no video in it" });
+  await expect(ingest).rejects.toMatchObject({ code: "no_video", message: "This file has no picture in it — send the video clip itself." });
 });
 
 test("a photo is rejected: it is not a clip, and one frame of it must never become a count", async () => {
@@ -75,7 +75,7 @@ test("a photo is rejected: it is not a clip, and one frame of it must never beco
 
   const ingest = ingestClip(photo, { fps: 1, outDir: join(dir, "window") });
 
-  await expect(ingest).rejects.toMatchObject({ code: "photo", message: "This is a photo; send a video clip" });
+  await expect(ingest).rejects.toMatchObject({ code: "photo", message: "Photos can't be counted — 5 seconds of video from the room tag will clear this room." });
 });
 
 test("a clip whose sound runs past its video is sampled, not mistaken for a cut-off upload", async () => {
@@ -111,5 +111,5 @@ test("a clip cut off mid-upload is rejected, not sampled as a shorter clip", asy
 
   const ingest = ingestClip(clip, { fps: 1, outDir: join(dir, "cut-off") });
 
-  await expect(ingest).rejects.toMatchObject({ code: "incomplete", message: "This clip is incomplete; upload it again" });
+  await expect(ingest).rejects.toMatchObject({ code: "incomplete", message: "This clip didn't finish uploading — send it again." });
 });
