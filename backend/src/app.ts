@@ -8,6 +8,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { prismaDocumentStore } from "./routes/document-store";
 import { documentRoutes } from "./routes/documents";
+import { prismaProjectStore } from "./routes/project-store";
+import { projectRoutes } from "./routes/projects";
 
 export const app = new Hono();
 
@@ -24,6 +26,7 @@ app.use(
 
 app.get("/health", (c) => c.json({ ok: true }));
 
+app.route("/", projectRoutes(prismaProjectStore));
 app.route("/", documentRoutes(prismaDocumentStore));
 
 app.notFound((c) => c.json({ error: "not_found" }, 404));
