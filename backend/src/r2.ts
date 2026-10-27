@@ -33,4 +33,31 @@ export const r2Files = {
   async get(key: string): Promise<Uint8Array> {
     return new Uint8Array(await r2().file(key).arrayBuffer());
   },
+
+  /**
+   * A link the phone can PUT a file to, signed locally. The type is recorded on the
+   * upload but not enforced by R2: check the file's contents after it arrives.
+   */
+  presignUpload(key: string, contentType: string, expiresInSeconds: number): string {
+    return r2().presign(key, { method: "PUT", type: contentType, expiresIn: expiresInSeconds });
+  },
+
+  /** A short-lived link to view a private file, signed locally. */
+  presignRead(key: string, expiresInSeconds: number): string {
+    return r2().presign(key, { method: "GET", expiresIn: expiresInSeconds });
+  },
+
+  /** The stored file's size, or null when nothing has arrived at that key. */
+  async sizeOf(key: string): Promise<number | null> {
+    return (await r2().exists(key)) ? r2().size(key) : null;
+  },
+
+  /** The file's first bytes, read with a ranged request rather than a download. */
+  async headOf(key: string, bytes: number): Promise<Uint8Array> {
+    return new Uint8Array(await r2().file(key).slice(0, bytes).arrayBuffer());
+  },
+
+  async remove(key: string): Promise<void> {
+    await r2().delete(key);
+  },
 };
