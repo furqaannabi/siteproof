@@ -27,9 +27,9 @@
  * What SiteProof can count in v1. Proposed for `contract/` and awaiting Furqaan's
  * approval, so it lives here meanwhile and moves without changing this file's use of it.
  */
-export type ItemKind = "window" | "door";
+export const COUNTABLE = ["window", "door"] as const;
 
-export const COUNTABLE: readonly ItemKind[] = ["window", "door"];
+export type ItemKind = (typeof COUNTABLE)[number];
 
 /**
  * One line as the model returns it.
