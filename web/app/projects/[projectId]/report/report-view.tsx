@@ -90,7 +90,7 @@ function shortNote(row: RoomRow, item: ItemKind) {
  * The server sends only letters that passed its re-check; this is the same check again,
  * because a citation that fails it is never shown.
  */
-function checkedLetter(report: Report, claimId: string): QueryLetter | null {
+export function checkedLetter(report: Report, claimId: string): QueryLetter | null {
   const letter = report.query_letters.find((q) => q.claim_id === claimId);
   if (!letter) return null;
   const { invoice_claim_id, plan_claim_id, evidence } = letter.citations;

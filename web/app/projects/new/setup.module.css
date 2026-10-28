@@ -1,89 +1,412 @@
+/* Set up a project: rooms typed once, a run of flats, each flat free to differ. */
+
+.main {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-stretch: 80%;
+  font-weight: 800;
+  font-size: clamp(40px, 6vw, 58px);
+  line-height: 1;
+}
+
+.lede {
+  margin: 6px 0 0;
+  max-width: 640px;
+  color: var(--ink-2);
+}
+
 .form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .form {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+  }
+}
+
+.side {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  min-width: 0;
 }
 
-.rooms {
-  border: 0;
-  margin: 0;
-  padding: 0;
+.card {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 22px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(21, 32, 27, 0.07);
 }
 
-.legend {
-  font-family: var(--font-mono);
-  font-size: var(--text-label);
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0;
-  margin-bottom: 4px;
-}
-
-.rooms p {
+.cardTitle {
   margin: 0;
+  font-family: var(--font-display);
+  font-stretch: 80%;
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1.1;
 }
 
-.roomRow {
+.hint {
+  margin: 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Rooms as chips */
+
+.roomField {
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
   gap: 8px;
 }
 
-.roomRow > label {
-  flex: 1 1 auto;
-}
-
-.chips {
+.chipBox {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-}
-
-.chip {
-  min-height: 44px;
-  padding: 0 12px;
+  min-height: 56px;
+  padding: 8px 10px;
   border: 1.5px solid var(--rule);
-  background: var(--panel);
-  color: var(--ink);
-  font-size: var(--text-control);
+  border-radius: 12px;
+  background: #fbfcfa;
+  cursor: text;
 }
 
-@media (hover: hover) {
-  .chip:hover:not(:disabled) {
-    border-color: var(--ink);
-  }
+.chipBox:focus-within {
+  border-color: var(--binding);
+  box-shadow: 0 0 0 3px rgba(29, 74, 60, 0.15);
 }
 
-.chip:disabled {
+.chipBox[data-invalid] {
+  border-color: var(--short);
+}
+
+.roomChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 6px 0 12px;
+  border-radius: 999px;
+  background: var(--binding);
+  color: var(--binding-ink);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.roomChip button {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(233, 241, 236, 0.18);
+  color: inherit;
+  cursor: pointer;
+}
+
+.chipInput {
+  flex: 1 1 160px;
+  min-width: 0;
+  min-height: 36px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  padding: 0 6px;
+}
+
+.chipInput:focus {
+  outline: none;
+}
+
+.quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.quickChip {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px dashed var(--rule-strong);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--rule-strong);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.quickChip:disabled {
   opacity: 0.5;
 }
 
-/* On a phone the main action stays in reach of a thumb. */
-.submitBar {
-  position: sticky;
-  bottom: 0;
-  padding: 12px 0 max(12px, env(safe-area-inset-bottom));
-  background: var(--ground);
-  border-top: 1px solid var(--rule);
+/* Adding flats */
+
+.addFlats {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.submitBar button {
+.run {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.wide {
+  grid-column: span 2;
+}
+
+.addButton,
+.addButtonQuiet,
+.submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.addButton {
+  border: 0;
+  background: var(--binding);
+  color: var(--binding-ink);
+}
+
+.addButtonQuiet {
+  border: 1px solid var(--rule-strong);
+  background: #fff;
+  color: var(--ink);
+}
+
+.addButton:disabled,
+.addButtonQuiet:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* The flat list */
+
+.flats {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+.flat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 4px;
+  border-bottom: 1px solid #e3e9e4;
+}
+
+.flat[data-open] {
+  background: #f6f9f5;
+  border-radius: 10px;
+  padding: 8px 10px 14px;
+}
+
+.flatRow {
+  display: grid;
+  grid-template-columns: minmax(80px, auto) minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.flatRow b {
+  font-family: var(--font-display);
+  font-stretch: 82%;
+  font-size: 20px;
+}
+
+.flatRooms {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.same,
+.own {
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.same {
+  background: #dcefe3;
+  color: var(--verified);
+}
+
+.own {
+  background: #fff1e4;
+  color: var(--short);
+}
+
+.iconButton {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.iconButton[aria-expanded="true"] {
+  background: var(--binding);
+  color: var(--binding-ink);
+}
+
+.flatEdit {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.textButton {
+  align-self: flex-start;
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--link);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.total {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+.total b {
+  font-family: var(--font-display);
+  font-stretch: 78%;
+  font-weight: 800;
+  font-size: 28px;
+  color: var(--ink);
+}
+
+.submit {
+  border: 0;
+  background: var(--outline);
+  color: #1b0f04;
+  font-weight: 700;
+  min-height: 50px;
+  padding: 0 24px;
+}
+
+.submit:disabled {
+  opacity: 0.6;
+}
+
+@media (hover: hover) {
+  .quickChip:hover:not(:disabled),
+  .addButtonQuiet:hover:not(:disabled),
+  .iconButton:not([aria-expanded="true"]):hover {
+    background: var(--ground);
+  }
+
+  .addButton:hover:not(:disabled) {
+    background: var(--binding-2);
+  }
+
+  .submit:hover:not(:disabled) {
+    filter: brightness(1.06);
+  }
+
+  .iconButton:not([aria-expanded="true"]):hover {
+    color: var(--ink);
+  }
+}
+
+/* On a phone the main action stays in reach of a thumb, above the tab bar. */
+.submitBar {
+  position: sticky;
+  bottom: calc(62px + env(safe-area-inset-bottom));
+  padding: 12px 0;
+  background: var(--ground);
+}
+
+.submitBar .submit {
   width: 100%;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 960px) {
   .submitBar {
     position: static;
-    border-top: 0;
+    padding: 0;
     background: transparent;
   }
 
-  .submitBar button {
+  .submitBar .submit {
     width: auto;
+  }
+}
+
+@media (max-width: 639px) {
+  .main {
+    padding: 22px 16px 40px;
+  }
+
+  .run {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .run > button {
+    grid-column: 1 / -1;
   }
 }

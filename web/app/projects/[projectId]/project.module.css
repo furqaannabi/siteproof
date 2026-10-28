@@ -135,16 +135,15 @@
 }
 
 .slabTop {
-  fill: #b9b6ac;
-  filter: drop-shadow(0 14px 14px rgba(21, 32, 27, 0.18));
+  fill: #cfcbc0;
 }
 
 .slabFront {
-  fill: #9c998f;
+  fill: #a8a499;
 }
 
 .slabSide {
-  fill: #8d8a81;
+  fill: #96928a;
 }
 
 .hatchBase {
@@ -162,58 +161,84 @@
 }
 
 .floor {
-  fill: #f1eee6;
-  stroke: var(--rule);
-  stroke-width: 1.5;
-  transition: filter 0.15s;
+  fill: #f4f1ea;
+  stroke: #cfc6b4;
+  stroke-width: 1;
+  transition: fill 0.15s, stroke 0.15s;
 }
 
 .room[data-outcome="verified"] .floor {
-  fill: var(--verified-tint);
-  stroke: var(--verified);
+  fill: #d8ecdf;
 }
 
 .room[data-outcome="short"] .floor {
   fill: url(#plan-hatch);
-  stroke: var(--short);
 }
 
 .room[data-outcome="not_seen"] .floor {
-  fill: #c9cfcb;
-  stroke: var(--not-seen);
-  stroke-dasharray: 8 6;
+  fill: #d3d8d5;
 }
 
-.room:hover .floor {
-  filter: brightness(1.04);
+@media (hover: hover) {
+  .room:hover .floor {
+    stroke: var(--rule-strong);
+    stroke-width: 2.5;
+  }
 }
 
+/* The room on show: its floor outlined in the evidence orange. */
 .room[data-selected="true"] .floor,
 .room:focus-visible .floor {
-  stroke: var(--ink);
-  stroke-width: 3.5;
-  stroke-dasharray: none;
+  stroke: var(--outline);
+  stroke-width: 4;
 }
 
-.wallBack {
-  fill: #e8e1d2;
-  stroke: #cfc6b4;
+/* Walls: light where they face the light (from the left), darker where they turn away. */
+.wallFace {
+  stroke: #c9bfac;
+  stroke-width: 0.6;
+  stroke-linejoin: round;
 }
 
-.wallLeft {
-  fill: #d9d1c1;
-  stroke: #cfc6b4;
+.wallFace[data-side="back"] {
+  fill: #ece6d9;
 }
 
+.wallFace[data-side="left"] {
+  fill: #ddd5c4;
+}
+
+.wallFace[data-side="front"] {
+  fill: #d4cbb8;
+}
+
+.wallFace[data-side="right"] {
+  fill: #c2b8a3;
+}
+
+.wallTop {
+  fill: #faf7f0;
+  stroke: #c9bfac;
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+}
+
+/* What the plan holds: glass for a window, timber for a door; counted ones outlined. */
 .marker {
-  fill: #c3cdc9;
-  stroke: #8e9a95;
+  fill: #c9dde6;
+  fill-opacity: 0.85;
+  stroke: #8fa3ab;
   stroke-width: 1;
+  stroke-linejoin: round;
+}
+
+.marker[data-item="door"] {
+  fill: #c9a77f;
+  stroke: #8c6c48;
 }
 
 .marker[data-counted="true"] {
-  fill: #a9c7d6;
-  stroke: #2fa86c;
+  stroke: #1f8a52;
   stroke-width: 2.5;
 }
 
@@ -221,23 +246,34 @@
   stroke: var(--outline);
 }
 
-.tagMark {
-  fill: var(--tag-paper);
-  stroke: var(--ink);
+/* Labels: a pill over each room, its name and its outcome. */
+.label {
+  cursor: pointer;
+}
+
+.labelBox {
+  fill: #fff;
+  stroke: rgba(21, 32, 27, 0.12);
+  stroke-width: 1;
+  filter: drop-shadow(0 4px 8px rgba(21, 32, 27, 0.14));
+  transition: fill 0.15s;
+}
+
+.label[data-selected="true"] .labelBox {
+  fill: var(--binding);
+  stroke: var(--binding);
 }
 
 .roomName {
   font-family: var(--font-display);
   font-stretch: 82%;
   font-weight: 700;
-  font-size: 17px;
   fill: var(--ink);
   text-anchor: middle;
   pointer-events: none;
 }
 
 .roomState {
-  font-size: 12px;
   font-weight: 600;
   fill: var(--muted);
   text-anchor: middle;
@@ -250,6 +286,34 @@
 
 .roomState[data-outcome="short"] {
   fill: var(--short);
+}
+
+.label[data-selected="true"] .roomName,
+.label[data-selected="true"] .roomState {
+  fill: var(--binding-ink);
+}
+
+.stateDot {
+  fill: #b9c2bd;
+}
+
+.stateDot[data-outcome="verified"] {
+  fill: var(--verified);
+}
+
+.stateDot[data-outcome="short"] {
+  fill: var(--short);
+}
+
+.stateDot[data-outcome="not_seen"] {
+  fill: none;
+  stroke: var(--not-seen);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 1.6;
+}
+
+.label[data-selected="true"] .stateDot[data-outcome="not_seen"] {
+  stroke: var(--binding-ink);
 }
 
 .ping {
@@ -841,13 +905,4 @@
   }
 }
 
-/* On a phone the plan is drawn at about half size, so its words are drawn twice as large. */
-@media (max-width: 640px) {
-  .roomName {
-    font-size: 30px;
-  }
 
-  .roomState {
-    font-size: 22px;
-  }
-}

@@ -264,7 +264,10 @@ function Summary({ rooms, rows, outcomeOf, loading }: { rooms: Room[]; rows: Roo
 
 const CELL_W = 4;
 const CELL_D = 3.4;
-const WALL_H = 0.85;
+const WALL_H = 0.95;
+// The near walls and the walls between rooms are cut low, so every room can be seen into.
+const WALL_LOW = 0.24;
+const WALL_T = 0.14;
 const SCALE = 40;
 const COS30 = Math.cos(Math.PI / 6);
 
@@ -273,12 +276,109 @@ function iso(x: number, z: number, h = 0): [number, number] {
   return [(x - z) * COS30 * SCALE, (x + z) * 0.5 * SCALE - h * SCALE];
 }
 const pts = (p: [number, number][]) => p.map(([a, b]) => `${a.toFixed(1)},${b.toFixed(1)}`).join(" ");
+const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
+
+/** Is the phone layout on? The plan's labels are drawn larger there, since the drawing is smaller. */
+function useNarrow() {
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const update = () => setNarrow(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return narrow;
+}
+
+type SideKey = "back" | "left" | "front" | "right";
 
 /**
- * The flat as an angled plan, each room's floor coloured by its outcome. Markers along
- * each room's back wall stand for what the plan holds for the item on show; counted ones
- * are outlined. No marker ever says "missing here": SiteProof doesn't know where in the
- * room an item is, only how many were counted.
+ * One side of a room: where its wall runs along the floor, the way into the room, and how
+ * tall it's drawn. The far walls of the flat are full height; every other wall is cut low.
+ * A far side that backs onto another room is left to that room's near wall, so no wall is
+ * drawn twice.
+ */
+interface Side {
+  key: SideKey;
+  from: [number, number];
+  dir: [number, number];
+  inward: [number, number];
+  len: number;
+  height: number;
+  outside: boolean;
+  drawn: boolean;
+}
+
+function sidesOf(q: Rect, all: Rect[], bounds: Rect): Side[] {
+  const backs = (o: Rect) => o !== q && near(o.z + o.d, q.z) && o.x < q.x + q.w - 1e-6 && o.x + o.w > q.x + 1e-6;
+  const lefts = (o: Rect) => o !== q && near(o.x + o.w, q.x) && o.z < q.z + q.d - 1e-6 && o.z + o.d > q.z + 1e-6;
+  const outBack = near(q.z, bounds.z);
+  const outLeft = near(q.x, bounds.x);
+  return [
+    { key: "back", from: [q.x, q.z], dir: [1, 0], inward: [0, 1], len: q.w, height: outBack ? WALL_H : WALL_LOW, outside: outBack, drawn: outBack || !all.some(backs) },
+    { key: "left", from: [q.x, q.z], dir: [0, 1], inward: [1, 0], len: q.d, height: outLeft ? WALL_H : WALL_LOW, outside: outLeft, drawn: outLeft || !all.some(lefts) },
+    { key: "front", from: [q.x, q.z + q.d], dir: [1, 0], inward: [0, -1], len: q.w, height: WALL_LOW, outside: near(q.z + q.d, bounds.z + bounds.d), drawn: true },
+    { key: "right", from: [q.x + q.w, q.z], dir: [0, 1], inward: [-1, 0], len: q.d, height: WALL_LOW, outside: near(q.x + q.w, bounds.x + bounds.w), drawn: true },
+  ];
+}
+
+const along = (s: Side, d: number, inset = 0): [number, number] => [s.from[0] + s.dir[0] * d + s.inward[0] * inset, s.from[1] + s.dir[1] * d + s.inward[1] * inset];
+
+/** A wall: for a far wall, its face towards the room; for a near wall, its face towards you. Then its top. */
+function Wall({ side }: { side: Side }) {
+  const far = side.key === "back" || side.key === "left";
+  const faceAt = far ? WALL_T : 0;
+  const [a, b] = [along(side, 0, faceAt), along(side, side.len, faceAt)];
+  const h = side.height;
+  const [a0, b0, a1, b1] = [along(side, 0), along(side, side.len), along(side, 0, WALL_T), along(side, side.len, WALL_T)];
+  return (
+    <>
+      <polygon className={styles.wallFace} data-side={side.key} data-tall={h === WALL_H || undefined} points={pts([iso(...a), iso(...b), iso(...b, h), iso(...a, h)])} />
+      <polygon className={styles.wallTop} points={pts([iso(...a0, h), iso(...b0, h), iso(...b1, h), iso(...a1, h)])} />
+    </>
+  );
+}
+
+/**
+ * One marker per planned item, spaced along the room's outside walls: a pane on a full
+ * wall, standing on the top of a low one. A marker on a shared wall would look as if it
+ * belonged to the room next door; a room with no outside wall uses all four.
+ */
+function markersFor(sides: Side[], n: number): { side: Side; a: number; b: number }[] {
+  if (n === 0) return [];
+  const outside = sides.filter((s) => s.outside);
+  const use = outside.length ? outside : sides;
+  const total = use.reduce((t, s) => t + s.len, 0);
+  const span = Math.min(0.9, (total / n) * 0.55);
+  return Array.from({ length: n }, (_, i) => {
+    let t = ((i + 0.5) / n) * total;
+    let side = use[0];
+    for (const s of use) {
+      side = s;
+      if (t <= s.len) break;
+      t -= s.len;
+    }
+    t = Math.min(Math.max(t, span / 2 + 0.25), side.len - span / 2 - 0.25);
+    return { side, a: t - span / 2, b: t + span / 2 };
+  });
+}
+
+function Marker({ side, a, b, item, counted }: { side: Side; a: number; b: number; item: ItemKind; counted: boolean }) {
+  const far = side.key === "back" || side.key === "left";
+  // On a full wall the pane is set into the face; on a low wall it stands on the wall's top.
+  const inset = far && side.height === WALL_H ? WALL_T + 0.01 : WALL_T / 2;
+  const [lo, hi] = side.height === WALL_H ? (item === "door" ? [0, 0.72] : [0.3, 0.72]) : [side.height, side.height + (item === "door" ? 0.55 : 0.4)];
+  const [p, q] = [along(side, a, inset), along(side, b, inset)];
+  return <polygon className={styles.marker} data-item={item} data-counted={counted} points={pts([iso(...p, lo), iso(...q, lo), iso(...q, hi), iso(...p, hi)])} />;
+}
+
+/**
+ * The flat as a cut-away drawing: each room's floor coloured by its outcome, the far walls
+ * standing, the rest cut low so every room can be seen into. Markers stand for what the
+ * plan holds for the item on show; counted ones are outlined. No marker ever says
+ * "missing here": SiteProof doesn't know where in the room an item is, only how many
+ * were counted. Not to scale.
  */
 function FlatPlan({
   rooms,
@@ -295,15 +395,16 @@ function FlatPlan({
   selectedId: string | undefined;
   onSelect: (id: string) => void;
 }) {
+  const narrow = useNarrow();
   const layout = autoLayout(rooms.length, CELL_W, CELL_D);
   if (layout.length === 0) return null;
   const all = { x: Math.min(...layout.map((q) => q.x)), z: Math.min(...layout.map((q) => q.z)) };
   const end = { x: Math.max(...layout.map((q) => q.x + q.w)), z: Math.max(...layout.map((q) => q.z + q.d)) };
   const bounds = { x: all.x, z: all.z, w: end.x - all.x, d: end.z - all.z };
-  const slab = 0.35;
-  const slabDepth = 0.4;
-  // The box is fitted to the slab under the rooms, which reaches past them on every side,
-  // and to the tops of the walls; the bottom pad leaves room for the slab's shadow.
+  const slab = 0.3;
+  const slabDepth = 0.35;
+  // The box is fitted to the base under the rooms, which reaches past them on every side,
+  // and to the tops of the walls; the bottom pad leaves room for the base's shadow.
   const corners = [
     iso(all.x - slab, all.z - slab, WALL_H),
     iso(end.x + slab, all.z - slab, -slabDepth),
@@ -315,6 +416,10 @@ function FlatPlan({
   const w = Math.max(...corners.map((c) => c[0])) - minX + 16;
   const h = Math.max(...corners.map((c) => c[1])) - minY + 34;
   const order = layout.map((q, i) => ({ q, room: rooms[i] })).sort((a, b) => a.q.x + a.q.z - (b.q.x + b.q.z));
+  // The base under each room, reaching a little past it: its sides first, then every top,
+  // so where two rooms meet no side shows through.
+  const base = order.map(({ q }) => ({ x0: q.x - slab, z0: q.z - slab, x1: q.x + q.w + slab, z1: q.z + q.d + slab }));
+  const k = narrow ? 1.4 : 1;
 
   return (
     <svg className={styles.plan} viewBox={`${minX} ${minY} ${w} ${h}`} role="group" aria-label="The flat's rooms, coloured by outcome. Not to scale.">
@@ -323,22 +428,30 @@ function FlatPlan({
           <rect width="10" height="10" className={styles.hatchBase} />
           <rect width="4" height="10" className={styles.hatchLine} />
         </pattern>
+        <filter id="plan-shadow" x="-10%" y="-10%" width="120%" height="140%">
+          <feDropShadow dx="0" dy="14" stdDeviation="12" floodColor="#15201b" floodOpacity="0.16" />
+        </filter>
       </defs>
-      <polygon className={styles.slabTop} points={pts([iso(all.x - slab, all.z - slab), iso(end.x + slab, all.z - slab), iso(end.x + slab, end.z + slab), iso(all.x - slab, end.z + slab)])} />
-      <polygon
-        className={styles.slabFront}
-        points={pts([iso(all.x - slab, end.z + slab), iso(end.x + slab, end.z + slab), iso(end.x + slab, end.z + slab, -slabDepth), iso(all.x - slab, end.z + slab, -slabDepth)])}
-      />
-      <polygon
-        className={styles.slabSide}
-        points={pts([iso(end.x + slab, all.z - slab), iso(end.x + slab, end.z + slab), iso(end.x + slab, end.z + slab, -slabDepth), iso(end.x + slab, all.z - slab, -slabDepth)])}
-      />
+      <g filter="url(#plan-shadow)">
+        {base.map((b, i) => (
+          <g key={i}>
+            <polygon className={styles.slabFront} points={pts([iso(b.x0, b.z1), iso(b.x1, b.z1), iso(b.x1, b.z1, -slabDepth), iso(b.x0, b.z1, -slabDepth)])} />
+            <polygon className={styles.slabSide} points={pts([iso(b.x1, b.z0), iso(b.x1, b.z1), iso(b.x1, b.z1, -slabDepth), iso(b.x1, b.z0, -slabDepth)])} />
+          </g>
+        ))}
+        {base.map((b, i) => (
+          <polygon key={i} className={styles.slabTop} points={pts([iso(b.x0, b.z0), iso(b.x1, b.z0), iso(b.x1, b.z1), iso(b.x0, b.z1)])} />
+        ))}
+      </g>
       {order.map(({ q, room }, i) => {
         const outcome = outcomeOf(room.id);
         const row = rows.find((r) => r.room.id === room.id && r.claim.item === item);
         const planned = row?.claim.qty ?? 0;
         const counted = row && row.result.outcome !== "not_seen" ? Math.min(row.result.counted, planned) : 0;
-        const [tx, ty] = iso(q.x, q.z + q.d / 2, WALL_H * 0.6);
+        const sides = sidesOf(q, layout, bounds);
+        const markers = markersFor(sides, planned);
+        const far = sides.filter((s) => s.drawn && (s.key === "back" || s.key === "left"));
+        const nearSides = sides.filter((s) => s.key === "front" || s.key === "right");
         const name = `${room.name}: ${outcome ? STAMP[outcome] : "nothing judged yet"}${row ? `, ${row.result.outcome === "not_seen" ? "not counted" : counted} of ${planned} ${ITEM_PLURAL[item]}` : ""}`;
         return (
           <g
@@ -360,68 +473,51 @@ function FlatPlan({
             }}
           >
             <polygon className={styles.floor} points={pts([iso(q.x, q.z), iso(q.x + q.w, q.z), iso(q.x + q.w, q.z + q.d), iso(q.x, q.z + q.d)])} />
-            <polygon className={styles.wallBack} points={pts([iso(q.x, q.z), iso(q.x + q.w, q.z), iso(q.x + q.w, q.z, WALL_H), iso(q.x, q.z, WALL_H)])} />
-            <polygon className={styles.wallLeft} points={pts([iso(q.x, q.z), iso(q.x, q.z + q.d), iso(q.x, q.z + q.d, WALL_H), iso(q.x, q.z, WALL_H)])} />
-            {markerSpots(q, planned, bounds).map((m, k) => (
-              <polygon key={k} className={styles.marker} data-counted={k < counted} points={pts(m)} />
+            {far.map((s) => (
+              <Wall key={s.key} side={s} />
             ))}
-            <rect className={styles.tagMark} x={tx - 6} y={ty - 6} width={12} height={12} rx={1.5} />
+            {markers
+              .map((m, n) => ({ ...m, n }))
+              .filter((m) => m.side.key === "back" || m.side.key === "left")
+              .map((m) => (
+                <Marker key={m.n} side={m.side} a={m.a} b={m.b} item={item} counted={m.n < counted} />
+              ))}
+            {nearSides.map((s) => (
+              <Wall key={s.key} side={s} />
+            ))}
+            {markers
+              .map((m, n) => ({ ...m, n }))
+              .filter((m) => m.side.key === "front" || m.side.key === "right")
+              .map((m) => (
+                <Marker key={m.n} side={m.side} a={m.a} b={m.b} item={item} counted={m.n < counted} />
+              ))}
           </g>
         );
       })}
       {/* Labels last, so no room drawn in front covers another's name. */}
       {order.map(({ q, room }) => {
         const outcome = outcomeOf(room.id);
+        const state = outcome ? STAMP[outcome] : "Nothing judged yet";
         const [cx, cy] = iso(q.x + q.w / 2, q.z + q.d / 2);
+        const lw = (Math.max(room.name.length * 8.4, state.length * 6.6 + 16) + 26) * k;
+        const lh = 46 * k;
+        const selected = room.id === selectedId;
         return (
-          <g key={room.id} aria-hidden="true">
-            {outcome === "not_seen" && <circle className={styles.ping} cx={cx} cy={cy - 30} r={7} />}
-            <text className={styles.roomName} x={cx} y={cy}>
+          <g key={room.id} className={styles.label} data-selected={selected} aria-hidden="true" onClick={() => onSelect(room.id)}>
+            {outcome === "not_seen" && <circle className={styles.ping} cx={cx} cy={cy - lh / 2 - 14 * k} r={7} />}
+            <rect className={styles.labelBox} x={cx - lw / 2} y={cy - lh / 2} width={lw} height={lh} rx={lh / 2} />
+            <text className={styles.roomName} x={cx} y={cy - 3 * k} style={{ fontSize: 16 * k }}>
               {room.name}
-              <tspan className={styles.roomState} data-outcome={outcome ?? "none"} x={cx} dy="1.4em">
-                {outcome ? STAMP[outcome] : "Nothing judged yet"}
-              </tspan>
+            </text>
+            <circle className={styles.stateDot} data-outcome={outcome ?? "none"} cx={cx - (state.length * 3.3 + 2) * k} cy={cy + 11 * k} r={4 * k} />
+            <text className={styles.roomState} data-outcome={outcome ?? "none"} x={cx + 6 * k} y={cy + 15 * k} style={{ fontSize: 12 * k }}>
+              {state}
             </text>
           </g>
         );
       })}
     </svg>
   );
-}
-
-/**
- * One upright marker per planned item, spaced evenly along the room's outside walls. A
- * marker on a shared wall would look as if it belonged to the room next door; a room with
- * no outside wall uses all four.
- */
-function markerSpots(q: Rect, n: number, bounds: Rect): [number, number][][] {
-  if (n === 0) return [];
-  const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
-  const inset = 0.3;
-  // Each side as a start point and a direction, walked clockwise from the back-left corner.
-  const all = [
-    { outside: near(q.z, bounds.z), from: [q.x + inset, q.z], dir: [1, 0], len: q.w - 2 * inset },
-    { outside: near(q.x + q.w, bounds.x + bounds.w), from: [q.x + q.w, q.z + inset], dir: [0, 1], len: q.d - 2 * inset },
-    { outside: near(q.z + q.d, bounds.z + bounds.d), from: [q.x + q.w - inset, q.z + q.d], dir: [-1, 0], len: q.w - 2 * inset },
-    { outside: near(q.x, bounds.x), from: [q.x, q.z + q.d - inset], dir: [0, -1], len: q.d - 2 * inset },
-  ];
-  const sides = all.some((x) => x.outside) ? all.filter((x) => x.outside) : all;
-  const total = sides.reduce((t, x) => t + x.len, 0);
-  const span = Math.min(0.9, (total / n) * 0.6);
-  return Array.from({ length: n }, (_, i) => {
-    let t = ((i + 0.5) / n) * total;
-    let side = sides[0];
-    for (const x of sides) {
-      side = x;
-      if (t <= x.len) break;
-      t -= x.len;
-    }
-    t = Math.min(Math.max(t, span / 2), side.len - span / 2);
-    const at = (d: number): [number, number] => [side.from[0] + side.dir[0] * d, side.from[1] + side.dir[1] * d];
-    const [ax, az] = at(t - span / 2);
-    const [bx, bz] = at(t + span / 2);
-    return [iso(ax, az, 0.22), iso(bx, bz, 0.22), iso(bx, bz, 0.68), iso(ax, az, 0.68)];
-  });
 }
 
 /* ---------- The room on show ---------- */
