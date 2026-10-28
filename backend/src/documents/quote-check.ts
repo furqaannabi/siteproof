@@ -61,3 +61,14 @@ export function verifyQuote(documentText: string, quote: string): boolean {
   if (quote.trim() === "") return false;
   return normalise(documentText).includes(normalise(quote));
 }
+
+/**
+ * True when `text` appears in `quote` as whole words, under the same normalisation
+ * as `verifyQuote`. Whole words, so "Bedroom 1" is not found inside "Bedroom 12".
+ */
+export function lineMentions(quote: string, text: string): boolean {
+  const needle = normalise(text);
+  if (needle === "") return false;
+  const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|[^a-z0-9])${escaped}($|[^a-z0-9])`).test(normalise(quote));
+}

@@ -6,21 +6,8 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import type { Project, Room } from "@siteproof/contract";
+import type { CreatedProject, CreateProject } from "@siteproof/contract";
 import { api } from "@siteproof/contract";
-
-/** The request. Proposed for `contract/`, awaiting Furqaan; lives here meanwhile. */
-export interface CreateProject {
-  name: string;
-  builder: string;
-  flats: { name: string; rooms: { name: string }[] }[];
-}
-
-/** The response. Proposed for `contract/` alongside `CreateProject`. */
-export interface CreatedProject {
-  project: Project;
-  rooms: Room[];
-}
 
 /** What the store is asked to save: the request, with a code on every room. */
 export interface NewProject {

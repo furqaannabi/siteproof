@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tax invoice, Flat 302</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #111; }
+  .letterhead { border-bottom: 2px solid #111; padding-bottom: 6px; margin-bottom: 10px; }
+  .letterhead h1 { font-size: 15pt; margin: 0; }
+  .letterhead p { margin: 2px 0; font-size: 8.5pt; }
+  h2 { font-size: 13pt; margin: 8px 0 6px; text-align: center; letter-spacing: 0.05em; }
+  .parties { width: 100%; border-collapse: collapse; margin-bottom: 8px; }
+  .parties td { vertical-align: top; width: 50%; padding: 4px 6px; border: 1px solid #555; }
+  table.items { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  table.items th, table.items td { border: 1px solid #555; padding: 3px 5px; vertical-align: top; }
+  table.items th { background: #e8e8e8; text-align: left; }
+  td.n { text-align: right; white-space: nowrap; }
+  td.nw { white-space: nowrap; }
+  .totals { width: 45%; margin-left: auto; border-collapse: collapse; margin-top: 6px; }
+  .totals td { border: 1px solid #555; padding: 3px 6px; }
+  .words { margin-top: 8px; }
+  .sample { margin-top: 14px; font-size: 8pt; color: #555; border-top: 1px solid #aaa; padding-top: 4px; }
+</style>
+</head>
+<body>
+<div class="letterhead">
+  <h1>Northfield Constructions Pvt. Ltd.</h1>
+  <p>Northfield Residency, Tower B &middot; Sector 9, Pune 411057 &middot; GSTIN: 27SAMPLE0000X1Z0</p>
+</div>
+
+<h2>TAX INVOICE</h2>
+
+<table class="parties">
+  <tr>
+    <td><strong>Invoice No:</strong> NR/INV/2026/0412<br><strong>Date:</strong> 26 October 2026<br><strong>Place of supply:</strong> Maharashtra (27)</td>
+    <td><strong>Bill to:</strong> The Allottee, Flat 302<br>Northfield Residency, Tower B<br>Sector 9, Pune 411057</td>
+  </tr>
+</table>
+
+<table class="items">
+  <thead>
+    <tr><th>Sr</th><th>Description of work</th><th>HSN/SAC</th><th>Qty</th><th>Unit</th><th>Rate (Rs)</th><th>Taxable value (Rs)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>Supply and fixing of UPVC openable windows, 1200 x 1500 mm, with 5 mm clear glass</td><td class="nw">3925</td><td class="n">11</td><td>nos</td><td class="n">9,500</td><td class="n">1,04,500</td></tr>
+    <tr><td>2</td><td>Supply and fixing of UPVC openable window, 900 x 1200 mm (kitchen)</td><td class="nw">3925</td><td class="n">1</td><td>no</td><td class="n">7,200</td><td class="n">7,200</td></tr>
+    <tr><td>3</td><td>Flush doors, 900 x 2100 mm, with frame and hardware</td><td class="nw">4418</td><td class="n">3</td><td>nos</td><td class="n">11,500</td><td class="n">34,500</td></tr>
+    <tr><td>4</td><td>Flush door, 800 x 2100 mm, with frame and hardware</td><td class="nw">4418</td><td class="n">1</td><td>no</td><td class="n">10,000</td><td class="n">10,000</td></tr>
+    <tr><td>5</td><td>Main entrance door, teak veneer flush shutter, 1000 x 2100 mm, with mortise lock</td><td class="nw">4418</td><td class="n">1</td><td>no</td><td class="n">24,000</td><td class="n">24,000</td></tr>
+    <tr><td>6</td><td>Internal cement plaster, 12 mm thick, in two coats</td><td class="nw">995454</td><td class="n">240</td><td>sqm</td><td class="n">380</td><td class="n">91,200</td></tr>
+  </tbody>
+</table>
+
+<table class="totals">
+  <tr><td>Total taxable value</td><td class="n">2,71,400</td></tr>
+  <tr><td>CGST @ 9%</td><td class="n">24,426</td></tr>
+  <tr><td>SGST @ 9%</td><td class="n">24,426</td></tr>
+  <tr><td><strong>Invoice total</strong></td><td class="n"><strong>3,20,252</strong></td></tr>
+</table>
+
+<p class="words"><strong>Amount in words:</strong> Rupees Three Lakh Twenty Thousand Two Hundred Fifty-Two only.</p>
+
+<p>Payment due within 15 days of the invoice date. Please quote the invoice number with your payment.</p>
+
+<p>For Northfield Constructions Pvt. Ltd.<br>Authorised Signatory</p>
+
+<p class="sample">Sample document prepared for the SiteProof demo. The builder, project, allottee and GSTIN are fictional.</p>
+</body>
+</html>

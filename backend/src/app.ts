@@ -6,6 +6,25 @@
  */
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { api } from "@siteproof/contract";
+import {
+  builderLinkRequired,
+  env,
+  projectInForm,
+  projectInJson,
+  projectInTicket,
+  projectOfClip,
+  projectLinkVersions,
+  projectOfDocument,
+  setupKeyRequired,
+  ticketClipRegistered,
+  uploadAllowance,
+} from "./auth/guards";
+import { linkRoutes } from "./auth/links-route";
+import { checkReadablePdf } from "./documents/read-pdf";
+import { r2Files } from "./r2";
+import { prismaClipStore } from "./routes/clip-store";
+import { clipRoutes } from "./routes/clips";
 import { prismaDocumentStore } from "./routes/document-store";
 import { documentRoutes } from "./routes/documents";
 import { prismaProjectStore } from "./routes/project-store";
@@ -26,8 +45,39 @@ app.use(
 
 app.get("/health", (c) => c.json({ ok: true }));
 
+// Who may do what, checked before any route runs: the team's setup key to create a
+// project, and the project's builder link for everything a builder does in it.
+app.on("POST", api.createProject(), setupKeyRequired);
+app.on("POST", api.createClip(), builderLinkRequired(projectInJson));
+app.on("POST", api.completeClip(), builderLinkRequired(projectInTicket));
+// At most 30 clips a project a day, checked when the link is asked for and again when
+// the clip is registered, which is what queues the paid SAM 3.1 run.
+app.on("POST", api.createClip(), uploadAllowance({ projectOf: projectInJson }));
+app.on("POST", api.completeClip(), uploadAllowance({ projectOf: projectInTicket, alreadyRegistered: ticketClipRegistered }));
+app.on("GET", api.clipStatus(":id"), builderLinkRequired(projectOfClip));
+app.on("POST", api.createDocument(), builderLinkRequired(projectInForm));
+app.on("GET", api.documentStatus(":id"), builderLinkRequired(projectOfDocument));
+
 app.route("/", projectRoutes(prismaProjectStore));
-app.route("/", documentRoutes(prismaDocumentStore));
+app.route(
+  "/",
+  linkRoutes({ secret: env("LINK_SECRET"), setupKey: () => process.env.SETUP_KEY, project: projectLinkVersions }),
+);
+app.route(
+  "/",
+  clipRoutes({
+    store: prismaClipStore,
+    files: r2Files,
+    // Read on use, so the app loads without it; a request without it is a 500.
+    ticketSecret: () => {
+      const secret = process.env.UPLOAD_TICKET_SECRET;
+      if (!secret) throw new Error("UPLOAD_TICKET_SECRET must be set in backend/.env");
+      return secret;
+    },
+    now: Date.now,
+  }),
+);
+app.route("/", documentRoutes({ store: prismaDocumentStore, files: r2Files, checkReadable: checkReadablePdf }));
 
 app.notFound((c) => c.json({ error: "not_found" }, 404));
 

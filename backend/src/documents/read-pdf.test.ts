@@ -155,3 +155,11 @@ test("pages left in the folder from another document never come back as this one
 
   await expect(render).rejects.toThrow("page folder is not empty");
 });
+
+test("a PDF that is scanned throughout is called a scan, not page 1 of one", async () => {
+  const pdf = await writePdf("all-scanned.pdf", [[], [], []]);
+
+  const read = readDocumentText(pdf);
+
+  await expect(read).rejects.toMatchObject({ code: "scan", message: "This looks like a scan. Send a PDF with selectable text." });
+});

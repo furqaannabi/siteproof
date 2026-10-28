@@ -160,8 +160,8 @@ export const flat302: Report = {
   stage: "Stage 6",
   rooms,
   documents: [
-    { id: DL, project_id: PROJECT, flat_id: FLAT, kind: "demand_letter", status: "done" },
-    { id: BOQ, project_id: PROJECT, flat_id: null, kind: "boq", status: "done" },
+    { id: DL, project_id: PROJECT, flat_id: FLAT, kind: "demand_letter", status: "done", reason: null },
+    { id: BOQ, project_id: PROJECT, flat_id: null, kind: "boq", status: "done", reason: null },
   ],
   clips,
   segments,

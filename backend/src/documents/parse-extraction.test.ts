@@ -3,11 +3,11 @@ import { parseExtraction } from "./parse-extraction";
 
 // A BOQ as `pdftotext -layout` renders it.
 const BOQ = [
-  "Item   Description                                      Unit   Qty",
-  "3.1    Providing and fixing UPVC openable window,        nos    12",
+  "Item   Description                                      Room        Unit   Qty",
+  "3.1    Providing and fixing UPVC openable window,        Kitchen     nos    12",
   "       1200 x 1500 mm, including hardware and fixtures",
-  "3.2    Providing and fixing flush door, 900 x 2100 mm    nos     8",
-  "4.1    Internal plaster, 12 mm thick, two coats          sqm   240",
+  "3.2    Providing and fixing flush door, 900 x 2100 mm    Bedroom 2   nos     8",
+  "4.1    Internal plaster, 12 mm thick, two coats          All rooms   sqm   240",
 ].join("\n");
 
 const ROOMS = [
@@ -25,7 +25,7 @@ test("a well-formed response becomes claims, with the quote checked against the 
         qty: 8,
         unit: "nos",
         room: "Bedroom 2",
-        source_quote: "3.2    Providing and fixing flush door, 900 x 2100 mm    nos     8",
+        source_quote: "3.2    Providing and fixing flush door, 900 x 2100 mm    Bedroom 2   nos     8",
       },
     ],
   });
@@ -39,7 +39,7 @@ test("a well-formed response becomes claims, with the quote checked against the 
       qty: 8,
       unit: "nos",
       room_id: "room_7f3a",
-      source_quote: "3.2    Providing and fixing flush door, 900 x 2100 mm    nos     8",
+      source_quote: "3.2    Providing and fixing flush door, 900 x 2100 mm    Bedroom 2   nos     8",
       quote_verified: true,
     },
   ]);
@@ -54,7 +54,7 @@ const DOOR = {
   qty: 8,
   unit: "nos",
   room: "Bedroom 2",
-  source_quote: "3.2    Providing and fixing flush door, 900 x 2100 mm    nos     8",
+  source_quote: "3.2    Providing and fixing flush door, 900 x 2100 mm    Bedroom 2   nos     8",
 };
 
 test("output that is not JSON fails loudly: it never reads as a document with no claims", () => {
@@ -187,4 +187,32 @@ test("a demand letter's counts with no unit become claims, not rejected lines", 
     ["window", 12, null, true],
     ["door", 5, null, true],
   ]);
+});
+
+// --- a room is only placed when it is on the quoted line ------------------------------
+
+test("a room the model names but the quoted line does not show leaves the claim unplaced", () => {
+  // The quote is genuine, so it verifies, but nothing in it says Bedroom 2.
+  const offLine = { ...DOOR, source_quote: "Providing and fixing flush door, 900 x 2100 mm" };
+
+  const { claims } = parseExtraction(response(offLine), context);
+
+  expect([claims[0]!.quote_verified, claims[0]!.room_id]).toEqual([true, null]);
+});
+
+test("Bedroom 1 is not found inside Bedroom 12", () => {
+  const doc = "D-7    Flush door, 900 x 2100 mm    Bedroom 12   nos   1";
+  const rooms = [{ id: "b1", name: "Bedroom 1" }, { id: "b12", name: "Bedroom 12" }];
+
+  const { claims } = parseExtraction(response({ ...DOOR, qty: 1, room: "Bedroom 1", source_quote: doc }), { documentText: doc, rooms });
+
+  expect(claims[0]!.room_id).toBeNull();
+});
+
+test("a room offered under a qualified name is placed when its own name is on the line", () => {
+  const rooms = [{ id: "r302b2", name: "302 / Bedroom 2", onLine: "Bedroom 2" }];
+
+  const { claims } = parseExtraction(response({ ...DOOR, room: "302 / Bedroom 2" }), { documentText: BOQ, rooms });
+
+  expect(claims[0]!.room_id).toBe("r302b2");
 });

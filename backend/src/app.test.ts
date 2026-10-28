@@ -28,3 +28,22 @@ test("with no origins configured, every site is refused", async () => {
 
   expect(res.headers.get("Access-Control-Allow-Origin")).toBeNull();
 });
+
+test("creating a project without the team's setup key is refused", async () => {
+  const res = await app.request("/projects", { method: "POST", body: "{}" });
+
+  expect(res.status).toBe(401);
+});
+
+test("every builder route refuses a request with no builder link", async () => {
+  const json = { "Content-Type": "application/json" };
+  const calls = [
+    app.request("/clips", { method: "POST", headers: json, body: JSON.stringify({ project_id: "p" }) }),
+    app.request("/clips/complete", { method: "POST", headers: json, body: JSON.stringify({ ticket: "t" }) }),
+    app.request("/clips/c1/status"),
+    app.request("/documents", { method: "POST", body: new FormData() }),
+    app.request("/documents/d1/status"),
+  ];
+
+  expect((await Promise.all(calls)).map((r) => r.status)).toEqual([401, 401, 401, 401, 401]);
+});

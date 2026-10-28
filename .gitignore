@@ -42,3 +42,5 @@ coverage/
 # Impeccable design tool: review screenshots and per-person settings stay local
 web/.impeccable/review/
 /.impeccable/
+# SAM answers cached by the accuracy runner: local, never committed.
+backend/accuracy/.cache/

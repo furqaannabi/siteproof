@@ -112,3 +112,11 @@ test("a page that is not a PNG or JPEG is refused before anything is sent", asyn
   await expect(ask).rejects.toMatchObject({ code: "bad_image" });
   expect(sent).toHaveLength(0);
 });
+
+test("an HTTP failure keeps its status as a number, so a 400 can be told from a 503", async () => {
+  const { fetch } = fakeFetch({}, 503);
+
+  const error = await askMuseSpark(request(), { apiKey: KEY, baseUrl: "https://api.test/v1", fetch }).catch((e) => e);
+
+  expect(error).toMatchObject({ code: "request_failed", status: 503 });
+});

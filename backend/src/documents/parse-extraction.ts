@@ -23,7 +23,7 @@
 import { z } from "zod";
 import type { Claim } from "@siteproof/contract";
 import { COUNTABLE } from "./extraction";
-import { verifyQuote } from "./quote-check";
+import { lineMentions, verifyQuote } from "./quote-check";
 
 /** The response was not usable as a whole. */
 export class ExtractionError extends Error {
@@ -72,7 +72,18 @@ export type ParsedClaim = Omit<Claim, "id" | "doc_id">;
 export interface ParseContext {
   /** The document as `pdftotext -layout` rendered it. Never text a model produced. */
   documentText: string;
-  rooms: readonly { id: string; name: string }[];
+  /**
+   * The rooms the model was offered. `onLine` is the text that must appear on the
+   * quoted line for the room to count, when it differs from the name offered
+   * ("Bedroom 2" for a room offered as "302 / Bedroom 2").
+   */
+  rooms: readonly RoomChoice[];
+}
+
+export interface RoomChoice {
+  id: string;
+  name: string;
+  onLine?: string;
 }
 
 export interface ParsedExtraction {
@@ -86,13 +97,19 @@ export interface ParsedExtraction {
  * Matching ignores case and surrounding space, because the model recasing a name is
  * not the builder meaning a different room. Two rooms sharing a name resolve to
  * null: picking the first would attach a count, and later evidence frames, to the
- * wrong room, and nothing downstream could tell.
+ * wrong room, and nothing downstream could tell. And the room must be written on the
+ * quoted line, or the claim stays unplaced.
  */
-function resolveRoom(name: string | null, rooms: readonly { id: string; name: string }[]): string | null {
+function resolveRoom(name: string | null, quote: string, rooms: readonly RoomChoice[]): string | null {
   if (name === null) return null;
   const wanted = name.trim().toLowerCase();
   const matches = rooms.filter((r) => r.name.trim().toLowerCase() === wanted);
-  return matches.length === 1 ? matches[0]!.id : null;
+  if (matches.length !== 1) return null;
+  const room = matches[0]!;
+  // The model may only place a claim in a room the quoted line itself names. A room
+  // read from a wrapped line, a heading or a guess has no evidence in the claim, and
+  // the room decides which footage the claim is judged against.
+  return lineMentions(quote, room.onLine ?? room.name) ? room.id : null;
 }
 
 function reasonFor(issues: readonly z.core.$ZodIssue[]): RejectReason {
@@ -139,7 +156,7 @@ export function parseExtraction(raw: string, { documentText, rooms }: ParseConte
       item: line.data.item,
       qty: line.data.qty,
       unit: line.data.unit,
-      room_id: resolveRoom(line.data.room, rooms),
+      room_id: resolveRoom(line.data.room, line.data.source_quote, rooms),
       source_quote: line.data.source_quote,
       quote_verified: verifyQuote(documentText, line.data.source_quote),
     });
