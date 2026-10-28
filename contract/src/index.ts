@@ -146,6 +146,11 @@ export interface Segment {
   t_start: number;
   t_end: number;
   full_sweep: boolean;
+  /**
+   * When the clip this segment came from was filmed: its `Clip.captured_at`, so a
+   * report can date its evidence without carrying the clip. null when unknown.
+   */
+  captured_at: string | null;
 }
 
 /**
@@ -280,6 +285,11 @@ export interface ProjectOverview {
   rooms: Room[];
   documents: Document[];
   clips: Clip[];
+  /**
+   * Every segment in the project, placed and unplaced, so the builder can see where
+   * each clip went and which passed no room tag, and so are never used for a claim.
+   */
+  segments: Segment[];
 }
 
 /**
@@ -305,14 +315,12 @@ export const api = {
   projectOverview: (projectId: string) => `/projects/${projectId}`,
   /** One flat's report, for its builder. Builder link. */
   flatReport: (flatId: string) => `/flats/${flatId}/report`,
-  /** One flat's report, for its buyer and bank. The report link is the token: no login. */
-  reportByLink: (token: string) => `/reports/${encodeURIComponent(token)}`,
   /**
-   * Replaced by `projectOverview` and `flatReport`; kept only until the web app has
-   * moved to them, then removed.
-   * @deprecated
+   * One flat's report, for its buyer and bank, with no login. The report link travels
+   * only in the `Authorization: Bearer` header, never in the path, so it is never
+   * written to a server or proxy log.
    */
-  projectReport: (projectId: string) => `/projects/${projectId}/report`,
+  reportByLink: () => "/report",
   /** Create a gap request from the coverage map. */
   requestFootage: (roomId: string) => `/rooms/${roomId}/request-footage`,
 } as const;

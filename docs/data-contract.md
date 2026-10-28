@@ -12,7 +12,7 @@ Room    { id, flat, name, qr_code }           // flat = the flat's id
 Clip    { id, project_id, url, captured_at|null, status: uploaded|processing|done|failed }
 Document { id, project_id, flat_id|null, kind: "demand_letter"|"invoice"|"boq",
            status: uploaded|processing|done|failed, reason|null }       // null flat = whole project (a BOQ)
-Segment { clip_id, room_id|null, t_start, t_end, full_sweep: bool }     // null room = "unplaced"
+Segment { clip_id, room_id|null, t_start, t_end, full_sweep: bool, captured_at|null }  // null room = "unplaced"
 ItemKind = "window" | "door"                                            // what v1 can count
 Claim   { id, doc_id, item: ItemKind|"not_countable", qty, unit|null, room_id|null, source_quote, quote_verified: bool }
 Detection { clip_id, room_id, item: ItemKind, track_id, best_frame_url, mask_url }
@@ -32,7 +32,7 @@ QueryLetter     { id, claim_id, body,
                   citations: { invoice_claim_id, plan_claim_id|null, evidence: [frame_url] } }
 Report          { project: { id, name, builder }, flat, rooms[], documents[], claims[],
                   results[], not_checked[], detections[], segments[], gap_requests[], query_letters[] }
-ProjectOverview { project, rooms[], documents[], clips[] }                  // the builder's whole project
+ProjectOverview { project, rooms[], documents[], clips[], segments[] }      // the builder's whole project
 ```
 
 ## API
@@ -48,8 +48,7 @@ ProjectOverview { project, rooms[], documents[], clips[] }                  // t
 | `GET /projects/:id/links` | The project's builder link and each flat's report link. Answers only the team's setup key or the project's own builder link | Furqaan |
 | `GET /projects/:id` | The builder's `ProjectOverview`: every flat, room, document and clip with its status. Builder link | Furqaan |
 | `GET /flats/:id/report` | One flat's `Report`, for its builder. Builder link | Furqaan |
-| `GET /reports/:token` | One flat's `Report`, for its buyer and bank. The report link is the token: no login | Furqaan |
-| `GET /projects/:id/report` | Replaced by the three above; kept only until the web app has moved to them | — |
+| `GET /report` | One flat's `Report`, for its buyer and bank, with no login. The report link travels only in `Authorization: Bearer`, never in the path, so it is never in a server or proxy log | Furqaan |
 | `POST /rooms/:id/request-footage` | Create a `GapRequest` from the coverage map. Builder link | Apurva |
 
 ## Who may call what
@@ -72,6 +71,8 @@ Every request carries its key as `Authorization: Bearer <token>` ([ADR](decision
 - **A `QueryLetter` in a response has had every citation re-checked**: the invoice line and plan line exist, the frames resolve. One that fails is not sent at all, so there is no flag to read. Every number in its `body` was put there by code from the `Result`; Muse Spark writes only the wording around them.
 - **A `GapRequest` is exact and small**, and becomes `cleared` when footage covering the room arrives.
 - **No stage label** ("Stage 6") is in the report: a label read off a demand letter is a claim shown to a bank with no checked quote behind it. The demand letter's own claims, with their verified quotes, say what is billed.
+- **`Segment.captured_at` is its clip's capture time**, so a report dates its evidence without carrying the clip; null when unknown, never the upload time.
+- **`ProjectOverview.segments` holds every segment in the project, placed and unplaced**, so the builder sees where each clip went and which passed no room tag.
 - **A clip is registered only once its video is in storage.** `POST /clips` saves nothing, so a clip and its ingest job are written together, never one without the other.
 - **`Segment.room_id` is null for an unplaced segment** — a part of a clip that passed no room tag. Unplaced segments are stored, but are never used for a per-room claim.
 - **`Segment.full_sweep`** is true only for one continuous stretch that starts at the room's QR tag and pans the whole room once in one direction, without panning back. It is what the coverage rule reads.
@@ -107,4 +108,5 @@ Flag these to Furqaan rather than deciding them in code:
 | `Claim.unit` may be null, where the document states no unit — found running real Muse Spark output on a demand letter | 27 October 2026 | Furqaan |
 | Builder routes need the project's builder link, `POST /projects` the setup key; `ProjectLinks` and `GET /projects/:id/links` added | 28 October 2026 | Furqaan |
 | The report becomes per flat and buyer-safe (`Report`, `GET /flats/:id/report`, `GET /reports/:token`), with `NotChecked`; `ProjectOverview` and `GET /projects/:id` for the builder; `GapRequest` and `QueryLetter` settled, from Apurva's proposal in `web/lib/types.ts` ([ADR](decisions/2026-10-28-the-report-is-per-flat-and-every-claim-is-judged-or-explained.md)) | 28 October 2026 | Furqaan |
+| `Segment.captured_at` and `ProjectOverview.segments` added, from [Apurva's proposal](decisions/2026-10-28-clip-placement-and-capture-time-proposed.md) (option A on both). The report link moves from the path to the `Authorization` header only: `GET /reports/:token` becomes `GET /report`; `GET /projects/:id/report` removed | 28 October 2026 | Furqaan |
 | `Document.reason` added. `CreateProject` and `CreatedProject` for `POST /projects` ([ADR](decisions/2026-10-27-creating-a-project-returns-its-rooms-and-their-qr-codes.md)). Clips upload in two steps: `POST /clips` returns a link and a ticket, `POST /clips/complete` registers the clip ([ADR](decisions/2026-10-27-clips-upload-in-two-steps-with-a-signed-ticket.md)) | 28 October 2026 | Furqaan |

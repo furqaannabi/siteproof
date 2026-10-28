@@ -87,3 +87,19 @@ export const ticketClipRegistered = async (c: Context) => {
   const { db } = await import("../db");
   return (await db.clip.count({ where: { object_key: read.body.object_key } })) > 0;
 };
+
+/** The project named in the path, as in `GET /projects/:id`. */
+export const projectInPath = async (c: Context) => field(c.req.param("id"));
+
+/** The project a flat in the path belongs to, as in `GET /flats/:id/report`. */
+export const projectOfFlat = async (c: Context) => {
+  const { db } = await import("../db");
+  const flat = await db.flat.findUnique({ where: { id: c.req.param("id") }, select: { project_id: true } });
+  return flat?.project_id ?? null;
+};
+
+/** A flat's report-link version, for `GET /report`. */
+export const flatLinkVersion = async (id: string) => {
+  const { db } = await import("../db");
+  return (await db.flat.findUnique({ where: { id }, select: { link_version: true } }))?.link_version ?? null;
+};

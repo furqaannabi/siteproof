@@ -138,7 +138,7 @@ const apiSource: DataSource = {
   },
   getOverview: (projectId) => asBuilder<ProjectOverview>(projectId, api.projectOverview(projectId)),
   getFlatReport: (projectId, flatId) => asBuilder<Report>(projectId, api.flatReport(flatId)),
-  getReportByLink: (token) => call<Report>(api.reportByLink(token), token),
+  getReportByLink: (token) => call<Report>(api.reportByLink(), token),
   getLinks: (projectId, setupKey) =>
     setupKey ? call<ProjectLinks>(api.projectLinks(projectId), setupKey) : asBuilder<ProjectLinks>(projectId, api.projectLinks(projectId)),
   createProject: (body, setupKey) => call<CreatedProject>(api.createProject(), setupKey, { method: "POST", body: JSON.stringify(body) }),

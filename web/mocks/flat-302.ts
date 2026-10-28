@@ -32,13 +32,13 @@ const clips: Clip[] = [
 ];
 
 const segments: Segment[] = [
-  { clip_id: "c-0409", room_id: "r-living", t_start: 6, t_end: 31, full_sweep: true },
-  { clip_id: "c-0409", room_id: null, t_start: 31, t_end: 38, full_sweep: false },
-  { clip_id: "c-0410", room_id: "r-bed1", t_start: 3, t_end: 19, full_sweep: true },
-  { clip_id: "c-0411", room_id: "r-bed3", t_start: 2, t_end: 17, full_sweep: true },
+  { clip_id: "c-0409", room_id: "r-living", t_start: 6, t_end: 31, full_sweep: true, captured_at: "2026-10-26T10:12:00+05:30" },
+  { clip_id: "c-0409", room_id: null, t_start: 31, t_end: 38, full_sweep: false, captured_at: "2026-10-26T10:12:00+05:30" },
+  { clip_id: "c-0410", room_id: "r-bed1", t_start: 3, t_end: 19, full_sweep: true, captured_at: "2026-10-26T10:14:00+05:30" },
+  { clip_id: "c-0411", room_id: "r-bed3", t_start: 2, t_end: 17, full_sweep: true, captured_at: null },
   // The kitchen: a partial pan that never started at its tag.
-  { clip_id: "c-0411", room_id: "r-kitchen", t_start: 18, t_end: 22, full_sweep: false },
-  { clip_id: "c-0412", room_id: "r-bed2", t_start: 0, t_end: 27, full_sweep: true },
+  { clip_id: "c-0411", room_id: "r-kitchen", t_start: 18, t_end: 22, full_sweep: false, captured_at: null },
+  { clip_id: "c-0412", room_id: "r-bed2", t_start: 0, t_end: 27, full_sweep: true, captured_at: "2026-10-26T10:19:00+05:30" },
 ];
 
 const roomKey: Record<string, string> = {

@@ -161,7 +161,7 @@ function settle(report: MockProject) {
 
 function fillGap(report: MockProject, clip: Clip, roomId: string) {
   if (report.project.id !== flat302.project.id) return;
-  report.segments.push({ clip_id: clip.id, room_id: roomId, t_start: 0, t_end: 5, full_sweep: true });
+  report.segments.push({ clip_id: clip.id, room_id: roomId, t_start: 0, t_end: 5, full_sweep: true, captured_at: clip.captured_at });
   for (const claim of report.claims.filter((c) => c.room_id === roomId)) {
     if (claim.item === "not_countable") continue;
     const result = report.results.find((r) => r.claim_id === claim.id);
@@ -201,7 +201,7 @@ export const mockSource = {
     const p = projectOf(projectId);
     settle(p);
     save();
-    return structuredClone({ project: p.project, rooms: p.rooms, documents: p.documents, clips: p.clips });
+    return structuredClone({ project: p.project, rooms: p.rooms, documents: p.documents, clips: p.clips, segments: p.segments });
   },
 
   async getFlatReport(flatId: string): Promise<Report> {

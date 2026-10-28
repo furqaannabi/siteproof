@@ -22,7 +22,17 @@ for (const { track_id, sightings } of objects) {
   const first = sightings[0]!.frame;
   const last = sightings.at(-1)!.frame;
   const best = Math.max(...sightings.map((s) => s.confidence ?? 0));
+  // The runs of consecutive frames: a track seen in two runs far apart may be two
+  // objects under one id, or one object that left and came back.
+  const runs: [number, number][] = [];
+  for (const { frame } of sightings) {
+    const run = runs.at(-1);
+    if (run && frame <= run[1] + 2) run[1] = frame;
+    else runs.push([frame, frame]);
+  }
+  const shown = runs.map(([a, b]) => (a === b ? `${a}` : `${a}–${b}`)).join(", ");
   console.log(`track ${track_id}: frames ${first}–${last} (${sightings.length} seen), best confidence ${best.toFixed(2)}`);
+  console.log(`  seen in ${runs.length} run(s): ${shown}`);
 }
 console.log(`\n"${prompt}": ${objects.length} distinct track id(s) in ${seconds} s`);
 if (hand !== undefined) {

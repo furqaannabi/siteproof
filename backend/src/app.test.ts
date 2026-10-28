@@ -47,3 +47,9 @@ test("every builder route refuses a request with no builder link", async () => {
 
   expect((await Promise.all(calls)).map((r) => r.status)).toEqual([401, 401, 401, 401, 401]);
 });
+
+test("the overview and a flat's report need a builder link, and a buyer's report a report link", async () => {
+  const calls = [app.request("/projects/p1"), app.request("/flats/f1/report"), app.request("/report")];
+
+  expect((await Promise.all(calls)).map((r) => r.status)).toEqual([401, 401, 401]);
+});

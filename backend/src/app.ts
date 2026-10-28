@@ -10,17 +10,22 @@ import { api } from "@siteproof/contract";
 import {
   builderLinkRequired,
   env,
+  flatLinkVersion,
   projectInForm,
   projectInJson,
+  projectInPath,
   projectInTicket,
   projectOfClip,
   projectLinkVersions,
   projectOfDocument,
+  projectOfFlat,
   setupKeyRequired,
   ticketClipRegistered,
   uploadAllowance,
 } from "./auth/guards";
 import { linkRoutes } from "./auth/links-route";
+import { loadOverview, loadReportRows } from "./reports/load";
+import { reportRoutes } from "./reports/routes";
 import { museSparkConfigFromEnv } from "./documents/muse-spark";
 import { checkReadablePdf } from "./documents/read-pdf";
 import { writeSteps } from "./gap-requests/steps";
@@ -61,9 +66,25 @@ app.on("POST", api.completeClip(), uploadAllowance({ projectOf: projectInTicket,
 app.on("GET", api.clipStatus(":id"), builderLinkRequired(projectOfClip));
 app.on("POST", api.createDocument(), builderLinkRequired(projectInForm));
 app.on("GET", api.documentStatus(":id"), builderLinkRequired(projectOfDocument));
+app.on("GET", api.projectOverview(":id"), builderLinkRequired(projectInPath));
+app.on("GET", api.flatReport(":id"), builderLinkRequired(projectOfFlat));
+// GET /report is opened by a flat's report link, checked in its route.
 app.on("POST", api.requestFootage(":id"), builderLinkRequired((c) => projectOfRoomId(c.req.param("id") ?? "")));
 
 app.route("/", projectRoutes(prismaProjectStore));
+// Links in a report or overview last 15 minutes: long enough to look through it, and
+// a link copied out of one stops working soon after.
+const presignView = (key: string) => r2Files.presignRead(key, 15 * 60);
+app.route(
+  "/",
+  reportRoutes({
+    secret: env("LINK_SECRET"),
+    flatLinkVersion,
+    reportRows: loadReportRows,
+    overview: (id) => loadOverview(id, presignView),
+    presign: presignView,
+  }),
+);
 app.route(
   "/",
   linkRoutes({ secret: env("LINK_SECRET"), setupKey: () => process.env.SETUP_KEY, project: projectLinkVersions }),
