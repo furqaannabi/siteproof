@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --env-file=.env --watch src/index.ts",
+    "dev": "prisma generate && bun --env-file=.env --watch src/index.ts",
     "start": "bun --env-file=.env src/index.ts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "prisma generate && tsc --noEmit",
     "test": "bun test",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",

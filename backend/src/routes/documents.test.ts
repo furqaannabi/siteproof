@@ -10,6 +10,7 @@ const record: DocumentRecord = {
   flat_id: null,
   kind: "boq",
   status: "processing",
+  reason: null,
   // Server-side only. The ADR is explicit that where the file lives is never in the contract.
   object_key: "8f14e45fceea167a5a36dedd4bea2543",
 };
@@ -26,7 +27,7 @@ function fakes(overrides: Partial<DocumentRouteDeps> = {}) {
       flatIdsOf: async (projectId) => (projectId === "prj_11cc" ? ["flat_302"] : null),
       createWithJob: async (input): Promise<Document> => {
         registered.push(input);
-        return { id: "doc_new", project_id: input.project_id, flat_id: input.flat_id, kind: input.kind, status: "uploaded" };
+        return { id: "doc_new", project_id: input.project_id, flat_id: input.flat_id, kind: input.kind, status: "uploaded", reason: null };
       },
     },
     files: { put: async (key, _bytes, type) => void stored.push({ key, type }) },
@@ -51,7 +52,7 @@ test("returns the document the contract describes", async () => {
   const res = await documentRoutes(fakes().deps).request("/documents/doc_4a91/status");
 
   expect(res.status).toBe(200);
-  expect(await res.json()).toEqual({ id: "doc_4a91", project_id: "prj_11cc", flat_id: null, kind: "boq", status: "processing" });
+  expect(await res.json()).toEqual({ id: "doc_4a91", project_id: "prj_11cc", flat_id: null, kind: "boq", status: "processing", reason: null });
 });
 
 test("the object key never reaches the response", async () => {
@@ -77,7 +78,7 @@ test("a BOQ for the whole project is stored under a random key, then registered 
   const res = await upload(deps, { project_id: "prj_11cc", kind: "boq" });
 
   expect(res.status).toBe(201);
-  expect(await res.json()).toEqual({ id: "doc_new", project_id: "prj_11cc", flat_id: null, kind: "boq", status: "uploaded" });
+  expect(await res.json()).toEqual({ id: "doc_new", project_id: "prj_11cc", flat_id: null, kind: "boq", status: "uploaded", reason: null });
   expect(stored).toHaveLength(1);
   expect(stored[0]!.key).toMatch(/^siteproof\/documents\/[0-9a-f]{32}\.pdf$/);
   expect(stored[0]!.type).toBe("application/pdf");

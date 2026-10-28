@@ -31,6 +31,19 @@ export interface Flat {
   name: string;
 }
 
+/** The body of `POST /projects`: a project with its flats and their rooms. */
+export interface CreateProject {
+  name: string;
+  builder: string;
+  flats: { name: string; rooms: { name: string }[] }[];
+}
+
+/** What `POST /projects` returns: the project, and every room with its tag code to print. */
+export interface CreatedProject {
+  project: Project;
+  rooms: Room[];
+}
+
 /** One builder's project. */
 export interface Project {
   id: string;
@@ -75,6 +88,35 @@ export interface Document {
   kind: DocumentKind;
   /** The same lifecycle as a clip: uploaded → processing → done / failed. */
   status: ClipStatus;
+  /**
+   * Why it failed, in plain words a builder can act on; null unless `status` is
+   * "failed". Chosen by code from a fixed list, never written by a model and never
+   * quoting the document.
+   */
+  reason: string | null;
+}
+
+/**
+ * Uploading a clip is two steps, so a clip and its job are saved only once the video
+ * is confirmed in storage. `POST /clips` saves nothing: it answers with a link to
+ * upload the video to and a signed ticket. `POST /clips/complete` with that ticket
+ * registers the clip and returns it; sending the same ticket again returns the same clip.
+ */
+export interface ClipUploadRequest {
+  project_id: string;
+  content_type: "video/mp4" | "video/quicktime";
+}
+
+/** What `POST /clips` returns. `upload_url` takes one PUT of the video, until `expires_at`. */
+export interface ClipUpload {
+  upload_url: string;
+  ticket: string;
+  expires_at: string;
+}
+
+/** The body of `POST /clips/complete`. It returns the `Clip`. */
+export interface CompleteClip {
+  ticket: string;
 }
 
 /**
@@ -154,8 +196,10 @@ export interface Result {
 export const api = {
   /** Create a project with its flats and rooms. */
   createProject: () => "/projects",
-  /** Register a clip and get a presigned upload URL back. */
+  /** Get a link to upload a clip to, and a ticket. Saves nothing. */
   createClip: () => "/clips",
+  /** Register an uploaded clip by its ticket. */
+  completeClip: () => "/clips/complete",
   /** Upload a demand letter, invoice or BOQ for extraction. */
   createDocument: () => "/documents",
   /** Poll a clip through uploaded → processing → done / failed. */

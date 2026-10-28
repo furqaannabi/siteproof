@@ -107,6 +107,7 @@ These are the product. Do not re-open them, and do not write code that bends the
 | Data | PostgreSQL through Prisma |
 | Clips, frames, masks | Cloudflare R2, a private bucket, access only through short-lived presigned URLs ([ADR](docs/decisions/2026-10-27-cloudflare-r2-for-clips-frames-and-masks.md)) |
 | Schema validation | Zod, on every API request body and every model response |
+| Who gets in | Secret links, no accounts: a builder link per project, a read-only report link per flat. Only a hash of each token is stored ([ADR](docs/decisions/2026-10-28-builder-access-by-secret-links-accepted.md)) |
 | Package manager and layout | pnpm workspace: `web/`, `backend/`, `contract/` |
 
 **Checked on 27 October 2026** against [Meta's Model API docs](https://dev.meta.ai/docs/pricing-rate-limits) and our own account. Base URL `https://api.meta.ai/v1`, bearer-token auth. Prices change: recheck the docs before relying on a number for anything larger than a test.
@@ -124,7 +125,6 @@ These are the product. Do not re-open them, and do not write code that bends the
 | Decision | Owner |
 | --- | --- |
 | Backend hosting | Furqaan |
-| Auth for the builder view (the buyer/bank report needs no login) | Apurva + Furqaan |
 
 ---
 

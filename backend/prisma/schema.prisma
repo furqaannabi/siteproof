@@ -119,6 +119,8 @@ model Document {
   flat_id    String?
   kind       DocumentKind
   status     ClipStatus   @default(uploaded)
+  /// Why it failed, in plain words from a fixed list in code; null unless failed.
+  reason     String?
   /// The R2 object key. Never in a response, never logged, never shown.
   object_key String       @unique
   created_at DateTime     @default(now())

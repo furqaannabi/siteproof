@@ -44,11 +44,9 @@ export const prismaExtractStore: ExtractStore = {
     ]);
   },
 
-  async markFailed(id, _reason) {
+  async markFailed(id, reason) {
     const { db } = await import("../db");
-    // The reason is not stored yet: Document has no reason column until Furqaan adds
-    // it. The status still tells the builder it failed.
-    await db.document.update({ where: { id }, data: { status: "failed" } });
+    await db.document.update({ where: { id }, data: { status: "failed", reason } });
   },
 };
 

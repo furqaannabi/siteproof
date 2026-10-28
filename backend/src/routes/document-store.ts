@@ -7,7 +7,7 @@
  */
 import type { DocumentStore } from "./documents";
 
-const CONTRACT_FIELDS = { id: true, project_id: true, flat_id: true, kind: true, status: true } as const;
+const CONTRACT_FIELDS = { id: true, project_id: true, flat_id: true, kind: true, status: true, reason: true } as const;
 
 export const prismaDocumentStore: DocumentStore = {
   async findById(id) {

@@ -11,21 +11,28 @@ Project { id, name, builder, flats[] }        Flat { id, name }
 Room    { id, flat, name, qr_code }           // flat = the flat's id
 Clip    { id, project_id, url, captured_at|null, status: uploaded|processing|done|failed }
 Document { id, project_id, flat_id|null, kind: "demand_letter"|"invoice"|"boq",
-           status: uploaded|processing|done|failed }                    // null flat = whole project (a BOQ)
+           status: uploaded|processing|done|failed, reason|null }       // null flat = whole project (a BOQ)
 Segment { clip_id, room_id|null, t_start, t_end, full_sweep: bool }     // null room = "unplaced"
 ItemKind = "window" | "door"                                            // what v1 can count
 Claim   { id, doc_id, item: ItemKind|"not_countable", qty, unit|null, room_id|null, source_quote, quote_verified: bool }
 Detection { clip_id, room_id, item: ItemKind, track_id, best_frame_url, mask_url }
 Result  { claim_id, counted, outcome: "verified"|"short"|"not_seen", room_covered: bool,
           evidence: [frame_url], note }
+
+CreateProject     { name, builder, flats: [{ name, rooms: [{ name }] }] }   // POST /projects body
+CreatedProject    { project: Project, rooms: Room[] }                        // POST /projects reply
+ClipUploadRequest { project_id, content_type: "video/mp4"|"video/quicktime" } // POST /clips body
+ClipUpload        { upload_url, ticket, expires_at }                         // POST /clips reply
+CompleteClip      { ticket }                                                 // POST /clips/complete body → Clip
 ```
 
 ## API
 
 | Method and path | What it does | Owner |
 | --- | --- | --- |
-| `POST /projects` | Create a project with its flats and rooms | William |
-| `POST /clips` | Register a clip and hand back a presigned upload URL | William |
+| `POST /projects` | Create a project with its flats and rooms; returns every room with its tag code | William |
+| `POST /clips` | Hand back a link to upload one video to and a signed ticket. Saves nothing | William |
+| `POST /clips/complete` | Register the uploaded clip by its ticket, once the video is confirmed in storage, and queue its ingest job. The same ticket again returns the same clip | William |
 | `POST /documents` | Upload a demand letter, invoice or BOQ for extraction | William |
 | `GET /clips/:id/status` | `uploaded` → `processing` → `done` / `failed`, for the upload UI to poll | William |
 | `GET /documents/:id/status` | The `Document`, with the same statuses, so the UI can tell "still reading" from "done" from "failed". Its claims arrive in the report | William |
@@ -36,6 +43,8 @@ Result  { claim_id, counted, outcome: "verified"|"short"|"not_seen", room_covere
 
 - **`Clip.captured_at` is null when the file carries no capture time** — WhatsApp may strip it. It is never filled in with the upload time; show it as "capture time unknown", never as a date.
 - **`Document.flat_id` is null for a document that covers the whole project**, such as a BOQ. A demand letter or invoice bills one flat. Where the file is stored stays server-side and is never in the contract.
+- **`Document.reason` is null unless the document failed.** Then it says why in plain words a builder can act on, chosen by code from a fixed list — never written by a model, never quoting the document.
+- **A clip is registered only once its video is in storage.** `POST /clips` saves nothing, so a clip and its ingest job are written together, never one without the other.
 - **`Segment.room_id` is null for an unplaced segment** — a part of a clip that passed no room tag. Unplaced segments are stored, but are never used for a per-room claim.
 - **`Segment.full_sweep`** is true only for one continuous stretch that starts at the room's QR tag and pans the whole room once in one direction, without panning back. It is what the coverage rule reads.
 - **`Claim.item` and `Detection.item` are keys from `ItemKind`, never a document's wording** — that lives in `source_quote`. So a claim and its detections always join; free text would miss the join, read as 0, and in a covered room become a false Short. How an item becomes a SAM prompt is the pipeline's business.
@@ -68,3 +77,4 @@ Flag these to Furqaan rather than deciding them in code:
 | `Flat` spelled out and `Room.flat` confirmed as an id; `Document` and `GET /documents/:id/status` added; `Clip.captured_at` may be null ([ADR](decisions/2026-10-27-contract-flat-document-and-capture-time.md)) | 27 October 2026 | Furqaan |
 | `ItemKind` added; `Claim.item` and `Detection.item` draw from it ([ADR](decisions/2026-10-27-claim-item-is-a-closed-vocabulary-not-the-boq-wording.md)). Approved William's ADRs on the closed vocabulary, the demand letter judged against the BOQ as a ceiling, and refusing unreadable input in the gap-request voice | 27 October 2026 | Furqaan |
 | `Claim.unit` may be null, where the document states no unit — found running real Muse Spark output on a demand letter | 27 October 2026 | Furqaan |
+| `Document.reason` added. `CreateProject` and `CreatedProject` for `POST /projects` ([ADR](decisions/2026-10-27-creating-a-project-returns-its-rooms-and-their-qr-codes.md)). Clips upload in two steps: `POST /clips` returns a link and a ticket, `POST /clips/complete` registers the clip ([ADR](decisions/2026-10-27-clips-upload-in-two-steps-with-a-signed-ticket.md)) | 28 October 2026 | Furqaan |

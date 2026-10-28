@@ -175,6 +175,6 @@ Indie entries are judged on creativity, technical ambition, and whether it works
 - The official Indie-track rules on team size and student conditions (William, 26 Oct).
 - ~~Measured SAM 3.1 and Muse Spark rate limits and cost per minute of video (Furqaan, 26 Oct).~~ Checked 27 Oct; the numbers are in CLAUDE.md under the tech stack.
 - Whether the SAM spike passes its go/no-go on shaky footage (Furqaan, evening of 27 Oct).
-- ~~S3 or R2 for clips, frames and masks~~ — R2, private ([decided 27 Oct](decisions/2026-10-27-cloudflare-r2-for-clips-frames-and-masks.md)). The backend host; auth for the builder view.
+- ~~S3 or R2 for clips, frames and masks~~ — R2, private ([decided 27 Oct](decisions/2026-10-27-cloudflare-r2-for-clips-frames-and-masks.md)). The backend host. ~~Auth for the builder view~~ — secret links ([decided 28 Oct](decisions/2026-10-28-builder-access-by-secret-links-accepted.md)).
 - The tolerance used by the comparison engine. ~~And whether the plan (BOQ) quantity or the demand-letter quantity wins when they disagree.~~ Settled 27 Oct: the demand letter is judged, the BOQ is a ceiling ([ADR](decisions/2026-10-27-the-demand-letter-is-judged-and-the-boq-is-a-ceiling.md)).
 - Whether the sample BOQ carries **per-room** quantities. The demand letter is flat-level ("windows complete: 12") but the demo's outcomes are per-room ("Bedroom 2 is Short by 2"), and only the BOQ can say how many windows a room was meant to have (William, drafting it 27 Oct).

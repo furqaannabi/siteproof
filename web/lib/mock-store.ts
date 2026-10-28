@@ -188,7 +188,7 @@ export const mockSource = {
   async registerDocument(input: NewDocument): Promise<Registered<Document>> {
     await delay(200);
     const report = reportOf(input.project_id);
-    const doc: Document = { id: crypto.randomUUID(), ...input, status: "uploaded" };
+    const doc: Document = { id: crypto.randomUUID(), ...input, status: "uploaded", reason: null };
     report.documents.push(doc);
     load().uploads[doc.id] = { kind: "document", project_id: input.project_id, uploaded_at: null, room_hint: null };
     save();

@@ -4,7 +4,8 @@
 #   pnpm db:down   stop it (the data volume is kept)
 #
 # Bound to 127.0.0.1 only. The defaults are for a local throwaway database; set
-# POSTGRES_PASSWORD in your shell to override them.
+# POSTGRES_PASSWORD in your shell to override them. If 5432 is taken locally:
+#   POSTGRES_PORT=5435 pnpm db:up   (and use that port in DATABASE_URL)
 services:
   db:
     image: postgres:18-alpine
@@ -13,7 +14,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-siteproof}
       POSTGRES_DB: ${POSTGRES_DB:-siteproof}
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - db-data:/var/lib/postgresql
     healthcheck:

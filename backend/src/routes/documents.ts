@@ -78,6 +78,7 @@ function toContract(record: DocumentRecord): Document {
     flat_id: record.flat_id,
     kind: record.kind,
     status: record.status,
+    reason: record.reason,
   };
 }
 
