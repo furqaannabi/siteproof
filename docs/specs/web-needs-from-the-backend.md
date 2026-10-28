@@ -32,16 +32,11 @@ What the web side relies on, so it matches what is built:
 - `GET /reports/:token` takes the token in the `Authorization` header. The path also carries it, as `api.reportByLink(token)` builds it; the web app sends both. If the path should carry it alone, say so.
 - A `Report` carries only what the contract lists for one flat: no clip URLs, no other flats' documents.
 
-## 3. The gap request: what it reads from the coverage map
+## 3. The gap request: built, room only
 
-`POST /rooms/:id/request-footage` is mine in the contract, and I'll build it. Its text has to be exact and small — "Need 5 s of Flat 302 kitchen, east wall" — which needs the coverage map to say what part of the room has not been seen. Nothing in the backend computes coverage below "the room has a full one-way sweep or not" (`Segment.full_sweep`) yet.
+`POST /rooms/:id/request-footage` is built ([decision](../decisions/2026-10-28-gap-request-text-and-pdf-export.md)): code writes "Need 5 s of Flat 302 kitchen, one slow sweep from its room tag", Muse Spark writes only the filming steps, checked, with fixed steps when it can't. It names the room, not a wall, because nothing yet says which part of a room wasn't seen. If the coverage map comes to name a wall, only `requestText` in `backend/src/routes/gap-requests.ts` changes.
 
-The question: **what will the coverage map hold for a room that is Not seen yet?**
-
-- **A. Only the room** (no full sweep). The request is "Need 5 s of Flat 302 kitchen, one slow sweep from its room tag". Buildable now, from segments alone. *Recommended for the freeze*: always exact and small, and never a guess about which wall.
-- **B. The room and the part not seen** (a wall or a direction from the tag). Gives "east wall", but needs the pipeline to know the room's layout relative to the tag.
-
-With A, I can build the route as soon as you confirm, and B stays a stretch.
+**For the report routes:** read a flat's gap requests with `gapRequestsOf(roomIds)` from `backend/src/routes/gap-request-store.ts`. It works out `cleared` (a full one-way sweep of the room in a clip uploaded after the request), so the pipeline needs no change to clear one.
 
 ## Also open, from earlier today
 
