@@ -80,7 +80,7 @@ export interface UploadItem {
 }
 
 /** A queue of uploads: check, register, PUT with progress, then poll the status until it settles. */
-export function useUploads(onSettled?: () => void) {
+export function useUploads(projectId: string, onSettled?: () => void) {
   const [items, setItems] = useState<UploadItem[]>([]);
   const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
   const retries = useRef(new Map<string, () => void>());
@@ -107,7 +107,7 @@ export function useUploads(onSettled?: () => void) {
     (key: string, kind: UploadItem["kind"], id: string) => {
       const tick = async () => {
         try {
-          const status = kind === "clip" ? await data.clipStatus(id) : (await data.documentStatus(id)).status;
+          const status = kind === "clip" ? await data.clipStatus(projectId, id) : (await data.documentStatus(projectId, id)).status;
           patch(key, { status });
           if (status === "done" || status === "failed") {
             onSettled?.();
@@ -121,7 +121,7 @@ export function useUploads(onSettled?: () => void) {
       };
       void tick();
     },
-    [onSettled, patch],
+    [projectId, onSettled, patch],
   );
 
   const run = useCallback(

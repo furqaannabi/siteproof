@@ -4,10 +4,11 @@ import type { Claim, Detection, Flat, ItemKind, NotCheckedReason, Outcome, Query
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EvidenceFrame } from "@/components/evidence-frame";
-import { AppHeader, ErrorPanel, Loading, ProjectNav, StaleNotice, ui, useFlatReport, useOverview } from "@/components/ui";
-import { data } from "@/lib/data";
+import { AppHeader, CopyButton, ErrorPanel, Loading, ProjectNav, StaleNotice, ui, useFlatReport, useOverview, useReportByLink } from "@/components/ui";
+import { builderToken, reportTokenFromHash } from "@/lib/access";
+import { data, DataError } from "@/lib/data";
 import type { Room3D } from "./plan-3d";
 import styles from "./report.module.css";
 
@@ -162,7 +163,7 @@ export function ReportPage({ projectId }: { projectId: string }) {
   const flats = project.overview?.project.flats ?? [];
   const asked = useSearchParams().get("flat");
   const flatId = (flats.find((f) => f.id === asked) ?? flats[0])?.id ?? null;
-  const flatReport = useFlatReport(flatId);
+  const flatReport = useFlatReport(projectId, flatId);
   // The report is read first by a buyer or bank deciding to pay; the builder's view is one
   // tap away, and stays chosen when the builder switches flats.
   const [view, setView] = useState<View>("bank");
@@ -211,18 +212,82 @@ export function ReportPage({ projectId }: { projectId: string }) {
   );
 }
 
+/**
+ * A flat's report opened from its report link (`/report#<token>`): the buyer's and bank's
+ * view, with no login and nothing of the builder's. The token is read after the page
+ * loads, from the part of the address a browser never sends to a server.
+ */
+export function LinkedReportPage() {
+  // undefined until the address has been read; null when it holds no report link.
+  const [token, setToken] = useState<string | null | undefined>(undefined);
+  useEffect(() => {
+    // A second link pasted into the same tab changes only the part after "#".
+    const read = () => setToken(reportTokenFromHash());
+    read();
+    window.addEventListener("hashchange", read);
+    return () => window.removeEventListener("hashchange", read);
+  }, []);
+  const { report, error, stale, reload } = useReportByLink(token ?? null);
+  // A link that opens nothing: mistyped, or replaced by the builder. Never "project".
+  const refused = error instanceof DataError && [401, 403, 404].includes(error.status);
+  if (token === null || refused) {
+    return (
+      <>
+        <AppHeader brandHref="/" />
+        <main className={ui.main}>
+          <section className={ui.empty}>
+            <h1 className={ui.h2}>{refused ? "This report link doesn't open anything" : "This link is missing its report"}</h1>
+            <p className={ui.lede}>
+              {refused
+                ? "It may be mistyped, or the builder may have replaced it with a new one. Ask whoever sent it for the current link."
+                : "Open the whole link you were sent. If it still doesn't work, ask whoever sent it for the current one."}
+            </p>
+          </section>
+        </main>
+      </>
+    );
+  }
+  if (error) {
+    return (
+      <>
+        <AppHeader brandHref="/" />
+        <main className={ui.main}>
+          <ErrorPanel error={error} retry={reload} home={false} />
+        </main>
+      </>
+    );
+  }
+  if (!report) {
+    return (
+      <>
+        <AppHeader brandHref="/" />
+        <Loading what="Loading the report" />
+      </>
+    );
+  }
+  return (
+    <>
+      <StaleNotice stale={stale} onRetry={reload} />
+      <ReportView report={report} flats={[]} view="bank" setView={() => {}} onChange={reload} buyer />
+    </>
+  );
+}
+
 function ReportView({
   report,
   flats,
   view,
   setView,
   onChange,
+  buyer = false,
 }: {
   report: Report;
   flats: Flat[];
   view: View;
   setView: (view: View) => void;
   onChange: () => void;
+  /** Opened from a report link: no builder view, no way into the project. */
+  buyer?: boolean;
 }) {
   const [item, setItem] = useState<ItemKind>("window");
   const [planMode, setPlanMode] = useState<"plan" | "3d">("plan");
@@ -287,15 +352,17 @@ function ReportView({
 
   return (
     <div className={styles.page}>
-      <AppHeader title={`${flat} · ${keepLastWord(report.project.name)}`}>
-        <div role="group" aria-label="Report view" className={ui.toggle}>
-          <button type="button" aria-pressed={view === "bank"} onClick={() => setView("bank")}>
-            Buyer / bank
-          </button>
-          <button type="button" aria-pressed={view === "builder"} onClick={() => setView("builder")}>
-            Builder
-          </button>
-        </div>
+      <AppHeader title={`${flat} · ${keepLastWord(report.project.name)}`} brandHref={buyer ? "/" : undefined}>
+        {!buyer && (
+          <div role="group" aria-label="Report view" className={ui.toggle}>
+            <button type="button" aria-pressed={view === "bank"} onClick={() => setView("bank")}>
+              Buyer / bank
+            </button>
+            <button type="button" aria-pressed={view === "builder"} onClick={() => setView("builder")}>
+              Builder
+            </button>
+          </div>
+        )}
         {view === "builder" && <ProjectNav projectId={report.project.id} current="report" />}
         <button type="button" className={`${ui.primaryButton} ${styles.exportButton}`} onClick={() => window.print()}>
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -318,7 +385,7 @@ function ReportView({
         {!letter || rows.length === 0 ? (
           <>
             {letter && <ItemSwitch item={item} onChange={setItem} />}
-            <NothingToJudge report={report} hasLetter={Boolean(letter)} item={item} letterClaimsItem={Boolean(letterClaim)} />
+            <NothingToJudge report={report} hasLetter={Boolean(letter)} item={item} letterClaimsItem={Boolean(letterClaim)} buyer={buyer} />
           </>
         ) : (
           <>
@@ -609,11 +676,13 @@ function NothingToJudge({
   hasLetter,
   item,
   letterClaimsItem,
+  buyer,
 }: {
   report: Report;
   hasLetter: boolean;
   item: ItemKind;
   letterClaimsItem: boolean;
+  buyer: boolean;
 }) {
   const boq = report.documents.find((d) => d.kind === "boq");
   const otherItems = (["window", "door"] as const).filter(
@@ -622,7 +691,9 @@ function NothingToJudge({
   const reading = report.documents.some((d) => d.kind === "demand_letter" && (d.status === "uploaded" || d.status === "processing"));
   const failed = report.documents.some((d) => d.kind === "demand_letter" && d.status === "failed");
   let title = "No demand letter yet";
-  let body = "Upload the demand letter and the bill of quantities, then the clips. The report fills in as each one is read.";
+  let body = buyer
+    ? "The builder hasn't sent the demand letter for this flat yet. This report fills in once they do."
+    : "Upload the demand letter and the bill of quantities, then the clips. The report fills in as each one is read.";
   if (reading) {
     title = "Reading the demand letter";
     body = "This usually takes a minute. The page updates by itself.";
@@ -649,34 +720,12 @@ function NothingToJudge({
     <section className={ui.empty}>
       <h1 className={ui.h2}>{title}</h1>
       <p className={ui.lede}>{body}</p>
-      {!reading && (
+      {!reading && !buyer && (
         <Link href={`/projects/${report.project.id}/upload`} className={ui.primaryButton}>
           Upload documents and clips
         </Link>
       )}
     </section>
-  );
-}
-
-function CopyButton({ text, label }: { text: string; label: string }) {
-  const [state, setState] = useState<"idle" | "copied" | "blocked">("idle");
-  return (
-    <button
-      type="button"
-      className={ui.primaryButton}
-      onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(text);
-          setState("copied");
-        } catch {
-          // Some browsers block the clipboard; the letter is on screen to select by hand.
-          setState("blocked");
-        }
-        setTimeout(() => setState("idle"), 2500);
-      }}
-    >
-      <span role="status">{state === "copied" ? "Copied" : state === "blocked" ? "Couldn't copy. Select the text instead" : label}</span>
-    </button>
   );
 }
 
@@ -692,7 +741,9 @@ function SendGapRequest({ projectId, roomId, text, sent, onSent }: { projectId: 
         disabled={busy}
         onClick={async () => {
           setBusy(true);
-          const url = `${window.location.origin}/projects/${projectId}/rooms/${roomId}/request`;
+          // The site phone uploads into the project, so the link carries the builder link.
+          const token = builderToken(projectId);
+          const url = `${window.location.origin}/projects/${projectId}/rooms/${roomId}/request${token ? `#key=${encodeURIComponent(token)}` : ""}`;
           try {
             if (navigator.share) {
               await navigator.share({ title: "SiteProof footage request", text, url });
@@ -700,7 +751,7 @@ function SendGapRequest({ projectId, roomId, text, sent, onSent }: { projectId: 
               await navigator.clipboard.writeText(`${text}: ${url}`);
               setState("copied");
             }
-            await data.requestFootage(roomId).catch(() => undefined);
+            await data.requestFootage(projectId, roomId).catch(() => undefined);
             onSent();
           } catch (e) {
             // Closing the share sheet is not an error.

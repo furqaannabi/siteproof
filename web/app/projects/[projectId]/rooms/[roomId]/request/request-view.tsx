@@ -12,7 +12,7 @@ export function RequestPage({ projectId, roomId }: { projectId: string; roomId: 
   // The project says which flat the room is in; that flat's report holds its gap request.
   const project = useOverview(projectId);
   const room = project.overview?.rooms.find((r) => r.id === roomId) ?? null;
-  const flatReport = useFlatReport(room?.flat ?? null);
+  const flatReport = useFlatReport(projectId, room?.flat ?? null);
   const error = project.error ?? flatReport.error;
   const stale = project.stale || flatReport.stale;
   const reload = useCallback(() => {
@@ -48,7 +48,7 @@ function RequestView({
   onSettled: () => void;
 }) {
   const settled = useCallback(() => onSettled(), [onSettled]);
-  const uploads = useUploads(settled);
+  const uploads = useUploads(projectId, settled);
   const roomId = room?.id ?? "";
   const flat = report?.flat;
   // A cleared request has done its job: the room's footage arrived.

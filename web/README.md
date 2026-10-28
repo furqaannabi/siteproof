@@ -17,12 +17,18 @@ Deployed on Vercel at [siteproof-alpha.vercel.app](https://siteproof-alpha.verce
 
 | Route | What |
 | --- | --- |
-| `/` | Start: set up a project, the demo report, projects made in mock mode |
-| `/projects/new` | Project, flat and room setup. Same name rules as `POST /projects` |
-| `/projects/[id]` | Next steps, the printable room tags, every document and clip with its status |
+| `/` | The landing page |
+| `/projects` | The projects whose builder links this phone has opened, one card per flat, and setting up a new one |
+| `/projects/new` | Project, flat and room setup, with the team's setup key. Same name rules as `POST /projects` |
+| `/projects/[id]` | Next steps, the links to share, the printable room tags, every document and clip with its status |
 | `/projects/[id]/upload` | Clips and documents: type checks, upload progress, status polling |
-| `/projects/[id]/report?flat=` | One flat's report, builder and buyer/bank views. Buyers will open it from their own report link, with no login |
+| `/projects/[id]/report?flat=` | One flat's report for its builder, with the buyer/bank view one tap away |
+| `/report#<token>` | One flat's report from its report link, for its buyer and bank. No login |
 | `/projects/[id]/rooms/[roomId]/request` | The gap request on the site supervisor's phone, with record or upload |
+
+## Links instead of logins
+
+There are no accounts ([ADR](../docs/decisions/2026-10-28-builder-access-by-secret-links-accepted.md)). A builder link is `/projects/<id>#key=<token>`; a report link is `/report#<token>`. The token is after `#`, which a browser never sends to a server, so it stays out of the web host's logs. Opening a builder link saves its token on that phone (`lib/access.ts`) and takes it out of the address bar; every builder request then sends it as `Authorization: Bearer`. A gap request sent to the site carries the builder link, since the site phone uploads into the project. Creating a project needs the team's setup key, remembered on the phone once it works. In mock mode none of this is checked.
 
 ## Mock data and the real API
 

@@ -6,4 +6,4 @@ Write a one-pager here only where a surface needs more detail than the plan give
 
 | Spec | Owner | Status |
 | --- | --- | --- |
-| — | — | None written yet |
+| [What the web app needs from the backend](web-needs-from-the-backend.md) | Apurva, for Furqaan | Open |

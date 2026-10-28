@@ -7,7 +7,8 @@ export const metadata: Metadata = {
   title: "Progress report · SiteProof",
 };
 
-// The buyer/bank view needs no login. The report itself loads in the browser, so the
+// One flat's report for its builder, behind the builder link; buyers and banks open it
+// from their report link at /report. The report itself loads in the browser, so the
 // static shell is just the loading state.
 export default function Page({ params }: PageProps<"/projects/[projectId]/report">) {
   return (

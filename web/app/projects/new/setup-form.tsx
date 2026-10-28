@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ui } from "@/components/ui";
-import { data } from "@/lib/data";
+import { saveBuilderToken, saveSetupKey, setupKey } from "@/lib/access";
+import { data, DataError, usingMock } from "@/lib/data";
 import type { CreateProject } from "@siteproof/contract";
 import styles from "./setup.module.css";
 
@@ -65,9 +66,18 @@ export function SetupForm() {
   const [tried, setTried] = useState(false);
   const [saving, setSaving] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  // Creating a project needs the team's setup key; remembered on this device once it works.
+  const [teamKey, setTeamKey] = useState("");
+  // Filled after the first render, so the server's HTML and the browser's agree.
+  useEffect(() => setTeamKey(setupKey() ?? ""), []);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const errors = tried ? validate(name, builder, flats) : {};
+  const check = () => {
+    const found = validate(name, builder, flats);
+    if (!usingMock && !teamKey.trim()) found.key = "Enter the team's setup key.";
+    return found;
+  };
+  const errors = tried ? check() : {};
 
   const updateFlat = (fk: string, change: (f: FlatDraft) => FlatDraft) => setFlats((fs) => fs.map((f) => (f.key === fk ? change(f) : f)));
 
@@ -75,7 +85,7 @@ export function SetupForm() {
     e.preventDefault();
     setTried(true);
     setServerError(null);
-    if (Object.keys(validate(name, builder, flats)).length > 0) {
+    if (Object.keys(check()).length > 0) {
       // Take the builder straight to the first thing to fix, once the errors have rendered.
       requestAnimationFrame(() => formRef.current?.querySelector<HTMLInputElement>('[aria-invalid="true"]')?.focus());
       return;
@@ -87,10 +97,17 @@ export function SetupForm() {
     };
     setSaving(true);
     try {
-      const { project } = await data.createProject(body);
+      const { project } = await data.createProject(body, teamKey.trim());
+      // The new project's builder link, so this device can open it; the setup key asks for it.
+      const links = await data.getLinks(project.id, usingMock ? undefined : teamKey.trim());
+      saveBuilderToken(project.id, links.builder_token);
+      if (!usingMock) saveSetupKey(teamKey.trim());
       router.push(`/projects/${project.id}?created=1`);
     } catch (err) {
-      setServerError(err instanceof Error ? err.message : "Couldn't create the project. Try again.");
+      if (err instanceof DataError && err.status === 401) {
+        saveSetupKey(null);
+        setServerError("That setup key isn't right. Check it with the SiteProof team.");
+      } else setServerError(err instanceof Error ? err.message : "Couldn't create the project. Try again.");
       setSaving(false);
     }
   }
@@ -188,6 +205,14 @@ export function SetupForm() {
         </button>
       </div>
 
+      {!usingMock && (
+        <section className={ui.panel}>
+          <h2 className={ui.h2}>Setup key</h2>
+          <p className={ui.muted}>Only the SiteProof team can set up a project. This phone remembers the key once it works.</p>
+          <Field label="Team setup key" type="password" value={teamKey} onChange={setTeamKey} error={errors.key} />
+        </section>
+      )}
+
       {serverError && (
         <div className={ui.errorPanel} role="alert">
           {serverError}
@@ -214,12 +239,14 @@ function Field({
   onChange,
   error,
   placeholder,
+  type = "text",
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   error?: string;
   placeholder?: string;
+  type?: "text" | "password";
 }) {
   const errorId = useId();
   return (
@@ -227,6 +254,8 @@ function Field({
       <span>{label}</span>
       <input
         className={ui.input}
+        type={type}
+        autoComplete={type === "password" ? "off" : undefined}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
