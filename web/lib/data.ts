@@ -14,26 +14,36 @@ import {
   type CreateProject,
   type Document,
   type Project,
+  type ProjectLinks,
   type ProjectOverview,
   type Report,
 } from "@siteproof/contract";
+import { builderToken, knownProjects } from "./access";
 import type { NewDocument, Registered } from "./types";
 
+/**
+ * Every builder call names its project: that picks the builder link it sends. There is no
+ * list of projects in the API; the list is the projects whose links this device holds.
+ */
 export interface DataSource {
-  /** There is no list endpoint in the contract. The API source fails, and the home page shows no list. */
   listProjects(): Promise<Project[]>;
   /** The builder's whole project: flats, rooms, documents and clips. */
   getOverview(projectId: string): Promise<ProjectOverview>;
   /** One flat's report, for its builder. */
-  getFlatReport(flatId: string): Promise<Report>;
-  createProject(body: CreateProject): Promise<CreatedProject>;
+  getFlatReport(projectId: string, flatId: string): Promise<Report>;
+  /** One flat's report from its report link, for its buyer and bank. No builder link. */
+  getReportByLink(token: string): Promise<Report>;
+  /** The project's builder link and each flat's report link. */
+  getLinks(projectId: string, setupKey?: string): Promise<ProjectLinks>;
+  /** Needs the team's setup key. */
+  createProject(body: CreateProject, setupKey: string): Promise<CreatedProject>;
   /** `roomHint` is used by the mock only. The real pipeline places a clip by its room tag. */
   registerClip(projectId: string, file: File, roomHint?: string | null): Promise<Registered<Clip>>;
   registerDocument(input: NewDocument, file: File): Promise<Registered<Document>>;
   upload(url: string, file: File, onProgress: (fraction: number) => void): Promise<void>;
-  clipStatus(clipId: string): Promise<ClipStatus>;
-  documentStatus(documentId: string): Promise<Document>;
-  requestFootage(roomId: string): Promise<void>;
+  clipStatus(projectId: string, clipId: string): Promise<ClipStatus>;
+  documentStatus(projectId: string, documentId: string): Promise<Document>;
+  requestFootage(projectId: string, roomId: string): Promise<void>;
 }
 
 export class DataError extends Error {
@@ -47,15 +57,17 @@ export class DataError extends Error {
 
 const NOT_READY = "This part of SiteProof isn't connected yet.";
 
-const base = process.env.NEXT_PUBLIC_API_URL ?? "";
+// A trailing slash in the env ("https://api.example.com/") would double up with each path.
+const base = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
-async function call<T>(path: string, init?: RequestInit): Promise<T> {
+/** `token` goes in `Authorization: Bearer`. It is never logged. */
+async function call<T>(path: string, token: string | null, init?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (init?.body) headers["content-type"] = "application/json";
+  if (token) headers.authorization = `Bearer ${token}`;
   let res: Response;
   try {
-    res = await fetch(base + path, {
-      ...init,
-      headers: init?.body ? { "content-type": "application/json", ...init.headers } : init?.headers,
-    });
+    res = await fetch(base + path, { ...init, headers });
   } catch {
     throw new DataError(0, "Can't reach SiteProof. Check your connection and try again.");
   }
@@ -79,13 +91,25 @@ function putWithProgress(url: string, file: File, onProgress: (fraction: number)
   });
 }
 
+/** A builder call for one project, with that project's link, or a plain refusal without one. */
+function asBuilder<T>(projectId: string, path: string, init?: RequestInit): Promise<T> {
+  const token = builderToken(projectId);
+  if (!token) return Promise.reject(new DataError(401, "no_link"));
+  return call<T>(path, token, init);
+}
+
 const apiSource: DataSource = {
   listProjects: async () => {
-    throw new DataError(501, NOT_READY);
+    // A link that no longer opens its project (replaced, or the project is gone) is left out.
+    const found = await Promise.all(knownProjects().map((id) => apiSource.getOverview(id).catch(() => null)));
+    return found.filter((o): o is ProjectOverview => o !== null).map((o) => o.project);
   },
-  getOverview: (projectId) => call<ProjectOverview>(api.projectOverview(projectId)),
-  getFlatReport: (flatId) => call<Report>(api.flatReport(flatId)),
-  createProject: (body) => call<CreatedProject>(api.createProject(), { method: "POST", body: JSON.stringify(body) }),
+  getOverview: (projectId) => asBuilder<ProjectOverview>(projectId, api.projectOverview(projectId)),
+  getFlatReport: (projectId, flatId) => asBuilder<Report>(projectId, api.flatReport(flatId)),
+  getReportByLink: (token) => call<Report>(api.reportByLink(token), token),
+  getLinks: (projectId, setupKey) =>
+    setupKey ? call<ProjectLinks>(api.projectLinks(projectId), setupKey) : asBuilder<ProjectLinks>(projectId, api.projectLinks(projectId)),
+  createProject: (body, setupKey) => call<CreatedProject>(api.createProject(), setupKey, { method: "POST", body: JSON.stringify(body) }),
   // The request and response of POST /clips and POST /documents aren't agreed yet (William).
   registerClip: async () => {
     throw new DataError(501, NOT_READY);
@@ -94,11 +118,11 @@ const apiSource: DataSource = {
     throw new DataError(501, NOT_READY);
   },
   upload: putWithProgress,
-  clipStatus: async (clipId) => {
-    const body = await call<ClipStatus | { status: ClipStatus }>(api.clipStatus(clipId));
+  clipStatus: async (projectId, clipId) => {
+    const body = await asBuilder<ClipStatus | { status: ClipStatus }>(projectId, api.clipStatus(clipId));
     return typeof body === "string" ? body : body.status;
   },
-  documentStatus: (documentId) => call<Document>(api.documentStatus(documentId)),
+  documentStatus: (projectId, documentId) => asBuilder<Document>(projectId, api.documentStatus(documentId)),
   // POST /rooms/:id/request-footage isn't built on the backend yet (Apurva).
   requestFootage: async () => {
     throw new DataError(501, NOT_READY);
@@ -127,14 +151,17 @@ function fromMock(): DataSource {
   return {
     listProjects: wrap((m) => m.listProjects()),
     getOverview: wrap((m, projectId: string) => m.getOverview(projectId)),
-    getFlatReport: wrap((m, flatId: string) => m.getFlatReport(flatId)),
+    getFlatReport: wrap((m, _projectId: string, flatId: string) => m.getFlatReport(flatId)),
+    getReportByLink: wrap((m, token: string) => m.getReportByLink(token)),
+    getLinks: wrap((m, projectId: string) => m.getLinks(projectId)),
+    // The mock needs no setup key.
     createProject: wrap((m, body: CreateProject) => m.createProject(body)),
     registerClip: wrap((m, projectId: string, file: File, roomHint?: string | null) => m.registerClip(projectId, file, roomHint ?? null)),
     registerDocument: wrap((m, input: NewDocument) => m.registerDocument(input)),
     upload: wrap((m, url: string, file: File, onProgress: (fraction: number) => void) => m.upload(url, file, onProgress)),
-    clipStatus: wrap((m, clipId: string) => m.clipStatus(clipId)),
-    documentStatus: wrap((m, documentId: string) => m.documentStatus(documentId)),
-    requestFootage: wrap((m, roomId: string) => m.requestFootage(roomId)),
+    clipStatus: wrap((m, _projectId: string, clipId: string) => m.clipStatus(clipId)),
+    documentStatus: wrap((m, _projectId: string, documentId: string) => m.documentStatus(documentId)),
+    requestFootage: wrap((m, _projectId: string, roomId: string) => m.requestFootage(roomId)),
   };
 }
 

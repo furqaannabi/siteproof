@@ -138,10 +138,30 @@
   }
 }
 
+.links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.links li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--rule);
+}
+
+.links strong {
+  display: block;
+}
+
 /* Printing this page prints the tag sheet only. */
 @media print {
   .created,
   .top,
+  .share,
   .columns,
   .tagsSection > p,
   .tagsSection button {

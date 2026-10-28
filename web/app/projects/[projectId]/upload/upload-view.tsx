@@ -38,8 +38,8 @@ export function UploadPage({ projectId }: { projectId: string }) {
 
 function UploadView({ report, onSettled }: { report: ProjectOverview; onSettled: () => void }) {
   const { project } = report;
-  const clips = useUploads(onSettled);
-  const docs = useUploads(onSettled);
+  const clips = useUploads(report.project.id, onSettled);
+  const docs = useUploads(report.project.id, onSettled);
   const [kind, setKind] = useState<DocumentKind>("demand_letter");
   const [flatId, setFlatId] = useState<string>(project.flats[0]?.id ?? "");
 

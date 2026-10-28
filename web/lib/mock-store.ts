@@ -7,7 +7,7 @@
  * "pipeline" it fakes is the demo story's last step: a clip filmed from a gap request
  * in the demo project clears that room, as the real kitchen clip will on stage.
  */
-import type { Clip, ClipStatus, CreatedProject, CreateProject, Document, Project, ProjectOverview, Report, Room } from "@siteproof/contract";
+import type { Clip, ClipStatus, CreatedProject, CreateProject, Document, Project, ProjectLinks, ProjectOverview, Report, Room } from "@siteproof/contract";
 import { detections, flat302 } from "@/mocks/flat-302";
 import type { NewDocument, Registered } from "./types";
 
@@ -198,6 +198,21 @@ export const mockSource = {
     settle(p);
     save();
     return structuredClone(cutReport(p, flatId));
+  },
+
+  /** Pretend links. The mock checks no tokens: every project on this device is open. */
+  async getLinks(projectId: string): Promise<ProjectLinks> {
+    await delay(100);
+    const p = projectOf(projectId);
+    return {
+      builder_token: `mock-builder-${projectId}`,
+      report_tokens: p.project.flats.map((f) => ({ flat_id: f.id, token: `mock-report-${f.id}` })),
+    };
+  },
+
+  async getReportByLink(token: string): Promise<Report> {
+    const flatId = token.startsWith("mock-report-") ? token.slice("mock-report-".length) : "";
+    return this.getFlatReport(flatId);
   },
 
   async createProject(body: CreateProject): Promise<CreatedProject> {

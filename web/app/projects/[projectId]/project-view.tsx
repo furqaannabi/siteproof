@@ -1,9 +1,12 @@
 "use client";
 
-import type { DocumentKind, ProjectOverview } from "@siteproof/contract";
+import type { DocumentKind, ProjectLinks, ProjectOverview } from "@siteproof/contract";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { AppHeader, captureTime, ErrorPanel, Loading, ProjectNav, StaleNotice, StatusBadge, ui, useOverview } from "@/components/ui";
+import { useEffect, useState } from "react";
+import { AppHeader, captureTime, CopyButton, ErrorPanel, Loading, ProjectNav, StaleNotice, StatusBadge, ui, useOverview } from "@/components/ui";
+import { builderLink, reportLink } from "@/lib/access";
+import { data } from "@/lib/data";
 import styles from "./project.module.css";
 
 export const DOCUMENT_LABEL: Record<DocumentKind, string> = {
@@ -88,6 +91,8 @@ function ProjectView({ report, created }: { report: ProjectOverview; created: bo
             ))}
           </ol>
         </section>
+
+        <ShareLinks project={report.project} />
 
         <section id="tags" className={styles.tagsSection}>
           <div className={ui.panelHead}>
@@ -178,5 +183,54 @@ function TagCode({ code }: { code: string }) {
     <span className={styles.qr} role="img" aria-label={`QR code ${code}`}>
       <span>QR</span>
     </span>
+  );
+}
+
+/**
+ * The links to send: one report link per flat for its buyer and bank, and the builder
+ * link for the builder's own team. Fetched when the page opens, never stored here.
+ */
+function ShareLinks({ project }: { project: ProjectOverview["project"] }) {
+  const [links, setLinks] = useState<ProjectLinks | null>(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    data.getLinks(project.id).then(setLinks, () => setFailed(true));
+  }, [project.id]);
+  const origin = typeof window === "undefined" ? "" : window.location.origin;
+
+  return (
+    <section className={`${ui.panel} ${styles.share}`} aria-labelledby="share-title">
+      <h2 id="share-title" className={ui.h2}>
+        Share
+      </h2>
+      {failed ? (
+        <p className={ui.muted}>The links couldn&apos;t be loaded. Reload the page to try again.</p>
+      ) : !links ? (
+        <p className={ui.muted}>Loading the links…</p>
+      ) : (
+        <ul className={styles.links}>
+          {project.flats.map((f) => {
+            const token = links.report_tokens.find((t) => t.flat_id === f.id)?.token;
+            if (!token) return null;
+            return (
+              <li key={f.id}>
+                <span className={ui.grow}>
+                  <strong>Flat {f.name} report</strong>
+                  <span className={ui.muted}>For its buyer and bank. Opens this flat&apos;s report only, with no login.</span>
+                </span>
+                <CopyButton text={reportLink(origin, token)} label="Copy link" className={ui.secondaryButton} />
+              </li>
+            );
+          })}
+          <li>
+            <span className={ui.grow}>
+              <strong>Builder link</strong>
+              <span className={ui.muted}>For your own team only. Anyone with it can upload and change this project.</span>
+            </span>
+            <CopyButton text={builderLink(origin, project.id, links.builder_token)} label="Copy link" className={ui.secondaryButton} />
+          </li>
+        </ul>
+      )}
+    </section>
   );
 }

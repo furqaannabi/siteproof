@@ -3,12 +3,14 @@
 import type { ClipStatus, ProjectOverview, Report } from "@siteproof/contract";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { takeBuilderLink } from "@/lib/access";
 import { data, DataError, usingMock } from "@/lib/data";
 import styles from "./ui.module.css";
 
-export function Brand() {
+/** `href` is where the mark leads: the projects list for a builder, the start page for a buyer. */
+export function Brand({ href = "/projects" }: { href?: string }) {
   return (
-    <Link href="/projects" className={styles.brand}>
+    <Link href={href} className={styles.brand}>
       <span className={styles.brandMark}>
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 12l5 5L20 6" />
@@ -20,11 +22,21 @@ export function Brand() {
 }
 
 /** The top bar. `title` and `eyebrow` name where you are; `children` go on the right. */
-export function AppHeader({ eyebrow, title, children }: { eyebrow?: string; title?: string; children?: React.ReactNode }) {
+export function AppHeader({
+  eyebrow,
+  title,
+  brandHref,
+  children,
+}: {
+  eyebrow?: string;
+  title?: string;
+  brandHref?: string;
+  children?: React.ReactNode;
+}) {
   return (
     <header className={styles.header}>
       <div className={styles.headerInner}>
-        <Brand />
+        <Brand href={brandHref} />
         {(eyebrow || title) && (
           <div className={styles.headerTitle}>
             {eyebrow && <span className={styles.eyebrow}>{eyebrow}</span>}
@@ -77,7 +89,8 @@ export function Loading({ what = "Loading" }: { what?: string }) {
   );
 }
 
-export function ErrorPanel({ error, retry }: { error: unknown; retry?: () => void }) {
+/** `home` offers the way back to the projects list; a buyer's report link has none. */
+export function ErrorPanel({ error, retry, home = true }: { error: unknown; retry?: () => void; home?: boolean }) {
   const { title, body, retry: canRetry } = describeError(error);
   return (
     <div className={styles.errorPanel} role="alert">
@@ -89,9 +102,11 @@ export function ErrorPanel({ error, retry }: { error: unknown; retry?: () => voi
             Try again
           </button>
         )}
-        <Link href="/projects" className={styles.secondaryButton}>
-          Back to projects
-        </Link>
+        {home && (
+          <Link href="/projects" className={styles.secondaryButton}>
+            Back to projects
+          </Link>
+        )}
       </div>
     </div>
   );
@@ -146,7 +161,11 @@ function useLive<T>(key: string | null, load: (() => Promise<T>) | null, busy: (
   }, [key]);
 
   useEffect(() => {
+    // Something new to load: never show the last one's data or error meanwhile.
     loaded.current = false;
+    setValue(null);
+    setError(null);
+    setStale(false);
     void reload();
     const online = () => void reload();
     window.addEventListener("online", online);
@@ -159,13 +178,30 @@ function useLive<T>(key: string | null, load: (() => Promise<T>) | null, busy: (
   return { value, error, stale, reload };
 }
 
-/** The builder's whole project, reloaded while any clip or document is being processed. */
+/**
+ * The builder's whole project, reloaded while any clip or document is being processed.
+ * A page opened from a builder link saves the link first.
+ */
 export function useOverview(projectId: string) {
   const { value, ...rest } = useLive(
     `overview:${projectId}`,
-    () => data.getOverview(projectId),
+    () => {
+      takeBuilderLink(projectId);
+      return data.getOverview(projectId);
+    },
     (o: ProjectOverview) => [...o.clips, ...o.documents].some((x) => PENDING.includes(x.status)),
   );
+  // A builder link pasted into a tab already on this project changes only the part after "#".
+  const { reload } = rest;
+  useEffect(() => {
+    const pasted = () => {
+      if (!window.location.hash.startsWith("#key=")) return;
+      takeBuilderLink(projectId);
+      void reload();
+    };
+    window.addEventListener("hashchange", pasted);
+    return () => window.removeEventListener("hashchange", pasted);
+  }, [projectId, reload]);
   return { overview: value, ...rest };
 }
 
@@ -173,10 +209,20 @@ export function useOverview(projectId: string) {
  * One flat's report, reloaded while any of its documents is being read. `flatId` is null
  * until the flat is known.
  */
-export function useFlatReport(flatId: string | null) {
+export function useFlatReport(projectId: string, flatId: string | null) {
   const { value, ...rest } = useLive(
     flatId && `report:${flatId}`,
-    flatId ? () => data.getFlatReport(flatId) : null,
+    flatId ? () => data.getFlatReport(projectId, flatId) : null,
+    (r: Report) => r.documents.some((d) => PENDING.includes(d.status)),
+  );
+  return { report: value, ...rest };
+}
+
+/** One flat's report from its report link: the buyer's and bank's view. */
+export function useReportByLink(token: string | null) {
+  const { value, ...rest } = useLive(
+    token && `link:${token}`,
+    token ? () => data.getReportByLink(token) : null,
     (r: Report) => r.documents.some((d) => PENDING.includes(d.status)),
   );
   return { report: value, ...rest };
@@ -195,13 +241,37 @@ export function StaleNotice({ stale, onRetry }: { stale: boolean; onRetry: () =>
   );
 }
 
+/** Copies `text`, and says so. Where the clipboard is blocked, the text is on screen to select. */
+export function CopyButton({ text, label, className = styles.primaryButton }: { text: string; label: string; className?: string }) {
+  const [state, setState] = useState<"idle" | "copied" | "blocked">("idle");
+  return (
+    <button
+      type="button"
+      className={className}
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          setState("copied");
+        } catch {
+          setState("blocked");
+        }
+        setTimeout(() => setState("idle"), 2500);
+      }}
+    >
+      <span role="status">{state === "copied" ? "Copied" : state === "blocked" ? "Couldn't copy. Select the text instead" : label}</span>
+    </button>
+  );
+}
+
 /** Plain words for a failed request, by what went wrong. */
 export function describeError(error: unknown): { title: string; body: string; retry: boolean } {
   const status = error instanceof DataError ? error.status : -1;
   if (status === 0)
     return { title: "No connection", body: "Check your mobile data or Wi-Fi. This page will try again when you're back online.", retry: true };
+  if (status === 401 && error instanceof DataError && error.message === "no_link")
+    return { title: "Open this project from its link", body: "This phone hasn't opened the project's builder link yet. Open the link you were sent, or ask the project's owner for it.", retry: false };
   if (status === 401 || status === 403)
-    return { title: "This link doesn't open this project", body: "Ask the builder for a fresh link.", retry: false };
+    return { title: "This link doesn't open anything", body: "It may have been replaced by a new one. Ask whoever sent it for the current link.", retry: false };
   if (status === 404) return { title: "We couldn't find this project", body: "Check the link, or start a new project.", retry: false };
   if (status === 429) return { title: "Too many uploads for today", body: "Try again tomorrow, or ask the SiteProof team to raise the limit.", retry: true };
   if (status >= 500) return { title: "SiteProof is having trouble", body: "Nothing you did caused this. Try again in a minute.", retry: true };

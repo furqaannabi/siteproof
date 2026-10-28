@@ -39,7 +39,6 @@ interface Loaded {
 
 export function ProjectCards() {
   const [cards, setCards] = useState<Loaded[] | null>(null);
-  const [listable, setListable] = useState(true);
 
   const load = useCallback(async () => {
     try {
@@ -49,7 +48,7 @@ export function ProjectCards() {
         projects.map(async (p): Promise<Loaded[]> => {
           const overview = await data.getOverview(p.id).catch(() => null);
           if (!overview) return [];
-          const reports = await Promise.all(overview.project.flats.map((f) => data.getFlatReport(f.id).catch(() => null)));
+          const reports = await Promise.all(overview.project.flats.map((f) => data.getFlatReport(p.id, f.id).catch(() => null)));
           return reports
             .filter((r): r is Report => r !== null)
             .map((report) => ({ report, oneOfMany: overview.project.flats.length > 1, summary: summarise(report, overview) }));
@@ -57,8 +56,6 @@ export function ProjectCards() {
       );
       setCards(perProject.flat());
     } catch {
-      // The API has no list of projects yet; the page still offers setting one up.
-      setListable(false);
       setCards([]);
     }
   }, []);
@@ -85,7 +82,8 @@ export function ProjectCards() {
         ))}
       </ul>
 
-      {!listable && <p className={s.note}>Projects you set up open from their own link until the project list is connected.</p>}
+      {/* There is no list of projects in the API: this page lists the ones opened on this phone. */}
+      {!usingMock && cards?.length === 0 && <p className={s.note}>Open a project&apos;s builder link on this phone and it appears here.</p>}
 
       {usingMock && cards && cards.length > 0 && (
         <button
