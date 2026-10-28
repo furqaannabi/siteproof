@@ -18,9 +18,9 @@ const Plan3D = dynamic(() => import("./plan-3d"), {
   loading: () => <div className={styles.loading3d}>Loading the 3D view…</div>,
 });
 
-type View = "builder" | "bank";
+export type View = "builder" | "bank";
 
-const ITEM_PLURAL: Record<ItemKind, string> = {
+export const ITEM_PLURAL: Record<ItemKind, string> = {
   window: "windows",
   door: "doors",
 };
@@ -28,7 +28,7 @@ const ITEM_SINGULAR: Record<ItemKind, string> = {
   window: "window",
   door: "door",
 };
-const ITEMS: ItemKind[] = ["window", "door"];
+export const ITEMS: ItemKind[] = ["window", "door"];
 
 const sentence = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -37,11 +37,11 @@ function keepLastWord(name: string) {
   return name.replace(/ (\S{1,3})$/, "\u00a0$1");
 }
 
-function itemWord(item: ItemKind, n: number) {
+export function itemWord(item: ItemKind, n: number) {
   return n === 1 ? ITEM_SINGULAR[item] : ITEM_PLURAL[item];
 }
 
-interface RoomRow {
+export interface RoomRow {
   room: Room;
   claim: Claim;
   result: Result;
@@ -65,13 +65,13 @@ function roomRows(report: Report, item: ItemKind): RoomRow[] {
   return rows;
 }
 
-const STAMP: Record<Outcome, string> = {
+export const STAMP: Record<Outcome, string> = {
   verified: "Verified",
   short: "Short",
   not_seen: "Not seen yet",
 };
 
-function seconds(t: number) {
+export function seconds(t: number) {
   const s = Math.round(t);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
@@ -232,7 +232,7 @@ export function LinkedReportPage() {
 }
 
 /** Every room's row for every item, in the plan's order. */
-function allRows(report: Report): RoomRow[] {
+export function allRows(report: Report): RoomRow[] {
   const byRoom = new Map(report.rooms.map((r) => [r.id, [] as RoomRow[]]));
   for (const item of ITEMS) for (const row of roomRows(report, item)) byRoom.get(row.room.id)?.push(row);
   return [...byRoom.values()].flat();
@@ -261,7 +261,7 @@ function billFor(report: Report, rows: RoomRow[], item: ItemKind, letterId: stri
   };
 }
 
-function coverage(segments: Segment[]) {
+export function coverage(segments: Segment[]) {
   const sweep = segments.find((s) => s.full_sweep);
   if (sweep)
     return {
@@ -589,7 +589,7 @@ function Entry({ report, row, order }: { report: Report; row: RoomRow; order: nu
   );
 }
 
-interface Step {
+export interface Step {
   key: string;
   label: string;
   text: string;
@@ -597,7 +597,7 @@ interface Step {
 }
 
 /** The next steps in the fixed band, one at a time. Builders clear gaps; buyers and banks see what to hold. */
-function nextSteps(report: Report, view: View, shortRows: RoomRow[], unseenRooms: Room[], onChange: () => void): Step[] {
+export function nextSteps(report: Report, view: View, shortRows: RoomRow[], unseenRooms: Room[], onChange: () => void): Step[] {
   const steps: Step[] = [];
   for (const room of unseenRooms) {
     const gap = report.gap_requests.find((g) => g.room_id === room.id && g.status !== "cleared");
@@ -650,7 +650,7 @@ function nextSteps(report: Report, view: View, shortRows: RoomRow[], unseenRooms
   return steps;
 }
 
-function NextStep({ steps }: { steps: Step[] }) {
+export function NextStep({ steps }: { steps: Step[] }) {
   const [i, setI] = useState(0);
   const step = steps[i % steps.length];
   return (
@@ -870,7 +870,7 @@ function NothingToJudge({
 }
 
 /** Makes the room's gap request on the server; the report then shows it, ready to send. */
-function WriteGapRequest({ projectId, roomId, onWritten, compact = false }: { projectId: string; roomId: string; onWritten: () => void; compact?: boolean }) {
+export function WriteGapRequest({ projectId, roomId, onWritten, compact = false }: { projectId: string; roomId: string; onWritten: () => void; compact?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   return (
@@ -904,7 +904,7 @@ function WriteGapRequest({ projectId, roomId, onWritten, compact = false }: { pr
 /** Shares the phone page for this gap request (WhatsApp, on a phone), or copies its link. */
 // The server marks a request sent when it's written, before the builder has shared it,
 // so the button never says "Send again".
-function SendGapRequest({
+export function SendGapRequest({
   projectId,
   roomId,
   text,
