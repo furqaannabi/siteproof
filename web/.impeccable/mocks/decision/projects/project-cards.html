@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Project cards with tallies</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+*{box-sizing:border-box}body{margin:0;width:1440px;height:900px;overflow:hidden;background:#f4f1ea;color:#1e1d1a;font-family:'IBM Plex Sans',sans-serif;
+background-image:linear-gradient(rgba(22,58,107,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(22,58,107,.07) 1px,transparent 1px);background-size:24px 24px}
+header{height:72px;border-bottom:2px solid #1e1d1a;display:flex;align-items:center;gap:28px;padding:0 40px}
+.brand{display:flex;align-items:center;gap:10px;font:700 26px 'Barlow Condensed';text-transform:uppercase}.mk{width:30px;height:30px;background:#e8590c}
+main{padding:36px 40px}
+h1{margin:0;font:700 64px/.95 'Barlow Condensed'}
+.grid{margin-top:24px;display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.c{border:2px solid #1e1d1a;background:#fffdf8;padding:20px;display:flex;flex-direction:column;gap:12px;min-height:300px}
+.c.add{border-style:dashed;background:transparent;align-items:flex-start;justify-content:center}
+.c.add b{font:700 34px 'Barlow Condensed'}.c.add p{margin:0;font-size:15px;color:#3e3b35}
+.c h2{margin:0;font:700 30px/1 'Barlow Condensed'}.c small{font-size:14px;color:#5c5850}
+.big{font:700 56px/1 'Barlow Condensed'}.big em{font-style:normal;font-weight:500;color:#5c5850;font-size:30px}
+.tally{display:flex;gap:3px}.tally i{flex:1;height:14px;background:#2f6b3a}.tally .s{background:#fbe3d2;box-shadow:inset 0 0 0 2px #b4440a}.tally .n{background:repeating-linear-gradient(45deg,#cfcac0 0 2px,#fffdf8 2px 5px);box-shadow:inset 0 0 0 2px #4f4b44}
+.row{display:flex;gap:10px;margin-top:auto}
+.btn{border:2px solid #1e1d1a;padding:10px 14px;font-weight:600}.btn.p{background:#1e1d1a;color:#f4f1ea}.btn.o{background:#e8590c;border-color:#1e1d1a}
+.none{font:13px 'IBM Plex Mono';color:#5c5850;border:1.5px dashed #5c5850;padding:8px 10px;align-self:flex-start}
+.open{font:600 13px 'IBM Plex Sans';text-transform:uppercase;letter-spacing:.06em;color:#b4440a}
+</style></head><body>
+<header><div class="brand"><span class="mk"></span>SiteProof</div></header>
+<main>
+ <h1>Your projects</h1>
+ <div class="grid">
+  <div class="c add"><b>Set up a project</b><p>Name the flats and rooms; SiteProof makes one tag per doorway.</p><span class="btn o">Set up a project</span></div>
+  <div class="c"><h2>Northfield Residency, Tower B</h2><small>Flat 302 · Stage 6</small><div class="big">9 <em>of 12 windows</em></div><div class="tally"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="n"></i></div><span class="open">2 open · film the kitchen, explain Bedroom 2</span><div class="row"><span class="btn p">Open the report</span><span class="btn">Upload</span></div></div>
+  <div class="c"><h2>Lakeview Heights</h2><small>Flat 101 · 2 rooms</small><span class="none">No demand letter yet</span><span class="open">Upload the letter and BOQ</span><div class="row"><span class="btn p">Upload</span><span class="btn">Room tags</span></div></div>
+ </div>
+</main>
+</body></html>

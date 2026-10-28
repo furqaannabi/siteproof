@@ -1,0 +1,126 @@
+{
+  "title": "Choose the report's structure",
+  "question": "Same Site Drawing Set look. Pick how a buyer or bank on a phone gets from 'what can I pay against?' to the frames that prove it.",
+  "options": [
+    {
+      "id": "open-items-first",
+      "kind": "assigned",
+      "kicker": "THE ROLL",
+      "label": "Open items first",
+      "lineage": "a site snag list, what's left to close before handover",
+      "thesis": "The report opens on what is not yet proven and exactly what clears each item; everything verified follows as a checked appendix with its frames.",
+      "palette": ["#f4f1ea", "#1e1d1a", "#b4440a", "#4f4b44", "#2f6b3a", "#163a6b", "#e8590c"],
+      "materials": ["outcome stamps", "tally bar", "blueprint plan and 3D below"],
+      "viewport": "9 of 12 windows verified, 3 still open; then the two open items (Bedroom 2 Short 2 with its query letter, Kitchen Not seen yet with its 5-second request), then a collapsed Verified row.",
+      "risk": "Leading with what's open can read as bad news; the copy must keep 'what clears it' beside every item.",
+      "raised": [
+        { "from": "challenger-labanotation", "raise": "Every bar is exact: a segment per window, so the open part is measured, never decorative." },
+        { "from": "challenger-acetate-manual", "raise": "A stepped room index down the edge shows the report's whole extent and where you are in it." },
+        { "from": "challenger-transit", "raise": "Outcome colours become a strict system: one colour, one pattern, one meaning, everywhere on the page." },
+        { "from": "challenger-split-flap", "raise": "When a clip clears a room, its count and stamp change in place where the reader is already looking." }
+      ],
+      "html": ".impeccable/mocks/decision/report/open-items-first.html",
+      "htmlFrame": "390x844",
+      "comp": ".impeccable/mocks/decision/report/open-items-first.webp"
+    },
+    {
+      "id": "plan-first",
+      "kind": "dealt",
+      "label": "Plan-first sheet",
+      "lineage": "today's report, rebuilt around the drawing",
+      "thesis": "The blueprint plan is the report: each room's tile carries its count and stamp, and tapping one opens its frames and sources below.",
+      "palette": ["#163a6b", "#dce9f7", "#1d5550", "#5b3524", "#f4f1ea", "#e8590c"],
+      "materials": ["blueprint plan", "title block", "evidence panel"],
+      "viewport": "The answer line on top, then the plan filling the phone's width with five room tiles, Bedroom 2 selected; its evidence starts below the fold.",
+      "risk": "Familiar from today's screen; a buyer still has to tap rooms to learn what's open.",
+      "html": ".impeccable/mocks/decision/report/plan-first.html",
+      "htmlFrame": "390x844",
+      "comp": ".impeccable/mocks/decision/report/plan-first.webp"
+    },
+    {
+      "id": "marked-up-letter",
+      "kind": "dealt",
+      "label": "The marked-up letter",
+      "lineage": "a checked demand letter, stamped in the margin",
+      "thesis": "The report is the demand letter itself: each claimed line carries its stamp in the margin, and tapping a line opens its rooms and frames beneath it.",
+      "palette": ["#fffdf8", "#1e1d1a", "#ffe7a8", "#2f6b3a", "#b4440a", "#4f4b44", "#163a6b"],
+      "materials": ["the letter's own lines", "highlighter", "margin stamps"],
+      "viewport": "The letter's head (Flat 302, Stage 6), then 'Windows complete: 12' highlighted with 9 · 2 · 1 stamped beside it, opened to show its rooms; doors and plaster lines below.",
+      "risk": "Reads as a document first; the plan and 3D become secondary, opened from a line.",
+      "html": ".impeccable/mocks/decision/report/marked-up-letter.html",
+      "htmlFrame": "390x844",
+      "comp": ".impeccable/mocks/decision/report/marked-up-letter.webp"
+    },
+    {
+      "id": "challenger-ticket-wallet",
+      "kind": "challenger",
+      "catalogId": "vernacular-ephemera-jet-age-ticket-wallet",
+      "verdict": "competitive",
+      "label": "Claim coupons",
+      "lineage": "a ticket wallet, fused into the drawing set",
+      "thesis": "Each claim is a perforated coupon: the body shows what's verified with its frames, the stub carries what's still open and what clears it.",
+      "palette": ["#fffdf8", "#1e1d1a", "#2f6b3a", "#b4440a", "#163a6b", "#ffe7a8"],
+      "materials": ["perforated coupons", "carbon-numeral counts", "stamped stubs"],
+      "viewport": "A stack of coupons: Windows (9 of 12, stub: Short 2 · Not seen yet 1), Doors (4 of 5), Plaster (not checked), each coupon square-cornered with a perforated stub.",
+      "case": "Fuses cleanly: buyers know a coupon you release; it maps onto stage payments. Holds identification, narrower on clarity for per-room evidence.",
+      "risk": "Perforations can turn decorative; they have to separate 'proven' from 'open', nothing else.",
+      "html": ".impeccable/mocks/decision/report/challenger-ticket-wallet.html",
+      "htmlFrame": "390x844",
+      "comp": ".impeccable/mocks/decision/report/challenger-ticket-wallet.webp",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-jet-age-ticket-wallet-hero.webp"
+    },
+    {
+      "id": "challenger-title-wall",
+      "kind": "challenger",
+      "catalogId": "pop-culture-shelf-streaming-title-card-wall",
+      "verdict": "competitive",
+      "label": "Evidence wall",
+      "lineage": "a streaming catalogue's rows, fused into the drawing set",
+      "thesis": "One row per room, one tile per counted window with its outline; a missing window is an empty hatched tile, so the evidence is the count.",
+      "palette": ["#0f2a4f", "#dce9f7", "#e8590c", "#2f6b3a", "#b4440a", "#4f4b44"],
+      "materials": ["frame tiles", "hatched empty slots", "room rows"],
+      "viewport": "The answer line, then rows: Living Room (3 outlined tiles), Bedroom 2 (2 outlined, 2 hatched empty), Kitchen (1 hatched with a 5-second request).",
+      "case": "Fuses cleanly: everyone reads a row of tiles; seeing the gaps beats reading a number. Strong on clarity, narrower on bank-style auditability.",
+      "risk": "Many frames on a phone over slow data; tiles must load light and the plan must stay reachable.",
+      "html": ".impeccable/mocks/decision/report/challenger-title-wall.html",
+      "htmlFrame": "390x844",
+      "comp": ".impeccable/mocks/decision/report/challenger-title-wall.webp",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-streaming-title-card-wall-hero.webp"
+    },
+    {
+      "id": "challenger-labanotation", "kind": "challenger", "catalogId": "notation-diagram-systems-labanotation", "verdict": "declined",
+      "label": "Labanotation score", "lineage": "dance notation",
+      "thesis": "The report as a vertical score read upward.", "palette": ["#ffffff", "#111111", "#888888"], "materials": ["staff", "shaded blocks"],
+      "viewport": "A centre staff with shaded blocks per room.", "case": "Declined: buyers and banks can't read a notation they've never seen.",
+      "risk": "Unreadable without training.", "kept": "Bars exact to the count.",
+      "hero": "https://impeccable.style/worlds/cards/notation-diagram-systems-labanotation-hero.webp"
+    },
+    {
+      "id": "challenger-acetate-manual", "kind": "challenger", "catalogId": "rw-manual-acetate-tab-board", "verdict": "declined",
+      "label": "Acetate manual", "lineage": "boxed-software manuals",
+      "thesis": "Evidence on acetate leaves over tabbed dividers.", "palette": ["#f2c500", "#ffffff", "#1a1a1a"], "materials": ["acetate", "tab rail"],
+      "viewport": "A tabbed manual open at a room.", "case": "Declined: layered acetate and shadow fight the flat drawing set.",
+      "risk": "A costume of a different object.", "kept": "A stepped index showing the report's extent.",
+      "hero": "https://impeccable.style/worlds/cards/rw-manual-acetate-tab-board-hero.webp"
+    },
+    {
+      "id": "challenger-transit", "kind": "challenger", "catalogId": "wayfinding-cartography-signage-midnight-transit-diagram", "verdict": "declined",
+      "label": "Transit diagram", "lineage": "metro maps",
+      "thesis": "Items as coloured lines, rooms as stations.", "palette": ["#0b1640", "#e2231a", "#0072ce", "#ffb81c", "#00a651"], "materials": ["enamel", "interchanges"],
+      "viewport": "Window and door lines meeting at room stations.", "case": "Declined: a route map implies travel and order that rooms don't have.",
+      "risk": "Pretty but wrong model.", "kept": "Outcome colours as a strict system.",
+      "hero": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-midnight-transit-diagram-hero.webp"
+    },
+    {
+      "id": "challenger-split-flap", "kind": "challenger", "catalogId": "signals-instruments-split-flap-concourse", "verdict": "declined",
+      "label": "Split-flap board", "lineage": "station departure boards",
+      "thesis": "The report as a departure board of claims.", "palette": ["#111111", "#f2f2f2", "#f5b400"], "materials": ["flaps", "columns"],
+      "viewport": "Rows of claims flipping to their status.", "case": "Declined: a board hides the frames, and frames are the evidence.",
+      "risk": "Status without proof.", "kept": "Counts change in place when a clip lands.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-split-flap-concourse-hero.webp"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "code" },
+  "steer": true
+}

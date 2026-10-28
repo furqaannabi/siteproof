@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>The room walk</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+*{box-sizing:border-box}body{margin:0;width:1440px;height:900px;overflow:hidden;background:#fffdf8;color:#1e1d1a;font-family:'IBM Plex Sans',sans-serif}
+header{height:72px;border-bottom:2px solid #1e1d1a;display:flex;align-items:center;gap:28px;padding:0 40px;background:#f4f1ea}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed';font-weight:700;font-size:26px;text-transform:uppercase}.mk{width:30px;height:30px;background:#e8590c}
+.ht{flex:1;font-weight:600;font-size:17px}
+.tog{display:flex;border:2px solid #1e1d1a;font-weight:600;font-size:15px}.tog span{padding:10px 16px}.tog .on{background:#1e1d1a;color:#f4f1ea}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:40px;padding:28px 40px;border-bottom:2px solid #1e1d1a;background:#f4f1ea}
+.sum h1{margin:0;font:700 64px/.95 'Barlow Condensed'}
+.tally{display:flex;gap:4px;margin-top:14px}.tally i{flex:1;height:20px;background:#2f6b3a}.tally .s{background:#fbe3d2;box-shadow:inset 0 0 0 2px #b4440a}.tally .n{background:repeating-linear-gradient(45deg,#cfcac0 0 2px,#f4f1ea 2px 5px);box-shadow:inset 0 0 0 2px #4f4b44}
+.open{border-top:2px solid #1e1d1a}.open div{display:grid;grid-template-columns:1fr auto;padding:12px 0;border-bottom:1px solid #cfcac0;font-size:16px}.open b{font-weight:600}
+.os{color:#b4440a;font-weight:600}.on2{color:#4f4b44;font-weight:600}
+.wrap{display:grid;grid-template-columns:220px 1fr;}
+.idx{border-right:2px solid #1e1d1a;padding:20px 0}
+.idx a{display:grid;grid-template-columns:28px 1fr auto;padding:10px 20px;font-size:15px;align-items:center}.idx a code{font:12px 'IBM Plex Mono';color:#5c5850}.idx a.on{background:#1e1d1a;color:#f4f1ea}.idx a.on code{color:#cfcac0}
+.dot{width:10px;height:10px;background:#2f6b3a}.dot.s{background:#b4440a}.dot.n{background:#4f4b44}
+.room{padding:24px 40px}.rh{display:flex;align-items:center;gap:20px}
+.rh h2{margin:0;font:700 40px 'Barlow Condensed'}.rh .c{font:500 26px 'IBM Plex Mono'}
+.stamp{font:700 22px 'Barlow Condensed';letter-spacing:.1em;text-transform:uppercase;color:#2f6b3a;padding:3px 12px;border:3px solid currentColor;outline:1px solid currentColor;outline-offset:3px;transform:rotate(-5deg)}
+.frames{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+.f{height:200px;background:#0f2a4f;position:relative}.f i{position:absolute;left:34%;top:20%;width:32%;height:60%;background:#2b4e7e;outline:3px solid #e8590c;outline-offset:3px}
+.cap{font:13px 'IBM Plex Mono';color:#5c5850;margin-top:8px}
+.next{margin:12px 40px 0;border-top:2px solid #1e1d1a;padding-top:16px;display:flex;gap:20px;align-items:center}
+.next h2{margin:0;font:700 40px 'Barlow Condensed'}.ns{font:700 22px 'Barlow Condensed';letter-spacing:.1em;text-transform:uppercase;color:#4f4b44;padding:3px 12px;border:3px dashed currentColor;transform:rotate(-5deg)}
+</style></head><body>
+<header><div class="brand"><span class="mk"></span>SiteProof</div><div class="ht">Flat 302 · Stage 6 · Windows</div><div class="tog"><span>Builder</span><span class="on">Buyer / bank</span></div></header>
+<div class="sum">
+ <div><h1>9 of 12 windows verified</h1><div class="tally"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="n"></i></div></div>
+ <div class="open"><div><b>Bedroom 2: 2 windows not found in a full sweep</b><span class="os">Short 2</span></div><div><b>Kitchen: not filmed from its tag yet</b><span class="on2">Not seen yet</span></div></div>
+</div>
+<div class="wrap">
+ <nav class="idx"><a class="on"><code>R1</code>Living Room<span class="dot"></span></a><a><code>R2</code>Kitchen<span class="dot n"></span></a><a><code>R3</code>Bedroom 1<span class="dot"></span></a><a><code>R4</code>Bedroom 2<span class="dot s"></span></a><a><code>R5</code>Bedroom 3<span class="dot"></span></a><a style="margin-top:16px;font-weight:600">Plan · 3D</a></nav>
+ <div>
+  <section class="room"><div class="rh"><h2>R1 · Living Room</h2><span class="c">3 / 3</span><span class="stamp">Verified</span></div>
+   <div class="frames"><div class="f"><i></i></div><div class="f"><i></i></div><div class="f"><i></i></div></div>
+   <div class="cap">Clip filmed 26 Oct, 10:12 · one-way sweep 0:06–0:31 · "W-1 UPVC openable window … Living Room nos 3"</div></section>
+  <div class="next"><h2>R2 · Kitchen</h2><span class="ns">Not seen yet</span></div>
+ </div>
+</div>
+</body></html>

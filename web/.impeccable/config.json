@@ -1,0 +1,35 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/**"
+        ],
+        "createdAt": "2026-10-28T02:26:16.679Z",
+        "reason": "Agent: decision sketches use Barlow Condensed (documented in DESIGN.md) via the font shorthand; the detector parses 'condensed' as a separate family"
+      },
+      {
+        "rule": "cream-palette",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/**"
+        ],
+        "createdAt": "2026-10-28T02:26:40.553Z",
+        "reason": "Agent: the warm ground is Site Paper #f4f1ea, the documented ground in web/DESIGN.md (The Site Drawing Set); decision sketches inherit it"
+      },
+      {
+        "rule": "cramped-padding",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/**"
+        ],
+        "createdAt": "2026-10-28T03:02:58.906Z",
+        "reason": "Agent: decision-round sketches are throwaway thumbnails, already chosen from; the shipped report and landing page are checked without this exception"
+      }
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tally story · first viewport</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 1440px; height: 900px; overflow: hidden; background: #f4f1ea;
+    background-image: linear-gradient(rgba(22,58,107,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(22,58,107,.07) 1px, transparent 1px);
+    background-size: 24px 24px; color: #1e1d1a; font-family: 'IBM Plex Sans', sans-serif; }
+  header { height: 72px; border-bottom: 2px solid #1e1d1a; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; }
+  .brand { display: flex; align-items: center; gap: 10px; font: 700 26px 'Barlow Condensed'; text-transform: uppercase; }
+  .mark { width: 30px; height: 30px; background: #e8590c; }
+  .navl { font: 500 15px 'IBM Plex Sans'; color: #3e3b35; display: flex; gap: 28px; }
+  main { padding: 40px 48px 0; display: grid; grid-template-columns: 1fr 520px; gap: 48px; }
+  .eye { font: 13px 'IBM Plex Mono'; color: #5c5850; }
+  h1 { margin: 10px 0 0; font: 700 168px/0.86 'Barlow Condensed'; letter-spacing: -0.02em; }
+  h1 em { font-style: normal; font-weight: 500; color: #5c5850; }
+  h1 small { display: block; font: 700 64px/1 'Barlow Condensed'; letter-spacing: 0; }
+  .tally { display: flex; gap: 6px; margin-top: 28px; }
+  .tally i { flex: 1; height: 40px; background: #2f6b3a; }
+  .tally i.s { background: #fbe3d2; box-shadow: inset 0 0 0 3px #b4440a; }
+  .tally i.n { background: repeating-linear-gradient(45deg, #cfcac0 0 3px, #f4f1ea 3px 8px); box-shadow: inset 0 0 0 3px #4f4b44; }
+  .legend { display: flex; gap: 28px; margin-top: 12px; font: 16px 'IBM Plex Sans'; color: #3e3b35; }
+  .row { display: flex; gap: 16px; margin-top: 32px; align-items: center; }
+  .cta { background: #e8590c; color: #1e1d1a; font: 600 18px 'IBM Plex Sans'; padding: 18px 28px; }
+  .sub { font-size: 17px; color: #3e3b35; max-width: 460px; }
+  .plan { background: #163a6b; padding: 18px; align-self: start; margin-top: 24px;
+    background-image: linear-gradient(rgba(220,233,247,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(220,233,247,.09) 1px, transparent 1px); background-size: 20px 20px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 150px; gap: 3px; border: 1.5px solid #dce9f7; }
+  .r { padding: 12px 14px; color: #f4f8fc; font: 600 15px 'IBM Plex Sans'; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 0 0 1.5px #dce9f7; }
+  .r b { font: 700 34px 'Barlow Condensed'; }
+  .r small { font: 600 12px 'IBM Plex Sans'; letter-spacing: .06em; text-transform: uppercase; }
+  .v { background: #1d5550; } .v small { color: #9be7b0; }
+  .sh { background: #5b3524; box-shadow: 0 0 0 1.5px #dce9f7, inset 0 0 0 3px #f59e5b; } .sh small { color: #ffb37a; }
+  .ns { background: repeating-linear-gradient(45deg, rgba(220,233,247,.3) 0 1.5px, #163a6b 1.5px 10px); outline: 4px solid #e8590c; outline-offset: -10px; }
+  .big { grid-column: span 2; grid-row: span 2; }
+  .cap { margin-top: 10px; font: 13px 'IBM Plex Mono'; color: #dce9f7; }
+</style>
+</head>
+<body>
+<header><div class="brand"><span class="mark"></span>SiteProof</div><div class="navl"><span>How it works</span><span>The three outcomes</span><span>Open the demo</span></div></header>
+<main>
+  <div>
+    <div class="eye">Flat 302 · demand letter: "Windows complete: 12"</div>
+    <h1>9 <em>of</em> 12<small>windows verified, with the frames to prove it</small></h1>
+    <div class="tally"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="n"></i></div>
+    <div class="legend"><span>Verified 9</span><span>Short 2</span><span>Not seen yet 1</span></div>
+    <div class="row"><a class="cta">Open the Flat 302 demo</a><span class="sub">Built from the clips a builder already sends buyers. Scroll to watch each room get judged.</span></div>
+  </div>
+  <div class="plan">
+    <div class="grid">
+      <div class="r v big">Living Room<span><b>3 / 3</b><small>Verified</small></span></div>
+      <div class="r ns">Kitchen<span><b>– / 1</b><small>Not seen yet</small></span></div>
+      <div class="r v">Bedroom 1<span><b>2 / 2</b><small>Verified</small></span></div>
+      <div class="r sh">Bedroom 2<span><b>2 / 4</b><small>Short by 2</small></span></div>
+      <div class="r v">Bedroom 3<span><b>2 / 2</b><small>Verified</small></span></div>
+    </div>
+    <div class="cap">Next: the kitchen. One 5-second clip clears it.</div>
+  </div>
+</main>
+</body>
+</html>
