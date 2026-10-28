@@ -1,5 +1,6 @@
 "use client";
 
+import { BadgeCheck, Check, CircleArrowRight, Download, EyeOff, type LucideIcon, Minus, RotateCw } from "lucide-react";
 import type { Claim, Detection, Flat, ItemKind, NotCheckedReason, Outcome, QueryLetter, Report, Result, Room, Segment } from "@siteproof/contract";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -282,31 +283,19 @@ export function coverage(segments: Segment[]) {
   };
 }
 
+// One library set for every icon on the report, so they're drawn alike.
 const ICON = {
-  tick: "M5 12.5l4.5 4.5L19 7.5",
-  gap: "M5 12h14",
-  unseen: "M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6zM4 4l16 16",
-  sweep: "M4 18a10 10 0 0 1 16 0M17 14l3 4-4 1",
-  seal: "M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM8.5 12.2l2.4 2.3 4.6-4.8",
-  download: "M12 4v11M7 10l5 5 5-5M5 20h14",
-};
+  tick: Check,
+  gap: Minus,
+  unseen: EyeOff,
+  sweep: RotateCw,
+  next: CircleArrowRight,
+  seal: BadgeCheck,
+  download: Download,
+} satisfies Record<string, LucideIcon>;
 
-function Icon({ d, size = 18 }: { d: string; size?: number }) {
-  return (
-    <svg
-      aria-hidden="true"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d={d} />
-    </svg>
-  );
+function Icon({ of: Shape, size = 18 }: { of: LucideIcon; size?: number }) {
+  return <Shape aria-hidden="true" size={size} strokeWidth={2} />;
 }
 
 function ReportView({
@@ -369,7 +358,7 @@ function ReportView({
           </div>
         )}
         <button type="button" className={`${ui.primaryButton} ${styles.exportButton}`} onClick={() => window.print()}>
-          <Icon d={ICON.download} />
+          <Icon of={ICON.download} />
           <span className={ui.phoneHidden}>Print or save PDF</span>
         </button>
       </AppHeader>
@@ -410,7 +399,7 @@ function ReportView({
                 <div className={styles.secHead}>
                   <h2 className={styles.sec}>Room by room</h2>
                   <span className={styles.secNote}>
-                    <Icon d={ICON.seal} size={15} />
+                    <Icon of={ICON.seal} size={15} />
                     Every line quoted word for word from the bill of quantities, and checked
                   </span>
                 </div>
@@ -471,7 +460,7 @@ function BillPanel({ bill }: { bill: Bill }) {
       <h2 className={styles.billHead}>
         Demand letter <q className={styles.src}>{bill.claim.source_quote}</q>
         <span className={styles.chk}>
-          <Icon d={ICON.seal} size={15} />
+          <Icon of={ICON.seal} size={15} />
           quote checked
         </span>
       </h2>
@@ -503,7 +492,7 @@ function RoomEntry({ report, room, rows }: { report: Report; room: Room; rows: R
       <div className={styles.roomHead}>
         <h3 id={`room-h-${room.id}`}>{room.name}</h3>
         <span className={cov.covered ? styles.cov : styles.covNo}>
-          <Icon d={cov.covered ? ICON.sweep : ICON.unseen} />
+          <Icon of={cov.covered ? ICON.sweep : ICON.unseen} />
           {cov.text}
         </span>
         <span className={styles.when}>{cov.when}</span>
@@ -560,7 +549,7 @@ function Entry({ report, row, order }: { report: Report; row: RoomRow; order: nu
       </td>
       <td>
         <span className={`${styles.badge} ${styles[`badge_${result.outcome}`]}`}>
-          <Icon d={result.outcome === "verified" ? ICON.tick : result.outcome === "short" ? ICON.gap : ICON.unseen} size={16} />
+          <Icon of={result.outcome === "verified" ? ICON.tick : result.outcome === "short" ? ICON.gap : ICON.unseen} size={16} />
           {STAMP[result.outcome]}
         </span>
         {result.outcome === "short" && <span className={styles.gapNote}>{missingOf(row)} fewer than billed</span>}
@@ -657,7 +646,7 @@ export function NextStep({ steps }: { steps: Step[] }) {
     <div className={styles.band}>
       <div className={styles.bandIn} key={step.key} aria-live="polite">
         <span className={styles.bandLabel}>
-          <Icon d={ICON.sweep} size={16} />
+          <Icon of={ICON.next} size={16} />
           {step.label}
         </span>
         <span className={styles.bandText}>{step.text}</span>
@@ -722,7 +711,7 @@ function ShortPanel({ report, row, view }: { report: Report; row: RoomRow; view:
       <h3 className={styles.panelTitle}>Draft query letter · {row.room.name}</h3>
       <p className={styles.letter}>{letter.body}</p>
       <span className={styles.cites}>
-        <Icon d={ICON.seal} size={16} />
+        <Icon of={ICON.seal} size={16} />
         {citationCount(letter)} citations re-checked: billed line, plan line, frames
       </span>
       <CopyButton text={letter.body} label="Copy letter" className={ui.secondaryButton} />
