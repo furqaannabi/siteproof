@@ -4,7 +4,7 @@ import type { ClipStatus, ProjectOverview, Report } from "@siteproof/contract";
 import { Building2, ChevronDown, ChevronRight, CloudOff, Compass, FileCheck2, FolderOpen, KeyRound, type LucideIcon, Plus, SearchX, TriangleAlert, Unlink, Upload } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { takeBuilderLink } from "@/lib/access";
 import { data, DataError, usingMock } from "@/lib/data";
 import styles from "./ui.module.css";
@@ -63,24 +63,45 @@ function NavItem({ link, active }: { link: NavLink; active: boolean }) {
   );
 }
 
-// The sidebar's project list, kept between pages so it doesn't flash empty on each one.
+// The project list, kept between pages so the sidebar and the crumbs don't flash empty on
+// each one.
 let knownProjects: { id: string; name: string }[] | null = null;
+const projectListeners = new Set<() => void>();
+
+function subscribeProjects(listener: () => void) {
+  projectListeners.add(listener);
+  return () => {
+    projectListeners.delete(listener);
+  };
+}
+
+/**
+ * The project list as this tab knows it. Null in the server render and while hydrating, so
+ * the two agree; the names arrive in the render straight after.
+ */
+function useKnownProjects() {
+  return useSyncExternalStore(
+    subscribeProjects,
+    () => knownProjects,
+    () => null,
+  );
+}
 
 function useProjectList(place: NavPlace) {
-  const [projects, setProjects] = useState(knownProjects);
+  const projects = useKnownProjects();
+  const { projectId } = place;
   useEffect(() => {
-    let live = true;
+    // The list holds only projects whose builder link this phone has saved, so a link just
+    // opened is saved first, whether this runs before the page does or after.
+    if (projectId) takeBuilderLink(projectId);
     data
       .listProjects()
       .then((list) => {
         knownProjects = list.map((p) => ({ id: p.id, name: p.name }));
-        if (live) setProjects(knownProjects);
+        for (const listener of projectListeners) listener();
       })
       .catch(() => {});
-    return () => {
-      live = false;
-    };
-  }, []);
+  }, [projectId]);
   // Until the list arrives, the project you're in is still shown, so nothing jumps. Once
   // it has arrived, a project missing from it isn't invented.
   const list = projects ?? [];
@@ -101,7 +122,10 @@ function AppNav({ place }: { place: NavPlace }) {
   if (place.projectName === undefined && place.projectId) {
     place = { ...place, projectName: projects.find((p) => p.id === place.projectId)?.name };
   }
-  const bottom = place.projectId ? [...projectLinks(place.projectId), { ...APP_LINKS[0], label: "Projects" }] : APP_LINKS;
+  // A project that doesn't open from this phone gets no tabs of its own: each would lead to
+  // the same "We couldn't find this project".
+  const opens = place.projectId && projects.some((p) => p.id === place.projectId);
+  const bottom = opens ? [...projectLinks(place.projectId!), { ...APP_LINKS[0], label: "Projects" }] : APP_LINKS;
   return (
     <>
       <aside className={styles.sidebar}>
@@ -221,6 +245,7 @@ const PAGE_LABEL: Record<NavKey, string> = {
 
 /** Where you are, on a computer beside the sidebar: All projects / the project / this page. */
 function Crumbs({ place, title }: { place: NavPlace; title?: string }) {
+  const projects = useKnownProjects();
   const here = place.current === "report" && title ? `Report · ${title}` : PAGE_LABEL[place.current];
   return (
     <nav aria-label="You are here" className={styles.crumbs}>
@@ -229,7 +254,7 @@ function Crumbs({ place, title }: { place: NavPlace; title?: string }) {
           <Link href="/projects">All projects</Link>
           <ChevronRight size={16} aria-hidden="true" />
           <Link href={`/projects/${place.projectId}`}>
-            {place.projectName ?? knownProjects?.find((p) => p.id === place.projectId)?.name ?? "Project"}
+            {place.projectName ?? projects?.find((p) => p.id === place.projectId)?.name ?? "Project"}
           </Link>
           <ChevronRight size={16} aria-hidden="true" />
         </>
