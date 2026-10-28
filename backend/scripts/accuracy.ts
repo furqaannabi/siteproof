@@ -5,6 +5,10 @@
  *   bun --env-file=.env scripts/accuracy.ts --dry-run   frames and cost, nothing spent
  *   bun --env-file=.env scripts/accuracy.ts             count what is not cached, then score
  *
+ * For trying other wordings without touching the real labels or the defaults:
+ *   --labels <file>              score against another label file
+ *   --prompt window="glazed window"  ask SAM with this wording for one item (repeatable)
+ *
  * Labels are read from accuracy/labels.json (format in src/accuracy/labels.ts) and
  * clips from accuracy/footage/, which is gitignored: clips never go in the repo.
  * Every SAM answer is cached in accuracy/.cache/ by the clip's hash, the prompt and
@@ -26,6 +30,15 @@ const CACHE = join(ROOT, ".cache");
 // What SAM is asked for each item. Until Furqaan's item-to-prompt table exists in the
 // pipeline, the item names themselves; recorded in every cached answer.
 const PROMPTS: Record<ItemKind, string> = { window: "window", door: "door" };
+
+const args = Bun.argv.slice(2);
+const option = (name: string) => args.flatMap((a, i) => (a === name && args[i + 1] !== undefined ? [args[i + 1]!] : []));
+for (const override of option("--prompt")) {
+  const [item, ...rest] = override.split("=");
+  if (item !== "window" && item !== "door") throw new Error(`--prompt takes window=... or door=..., not ${override}`);
+  PROMPTS[item] = rest.join("=");
+}
+const labelsFile = option("--labels")[0] ?? join(ROOT, "labels.json");
 const MODEL = "sam-3.1";
 // CLAUDE.md, checked 27 October 2026: every frame of the clip, at least 50 a request.
 const USD_PER_FRAME = 0.2 / 1000;
@@ -54,7 +67,8 @@ async function cachePath(clip: string, prompt: string): Promise<string> {
 }
 
 const dryRun = Bun.argv.includes("--dry-run");
-const labels = parseLabels(await Bun.file(join(ROOT, "labels.json")).json());
+const labels = parseLabels(await Bun.file(labelsFile).json());
+console.log(`prompts: window = "${PROMPTS.window}", door = "${PROMPTS.door}"`);
 await mkdir(CACHE, { recursive: true });
 
 const results: CountResult[] = [];
