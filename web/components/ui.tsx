@@ -1,7 +1,7 @@
 "use client";
 
 import type { ClipStatus, ProjectOverview, Report } from "@siteproof/contract";
-import { Building2, ChevronDown, ChevronRight, FileCheck2, FolderOpen, type LucideIcon, Plus, Upload } from "lucide-react";
+import { Building2, ChevronDown, ChevronRight, CloudOff, Compass, FileCheck2, FolderOpen, KeyRound, type LucideIcon, Plus, SearchX, TriangleAlert, Unlink, Upload } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -81,9 +81,10 @@ function useProjectList(place: NavPlace) {
       live = false;
     };
   }, []);
-  // Until the list arrives, the project you're in is still shown, so nothing jumps.
+  // Until the list arrives, the project you're in is still shown, so nothing jumps. Once
+  // it has arrived, a project missing from it isn't invented.
   const list = projects ?? [];
-  if (place.projectId && !list.some((p) => p.id === place.projectId)) {
+  if (projects === null && place.projectId) {
     return [...list, { id: place.projectId, name: place.projectName ?? "This project" }];
   }
   return list;
@@ -259,26 +260,86 @@ export function Loading({ what = "Loading" }: { what?: string }) {
   );
 }
 
+/**
+ * A page that can't show what was asked for: a link that doesn't open, a page that isn't
+ * there, no connection. A card with an icon, a plain heading, what to do, and at most a
+ * couple of ways on. Never blames whoever is reading it.
+ */
+export function Notice({
+  icon: Icon,
+  tone = "plain",
+  title,
+  children,
+  actions,
+}: {
+  icon: LucideIcon;
+  tone?: "plain" | "warn";
+  title: string;
+  children: React.ReactNode;
+  actions?: React.ReactNode;
+}) {
+  return (
+    <section className={styles.notice} data-tone={tone} role={tone === "warn" ? "alert" : undefined}>
+      <span className={styles.noticeIcon} aria-hidden="true">
+        <Icon size={30} strokeWidth={2} />
+      </span>
+      <h1 className={styles.noticeTitle}>{title}</h1>
+      <div className={styles.noticeBody}>{children}</div>
+      {actions && <div className={styles.noticeActions}>{actions}</div>}
+    </section>
+  );
+}
+
+/**
+ * Any address SiteProof doesn't have. The way on is the start page, which anyone may see:
+ * a buyer who mistypes a report link is never led into a builder's projects.
+ */
+export function PageNotFound() {
+  return (
+    <Notice
+      icon={Compass}
+      title="There's no page here"
+      actions={
+        <Link href="/" className={styles.noticePrimary}>
+          Go to the start page
+        </Link>
+      }
+    >
+      <p>The address may be mistyped, or the page has moved. If someone sent you a link, open the whole link again or ask them for the current one.</p>
+    </Notice>
+  );
+}
+
 /** `home` offers the way back to the projects list; a buyer's report link has none. */
 export function ErrorPanel({ error, retry, home = true }: { error: unknown; retry?: () => void; home?: boolean }) {
   const { title, body, retry: canRetry } = describeError(error);
+  const status = error instanceof DataError ? error.status : -1;
+  const icon = status === 0 ? CloudOff : status === 401 && error instanceof DataError && error.message === "no_link" ? KeyRound : status === 401 || status === 403 ? Unlink : status === 404 ? SearchX : TriangleAlert;
+  const warn = status >= 500 || status === -1 || status === 429;
   return (
-    <div className={styles.errorPanel} role="alert">
-      <strong>{title}</strong>
-      <span>{body}</span>
-      <div className={styles.row}>
-        {retry && canRetry && (
-          <button type="button" className={styles.secondaryButton} onClick={retry}>
-            Try again
-          </button>
-        )}
-        {home && (
-          <Link href="/projects" className={styles.secondaryButton}>
-            Back to projects
-          </Link>
-        )}
-      </div>
-    </div>
+    <Notice
+      icon={icon}
+      tone={warn ? "warn" : "plain"}
+      title={title}
+      actions={
+        (retry && canRetry) || home ? (
+          <>
+            {retry && canRetry && (
+              <button type="button" className={styles.noticePrimary} onClick={retry}>
+                Try again
+              </button>
+            )}
+            {home && (
+              <Link href="/projects" className={retry && canRetry ? styles.noticeSecondary : styles.noticePrimary}>
+                Back to your projects
+              </Link>
+            )}
+          </>
+        ) : undefined
+      }
+    >
+      <p>{body}</p>
+    </Notice>
   );
 }
 

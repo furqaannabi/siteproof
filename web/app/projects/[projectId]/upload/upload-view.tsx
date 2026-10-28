@@ -250,7 +250,7 @@ function stages(item: UploadItem): Stage[] {
   return item.id === null ? ["failed", "todo", "todo"] : ["done", "failed", "todo"];
 }
 
-function Track({ item, labels }: { item: UploadItem; labels: [string, string, string] }) {
+export function Track({ item, labels }: { item: UploadItem; labels: [string, string, string] }) {
   const s = stages(item);
   return (
     <ol className={styles.track}>

@@ -1,13 +1,13 @@
 "use client";
 
-import { BadgeCheck, Check, CircleArrowRight, Download, EyeOff, type LucideIcon, Minus, RotateCw } from "lucide-react";
+import { BadgeCheck, Check, CircleArrowRight, Download, EyeOff, type LucideIcon, Minus, RotateCw, Unlink } from "lucide-react";
 import type { Claim, Detection, Flat, ItemKind, NotCheckedReason, Outcome, QueryLetter, Report, Result, Room, Segment } from "@siteproof/contract";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EvidenceFrame } from "@/components/evidence-frame";
-import { AppHeader, CopyButton, ErrorPanel, Loading, StaleNotice, ui, useFlatReport, useOverview, useReportByLink } from "@/components/ui";
+import { AppHeader, CopyButton, ErrorPanel, Loading, Notice, StaleNotice, ui, useFlatReport, useOverview, useReportByLink } from "@/components/ui";
 import { builderToken, reportTokenFromHash } from "@/lib/access";
 import { data, DataError } from "@/lib/data";
 import type { Room3D } from "./plan-3d";
@@ -194,14 +194,14 @@ export function LinkedReportPage() {
       <>
         <AppHeader brandHref="/" />
         <main className={ui.main}>
-          <section className={ui.empty}>
-            <h1 className={ui.h2}>{refused ? "This report link doesn't open anything" : "This link is missing its report"}</h1>
-            <p className={ui.lede}>
+          {/* No way on from here: a report link never leads anywhere else in the app. */}
+          <Notice icon={Unlink} title={refused ? "This report link doesn't open anything" : "This link is missing its report"}>
+            <p>
               {refused
                 ? "It may be mistyped, or the builder may have replaced it with a new one. Ask whoever sent it for the current link."
                 : "Open the whole link you were sent. If it still doesn't work, ask whoever sent it for the current one."}
             </p>
-          </section>
+          </Notice>
         </main>
       </>
     );
