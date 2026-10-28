@@ -15,6 +15,7 @@ import {
   type CreatedProject,
   type CreateProject,
   type Document,
+  type GapRequest,
   type Project,
   type ProjectLinks,
   type ProjectOverview,
@@ -48,7 +49,8 @@ export interface DataSource {
   uploadDocument(input: NewDocument, file: File, onProgress: (fraction: number) => void): Promise<Document>;
   clipStatus(projectId: string, clipId: string): Promise<ClipStatus>;
   documentStatus(projectId: string, documentId: string): Promise<Document>;
-  requestFootage(projectId: string, roomId: string): Promise<void>;
+  /** Sends the room's gap request, making it first if the room has none live. */
+  requestFootage(projectId: string, roomId: string): Promise<GapRequest>;
 }
 
 export class DataError extends Error {
@@ -59,8 +61,6 @@ export class DataError extends Error {
     super(message);
   }
 }
-
-const NOT_READY = "This part of SiteProof isn't connected yet.";
 
 // A trailing slash in the env ("https://api.example.com/") would double up with each path.
 const base = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
@@ -167,10 +167,7 @@ const apiSource: DataSource = {
     return typeof body === "string" ? body : body.status;
   },
   documentStatus: (projectId, documentId) => asBuilder<Document>(projectId, api.documentStatus(documentId)),
-  // POST /rooms/:id/request-footage isn't built on the backend yet (Apurva).
-  requestFootage: async () => {
-    throw new DataError(501, NOT_READY);
-  },
+  requestFootage: (projectId, roomId) => asBuilder<GapRequest>(projectId, api.requestFootage(roomId), { method: "POST" }),
 };
 
 /**

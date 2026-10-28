@@ -587,10 +587,23 @@ function ReportView({
                           <span className={styles.shotHint}>Start at the {selected.room.name.toLowerCase()} room tag and pan slowly one way. Don&apos;t pan back.</span>
                         </div>
                         {view === "builder" ? (
-                          <SendGapRequest projectId={report.project.id} roomId={selected.room.id} text={gap.text} sent={gap.status === "sent"} onSent={onChange} />
+                          <SendGapRequest projectId={report.project.id} roomId={selected.room.id} text={gap.text} onSent={onChange} />
                         ) : (
                           <span className={styles.shotStatus}>Requested · awaiting footage</span>
                         )}
+                      </div>
+                    )}
+
+                    {selected.result.outcome === "not_seen" && !gap && view === "builder" && (
+                      <div className={styles.shot}>
+                        <span className={styles.shotIcon}>
+                          <Camera />
+                        </span>
+                        <div className={styles.shotText}>
+                          <span className={styles.shotTitle}>Ask the site for 5 s of the {selected.room.name.toLowerCase()}</span>
+                          <span className={styles.shotHint}>One slow sweep from its room tag clears this room. SiteProof writes the request and the filming steps.</span>
+                        </div>
+                        <WriteGapRequest projectId={report.project.id} roomId={selected.room.id} onWritten={onChange} />
                       </div>
                     )}
 
@@ -729,8 +742,42 @@ function NothingToJudge({
   );
 }
 
+/** Makes the room's gap request on the server; the report then shows it, ready to send. */
+function WriteGapRequest({ projectId, roomId, onWritten }: { projectId: string; roomId: string; onWritten: () => void }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <div className={styles.sendWrap}>
+      <button
+        type="button"
+        className={ui.markButton}
+        disabled={busy}
+        onClick={async () => {
+          setBusy(true);
+          setError(null);
+          try {
+            await data.requestFootage(projectId, roomId);
+            onWritten();
+          } catch (e) {
+            setError(e instanceof DataError && e.status === 409 ? e.message : "Couldn't write the request. Try again.");
+          } finally {
+            setBusy(false);
+          }
+        }}
+      >
+        {busy ? "Writing the request…" : "Write the request"}
+      </button>
+      <span className={styles.sendNote} role="status">
+        {error ?? ""}
+      </span>
+    </div>
+  );
+}
+
 /** Shares the phone page for this gap request (WhatsApp, on a phone), or copies its link. */
-function SendGapRequest({ projectId, roomId, text, sent, onSent }: { projectId: string; roomId: string; text: string; sent: boolean; onSent: () => void }) {
+// The server marks a request sent when it's written, before the builder has shared it,
+// so the button never says "Send again".
+function SendGapRequest({ projectId, roomId, text, onSent }: { projectId: string; roomId: string; text: string; onSent: () => void }) {
   const [state, setState] = useState<"idle" | "copied" | "error">("idle");
   const [busy, setBusy] = useState(false);
   return (
@@ -761,10 +808,10 @@ function SendGapRequest({ projectId, roomId, text, sent, onSent }: { projectId: 
           }
         }}
       >
-        {sent ? "Send again" : "Send to site supervisor"}
+        Send to site supervisor
       </button>
       <span className={styles.sendNote} role="status">
-        {state === "copied" ? "Link copied. Paste it in WhatsApp." : state === "error" ? "Couldn't share. Try again." : sent ? "Sent" : ""}
+        {state === "copied" ? "Link copied. Paste it in WhatsApp." : state === "error" ? "Couldn't share. Try again." : ""}
       </span>
       <Link href={`/projects/${projectId}/rooms/${roomId}/request`} className={styles.sendPreview}>
         Open the request

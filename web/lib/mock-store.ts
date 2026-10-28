@@ -7,7 +7,7 @@
  * "pipeline" it fakes is the demo story's last step: a clip filmed from a gap request
  * in the demo project clears that room, as the real kitchen clip will on stage.
  */
-import type { Clip, ClipStatus, CreatedProject, CreateProject, Document, Project, ProjectLinks, ProjectOverview, Report, Room } from "@siteproof/contract";
+import type { Clip, ClipStatus, CreatedProject, CreateProject, Document, GapRequest, Project, ProjectLinks, ProjectOverview, Report, Room } from "@siteproof/contract";
 import { detections, flat302 } from "@/mocks/flat-302";
 import type { NewDocument } from "./types";
 
@@ -296,11 +296,32 @@ export const mockSource = {
     throw new MockError(404, "not_found");
   },
 
-  async requestFootage(roomId: string): Promise<void> {
-    await delay(200);
-    for (const report of Object.values(load().projects)) {
-      for (const g of report.gap_requests) if (g.room_id === roomId && g.status === "open") g.status = "sent";
+  /** As the backend: send the room's live request, or write one with the fixed steps. */
+  async requestFootage(roomId: string): Promise<GapRequest> {
+    await delay(300);
+    const p = Object.values(load().projects).find((x) => x.rooms.some((r) => r.id === roomId));
+    const room = p?.rooms.find((r) => r.id === roomId);
+    if (!p || !room) throw new MockError(404, "not_found");
+    const live = p.gap_requests.find((g) => g.room_id === roomId && g.status !== "cleared");
+    if (live) {
+      live.status = "sent";
+      save();
+      return structuredClone(live);
     }
+    const swept = p.segments.some((s) => s.room_id === roomId && s.full_sweep);
+    const notSeen = p.claims.some((c) => c.room_id === roomId && p.results.some((r) => r.claim_id === c.id && r.outcome === "not_seen"));
+    if (swept && !notSeen) throw new MockError(409, "This room already has a one-way sweep from its room tag, so there's nothing to film.");
+    const flat = p.project.flats.find((f) => f.id === room.flat);
+    const lower = room.name.toLowerCase();
+    const gap: GapRequest = {
+      id: crypto.randomUUID(),
+      room_id: roomId,
+      text: `Need 5 s of Flat ${flat?.name ?? ""} ${lower}, one slow sweep from its room tag`,
+      steps: [`Start with the ${lower}'s room tag in view, at the door.`, "Turn slowly one way until you have seen every wall.", "Stop there. Don't pan back."],
+      status: "sent",
+    };
+    p.gap_requests.push(gap);
     save();
+    return structuredClone(gap);
   },
 };
