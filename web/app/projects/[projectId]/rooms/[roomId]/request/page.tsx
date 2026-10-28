@@ -4,7 +4,7 @@ import { Loading } from "@/components/ui";
 import { RequestPage } from "./request-view";
 
 export const metadata: Metadata = {
-  title: "Footage request · SiteProof",
+  title: "Gap request · SiteProof",
 };
 
 type Props = PageProps<"/projects/[projectId]/rooms/[roomId]/request">;

@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useCallback } from "react";
 import { usingMock } from "@/lib/data";
-import { ErrorPanel, Loading, useReport } from "@/components/ui";
+import { ErrorPanel, Loading, StaleNotice, useReport } from "@/components/ui";
 import { CLIP_ACCEPT, UploadList, useUploads } from "@/components/uploads";
 import type { Report } from "@/lib/types";
 import styles from "./request.module.css";
 
 export function RequestPage({ projectId, roomId }: { projectId: string; roomId: string }) {
-  const { report, error, reload } = useReport(projectId);
+  const { report, error, stale, reload } = useReport(projectId);
   if (error) {
     return (
       <main className={styles.screen}>
@@ -18,7 +18,12 @@ export function RequestPage({ projectId, roomId }: { projectId: string; roomId: 
     );
   }
   if (!report) return <Loading what="Loading the request" />;
-  return <RequestView report={report} roomId={roomId} onSettled={reload} />;
+  return (
+    <>
+      <StaleNotice stale={stale} onRetry={reload} />
+      <RequestView report={report} roomId={roomId} onSettled={reload} />
+    </>
+  );
 }
 
 function RequestView({ report, roomId, onSettled }: { report: Report; roomId: string; onSettled: () => void }) {
@@ -55,7 +60,7 @@ function RequestView({ report, roomId, onSettled }: { report: Report; roomId: st
         <div className={styles.done}>
           <span className={styles.eyebrow}>{sentDone ? "Thank you" : "Nothing needed"}</span>
           <h1 className={styles.title}>{sentDone ? `${roomName} is covered now` : `No footage needed for ${lower}`}</h1>
-          <p>{sentDone ? "The clip was checked and the report is updated." : "This room has already been covered by a complete sweep."}</p>
+          <p>{sentDone ? "The clip was checked and the report is updated." : "This room is already covered by a one-way sweep."}</p>
           <Link href={reportHref} className={styles.cta}>
             See the report
           </Link>
@@ -63,7 +68,7 @@ function RequestView({ report, roomId, onSettled }: { report: Report; roomId: st
       ) : (
         <>
           <div className={styles.heading}>
-            <span className={styles.eyebrow}>1 shot clears the {lower}</span>
+            <span className={styles.eyebrow}>One clip clears the {lower}</span>
             <h1 className={styles.title}>{gap.text}</h1>
           </div>
 
@@ -74,7 +79,7 @@ function RequestView({ report, roomId, onSettled }: { report: Report; roomId: st
             <span className={`${styles.corner} ${styles.br}`} />
             <div className={styles.tagMock}>
               <span className={styles.tagSquare} />
-              <span className={styles.tagLabel}>Start at the {lower} door tag</span>
+              <span className={styles.tagLabel}>Start at the {lower} room tag</span>
             </div>
             <div className={styles.sweep}>
               <span>door</span>
@@ -97,7 +102,7 @@ function RequestView({ report, roomId, onSettled }: { report: Report; roomId: st
           </ol>
 
           <div className={styles.actions}>
-            <UploadList items={uploads.items} />
+            <UploadList items={uploads.items} onRetry={uploads.retry} />
             <label className={styles.cta}>
               <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 8h3l2-3h8l2 3h3v11H3z" />
