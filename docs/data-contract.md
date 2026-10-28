@@ -24,6 +24,7 @@ CreatedProject    { project: Project, rooms: Room[] }                        // 
 ClipUploadRequest { project_id, content_type: "video/mp4"|"video/quicktime" } // POST /clips body
 ClipUpload        { upload_url, ticket, expires_at }                         // POST /clips reply
 CompleteClip      { ticket }                                                 // POST /clips/complete body → Clip
+ProjectLinks      { builder_token, report_tokens: [{ flat_id, token }] }     // GET /projects/:id/links
 ```
 
 ## API
@@ -36,8 +37,18 @@ CompleteClip      { ticket }                                                 // 
 | `POST /documents` | Upload a demand letter, invoice or BOQ for extraction | William |
 | `GET /clips/:id/status` | `uploaded` → `processing` → `done` / `failed`, for the upload UI to poll | William |
 | `GET /documents/:id/status` | The `Document`, with the same statuses, so the UI can tell "still reading" from "done" from "failed". Its claims arrive in the report | William |
+| `GET /projects/:id/links` | The project's builder link and each flat's report link. Answers only the team's setup key or the project's own builder link | Furqaan |
 | `GET /projects/:id/report` | The report: claims, counts, results, evidence frames. No login needed for the buyer/bank view | Apurva |
 | `POST /rooms/:id/request-footage` | Create a gap request from the coverage map | Apurva |
+
+## Who may call what
+
+Every request carries its key as `Authorization: Bearer <token>` ([ADR](decisions/2026-10-28-builder-access-by-secret-links-accepted.md)).
+
+- **`POST /projects`** needs the team's setup key. Nobody else can create a project.
+- **Every other builder route** — clips, documents, their statuses, a project's links — needs that project's builder link. No link, or a link that isn't valid, is `401`; a valid link for a different project is `404`, the same as a project that does not exist.
+- **A report link** opens one flat's report and nothing else; it never opens a builder route.
+- Links never expire. Replacing one cuts off everyone who held it.
 
 ## What the shapes mean, and the rules attached to them
 
@@ -77,4 +88,5 @@ Flag these to Furqaan rather than deciding them in code:
 | `Flat` spelled out and `Room.flat` confirmed as an id; `Document` and `GET /documents/:id/status` added; `Clip.captured_at` may be null ([ADR](decisions/2026-10-27-contract-flat-document-and-capture-time.md)) | 27 October 2026 | Furqaan |
 | `ItemKind` added; `Claim.item` and `Detection.item` draw from it ([ADR](decisions/2026-10-27-claim-item-is-a-closed-vocabulary-not-the-boq-wording.md)). Approved William's ADRs on the closed vocabulary, the demand letter judged against the BOQ as a ceiling, and refusing unreadable input in the gap-request voice | 27 October 2026 | Furqaan |
 | `Claim.unit` may be null, where the document states no unit — found running real Muse Spark output on a demand letter | 27 October 2026 | Furqaan |
+| Builder routes need the project's builder link, `POST /projects` the setup key; `ProjectLinks` and `GET /projects/:id/links` added | 28 October 2026 | Furqaan |
 | `Document.reason` added. `CreateProject` and `CreatedProject` for `POST /projects` ([ADR](decisions/2026-10-27-creating-a-project-returns-its-rooms-and-their-qr-codes.md)). Clips upload in two steps: `POST /clips` returns a link and a ticket, `POST /clips/complete` registers the clip ([ADR](decisions/2026-10-27-clips-upload-in-two-steps-with-a-signed-ticket.md)) | 28 October 2026 | Furqaan |

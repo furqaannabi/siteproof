@@ -57,10 +57,12 @@ enum JobStatus {
 }
 
 model Project {
-  id         String   @id @default(uuid())
-  name       String
-  builder    String
-  created_at DateTime @default(now())
+  id           String   @id @default(uuid())
+  name         String
+  builder      String
+  /// The builder link's version. Replacing the link bumps it; the link itself is never stored.
+  link_version Int      @default(1)
+  created_at   DateTime @default(now())
 
   flats     Flat[]
   clips     Clip[]
@@ -68,9 +70,11 @@ model Project {
 }
 
 model Flat {
-  id         String @id @default(uuid())
-  project_id String
-  name       String
+  id           String @id @default(uuid())
+  project_id   String
+  name         String
+  /// The report link's version. Replacing the link bumps it; the link itself is never stored.
+  link_version Int    @default(1)
 
   project   Project    @relation(fields: [project_id], references: [id], onDelete: Cascade)
   rooms     Room[]

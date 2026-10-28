@@ -44,6 +44,17 @@ export interface CreatedProject {
   rooms: Room[];
 }
 
+/**
+ * A project's secret links, from `GET /projects/:id/links`: the builder link, which
+ * opens everything in the project, and one read-only report link per flat, for its
+ * buyer and bank. Each token goes in an `Authorization: Bearer` header. Only the team's
+ * setup key or the project's own builder link may ask for them.
+ */
+export interface ProjectLinks {
+  builder_token: string;
+  report_tokens: { flat_id: string; token: string }[];
+}
+
 /** One builder's project. */
 export interface Project {
   id: string;
@@ -206,6 +217,8 @@ export const api = {
   clipStatus: (clipId: string) => `/clips/${clipId}/status`,
   /** Poll a document through uploaded → processing → done / failed. */
   documentStatus: (documentId: string) => `/documents/${documentId}/status`,
+  /** A project's builder link and its flats' report links. */
+  projectLinks: (projectId: string) => `/projects/${projectId}/links`,
   /** The report. No login needed for the buyer/bank view. */
   projectReport: (projectId: string) => `/projects/${projectId}/report`,
   /** Create a gap request from the coverage map. */
