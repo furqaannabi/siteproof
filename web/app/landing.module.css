@@ -1,0 +1,912 @@
+/*
+ * The landing page: one drawing sheet folded down its centre. The paper side is the
+ * claim as a buyer gets it today; the blueprint side is the same claim proven. Every
+ * section keeps the fold, so the page reads as one sheet, not a stack of cards.
+ */
+
+.page {
+  --gutter: 16px;
+  --seam: 2px dashed var(--plan-line);
+  background: var(--panel);
+}
+
+/* ---------- The fold (first viewport) ---------- */
+
+.fold {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.paper,
+.proof {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px var(--gutter) 24px;
+}
+
+.paper {
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.proof {
+  background-color: var(--plan-bg);
+  background-image:
+    linear-gradient(rgba(220, 233, 247, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(220, 233, 247, 0.09) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: var(--plan-ink);
+  /* On a phone the fold runs across: the seam sits between the halves. */
+  border-top: var(--seam);
+  padding-top: 88px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  align-self: flex-start;
+  color: inherit;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-brand);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.mark {
+  width: 30px;
+  height: 30px;
+  background: var(--mark);
+  color: var(--mark-ink);
+  display: grid;
+  place-items: center;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  justify-content: flex-end;
+}
+
+.nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--plan-ink);
+  font-weight: 600;
+  font-size: var(--text-control);
+  text-decoration: none;
+}
+
+.nav a:hover {
+  text-decoration: underline;
+}
+
+.foldTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-page);
+  line-height: 0.95;
+  max-width: 13ch;
+}
+
+.claims {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.claims li {
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.claims mark {
+  font-family: var(--font-mono);
+  font-size: var(--text-minor-head);
+  font-weight: 500;
+  line-height: 1.35;
+  background: var(--quote-mark);
+  color: #1e1d1a;
+  padding: 6px 10px;
+}
+
+.problem {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 44ch;
+}
+
+.evidence {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Each answer: the item and its stamps on one line, the reason underneath. */
+.evidence li {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: center;
+  align-items: center;
+  gap: 8px 16px;
+  min-height: 64px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(220, 233, 247, 0.3);
+}
+
+.evidence b {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--text-minor-head);
+}
+
+.evidence li small {
+  grid-column: 1 / -1;
+  font-size: var(--text-small);
+  color: var(--plan-ink-soft);
+}
+
+.stamps {
+  justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 4px 4px 4px 0;
+}
+
+.stamps .stamp {
+  font-size: var(--text-small);
+  padding: 2px 8px;
+}
+
+/* On the blueprint a stamp gets a solid backing, so grid lines never run behind its letters. */
+.proof .stamp,
+.rowProof .stamp {
+  background: var(--plan-bg);
+}
+
+.proof .stamp_short {
+  color: var(--plan-label-short);
+}
+
+.heroFrame {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.heroFrame figcaption {
+  font-family: var(--font-mono);
+  font-size: var(--text-ref);
+  color: var(--plan-ink-soft);
+}
+
+/* A drawing's title block cell, naming the side of the fold. */
+.block {
+  margin-top: auto;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  border-top: 2px solid var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.block > span {
+  padding: 10px 12px 2px 0;
+}
+
+.block > span + span {
+  padding-left: 12px;
+  border-left: 1px solid var(--rule);
+}
+
+.blockProof {
+  border-top-color: var(--plan-line);
+  color: var(--plan-ink-soft);
+}
+
+.blockProof > span + span {
+  border-left-color: rgba(220, 233, 247, 0.4);
+}
+
+/* The seam: the one place the page asks for something. */
+.seam {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 0 28px;
+  background: var(--mark);
+  color: var(--mark-ink);
+  border: 2px solid var(--ink);
+  font-weight: 600;
+  font-size: var(--text-body);
+  text-decoration: none;
+}
+
+.cta:hover {
+  filter: brightness(1.08);
+}
+
+.cta:active {
+  translate: 0 1px;
+}
+
+.setUp {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: 44px;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: var(--text-control);
+}
+
+/* ---------- Line for line ---------- */
+
+.lines {
+  border-top: 2px solid var(--ink);
+}
+
+.linesHead {
+  padding: 56px var(--gutter) 32px;
+  display: grid;
+  gap: 16px;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.linesHead p {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 60ch;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-page);
+  line-height: 0.95;
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-bottom: 2px solid var(--ink);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-top: 2px solid var(--ink);
+}
+
+.rowPaper,
+.rowProof {
+  padding: 28px var(--gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rowPaper {
+  background: var(--panel);
+}
+
+.rowProof {
+  position: relative;
+  background-color: var(--plan-bg);
+  background-image:
+    linear-gradient(rgba(220, 233, 247, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(220, 233, 247, 0.09) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: var(--plan-ink);
+  border-top: var(--seam);
+}
+
+.row h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-subhead);
+  line-height: 1.05;
+}
+
+.row p {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.55;
+}
+
+.rowPaper p {
+  color: var(--ink-2);
+}
+
+.rowProof p {
+  color: var(--plan-ink-soft);
+}
+
+.quote {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  background: var(--quote-mark);
+  color: #1e1d1a !important;
+  padding: 2px 6px;
+}
+
+.diagram {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  display: block;
+}
+
+.svgLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.08em;
+  fill: var(--plan-ink-soft);
+}
+
+.rowText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ---------- Stamps ---------- */
+
+.stamp {
+  display: inline-block;
+  align-self: flex-start;
+  flex: 0 0 auto;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-control);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 3px 10px;
+  border: 3px solid currentColor;
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
+  transform: rotate(-5deg);
+}
+
+.stamp_verified {
+  color: var(--verified);
+}
+
+.proof .stamp_verified,
+.rowProof .stamp_verified {
+  color: var(--plan-label-verified);
+}
+
+.stamp_short {
+  color: var(--short);
+}
+
+.stamp_notSeen {
+  color: var(--not-seen);
+  border-style: dashed;
+}
+
+.proof .stamp_notSeen {
+  color: var(--plan-line);
+}
+
+.stamp_neutral {
+  color: var(--plan-ink-soft);
+  outline-color: transparent;
+  border-width: 2px;
+}
+
+/* The lighter amber holds 5.3:1 even where a stamp crosses a grid line. */
+.stamp_check {
+  color: var(--plan-label-short);
+}
+
+/* The signature: a row's stamp presses on as it reaches the fold. Armed only by script. */
+:global(html[data-stamps="armed"]) .row:not([data-pressed]) .rowProof .stamp {
+  opacity: 0;
+  transform: rotate(-5deg) scale(1.7);
+}
+
+.rowProof .stamp {
+  transition:
+    opacity 120ms ease-out,
+    transform 240ms cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+
+/* ---------- Outcomes, as the drawing's legend ---------- */
+
+.outcomes {
+  padding: 56px var(--gutter);
+  max-width: 1320px;
+  margin: 0 auto;
+  display: grid;
+  gap: 32px;
+}
+
+.outcomesHead {
+  display: grid;
+  gap: 16px;
+}
+
+.tally {
+  display: flex;
+  gap: 5px;
+  max-width: 560px;
+}
+
+.tally > i {
+  flex: 1 1 0;
+  height: 28px;
+}
+
+.tV {
+  background: var(--verified);
+}
+
+.tS {
+  background: var(--short-fill);
+  box-shadow: inset 0 0 0 2px var(--short);
+}
+
+.tN {
+  background: repeating-linear-gradient(45deg, var(--hatch) 0 2px, var(--panel) 2px 6px);
+  box-shadow: inset 0 0 0 2px var(--not-seen);
+}
+
+.tallyNote {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-ref);
+  color: var(--muted);
+}
+
+.legend {
+  margin: 0;
+  border-top: 2px solid var(--ink);
+}
+
+.legendRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.legendRow dt {
+  padding: 6px 0 6px 4px;
+}
+
+.legendRow dd {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.55;
+}
+
+.when {
+  font-weight: 600;
+}
+
+.shows {
+  color: var(--ink-2);
+}
+
+.request {
+  display: block;
+  margin: 8px 0;
+  padding: 12px 16px;
+  background: var(--plan-bg);
+  color: var(--plan-ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-subhead);
+  line-height: 1.05;
+}
+
+/* ---------- Rules band ---------- */
+
+.rules {
+  background-color: var(--plan-bg);
+  background-image:
+    linear-gradient(rgba(220, 233, 247, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(220, 233, 247, 0.09) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: var(--plan-ink);
+  padding: 56px var(--gutter);
+  display: grid;
+  gap: 28px;
+}
+
+.rules > * {
+  max-width: 1320px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.ruleList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  border-top: 1.5px solid var(--plan-line);
+}
+
+.ruleList li {
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(220, 233, 247, 0.3);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: var(--plan-ink-soft);
+}
+
+.ruleList b {
+  color: var(--plan-ink);
+}
+
+.ruleList li > span {
+  min-width: 0;
+}
+
+/* ---------- Who it's for ---------- */
+
+.who {
+  padding: 56px var(--gutter);
+  max-width: 1320px;
+  margin: 0 auto;
+  display: grid;
+  gap: 20px;
+}
+
+.whoLede {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 60ch;
+}
+
+.whoGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-top: 2px solid var(--ink);
+}
+
+.whoGrid > div {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.whoGrid h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-section);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.whoGrid p {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+
+/* ---------- The close: the fold again ---------- */
+
+.close {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  border-top: 2px solid var(--ink);
+}
+
+.closePaper,
+.closeProof {
+  padding: 56px var(--gutter);
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+}
+
+.closePaper {
+  background: var(--panel);
+}
+
+.closeProof {
+  background: var(--plan-bg);
+  color: var(--plan-ink);
+  border-top: var(--seam);
+  padding-top: 96px;
+}
+
+.closePaper p,
+.closeProof p {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-page);
+  line-height: 0.95;
+}
+
+.footer {
+  border-top: 2px solid var(--ink);
+  padding: 24px var(--gutter) 40px;
+  display: grid;
+  gap: 8px;
+  font-size: var(--text-small);
+  color: var(--muted);
+}
+
+.footer p {
+  margin: 0;
+  max-width: 80ch;
+}
+
+/* On a phone the fold runs across; the seam action sits on that line. */
+.fold > .seam {
+  position: relative;
+  left: auto;
+  top: auto;
+  transform: none;
+  justify-self: center;
+  margin: -28px 0;
+  order: 2;
+}
+
+.fold > .paper {
+  order: 1;
+  padding-bottom: 56px;
+}
+
+.fold > .proof {
+  order: 3;
+  padding-top: 56px;
+}
+
+.close > .seam {
+  position: relative;
+  left: auto;
+  transform: none;
+  top: auto;
+  justify-self: center;
+  margin: -28px 0;
+  order: 2;
+}
+
+.close > .closePaper {
+  order: 1;
+}
+
+.close > .closeProof {
+  order: 3;
+  padding-top: 72px;
+}
+
+/* ---------- Two halves from tablet up ---------- */
+
+@media (min-width: 900px) {
+  .page {
+    --gutter: 48px;
+  }
+
+  .fold {
+    grid-template-columns: 1fr 1fr;
+    min-height: min(100svh, 940px);
+  }
+
+  .fold > .paper,
+  .fold > .proof {
+    order: 0;
+    padding: 32px var(--gutter) 32px;
+    border-top: 0;
+  }
+
+  .fold > .proof {
+    border-left: var(--seam);
+  }
+
+  /* Both halves share one row grid: a 44px header, a two-line title slot, then
+     claim rows of one height, so each paper claim faces its stamped answer. */
+  .nav,
+  .brand {
+    height: 44px;
+  }
+
+  .paper .foldTitle,
+  .proof .foldTitle {
+    margin-top: 24px;
+    max-width: 16ch;
+    min-height: calc(2em * 0.95);
+  }
+
+  .claims li,
+  .evidence li {
+    height: 84px;
+    min-height: 0;
+  }
+
+  .evidence li {
+    grid-template-columns: auto 1fr;
+  }
+
+  .stamps {
+    justify-self: end;
+    justify-content: flex-end;
+  }
+
+  .claims,
+  .evidence {
+    margin-top: 8px;
+  }
+
+  /* The demo action sits on the fold in the title-block row; the proof side's
+     cell steps clear of it. */
+  .blockProof > span:first-child {
+    padding-left: 150px;
+  }
+
+  /* Sized so the whole fold, with the action, fits the first screen at 1440 x 900. */
+  .heroFrame {
+    max-width: 400px;
+  }
+
+  .fold > .seam {
+    position: absolute;
+    left: 50%;
+    top: auto;
+    bottom: 20px;
+    margin: 0;
+    transform: translateX(-50%);
+  }
+
+  .row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .rowPaper,
+  .rowProof {
+    padding: 40px var(--gutter);
+  }
+
+  .rowProof {
+    border-top: 0;
+    border-left: var(--seam);
+    display: grid;
+    grid-template-columns: minmax(200px, 280px) 1fr;
+    grid-template-areas:
+      "diagram text"
+      "diagram stamp";
+    grid-template-rows: auto 1fr;
+    gap: 14px 36px;
+    align-items: start;
+  }
+
+  .rowProof .diagram {
+    grid-area: diagram;
+  }
+
+  .rowProof .stamp {
+    grid-area: stamp;
+    justify-self: start;
+    margin: 6px 0 0 4px;
+  }
+
+  .rowText {
+    grid-area: text;
+    max-width: 46ch;
+  }
+
+  .outcomes {
+    grid-template-columns: 5fr 7fr;
+    align-items: start;
+    gap: 48px;
+  }
+
+  .legendRow {
+    grid-template-columns: 170px 1fr 1.3fr;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .ruleList {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 48px;
+  }
+
+  .whoGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .whoGrid > div {
+    padding: 20px 24px 20px 0;
+    border-bottom: 0;
+  }
+
+  .whoGrid > div + div {
+    padding-left: 24px;
+    border-left: 1px solid var(--rule);
+  }
+
+  .close {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .close > .closePaper,
+  .close > .closeProof {
+    order: 0;
+    min-height: 300px;
+    padding: 64px var(--gutter) 136px;
+    align-items: flex-start;
+  }
+
+  .close > .closePaper {
+    justify-content: flex-end;
+    padding-right: 32px;
+  }
+
+  .close > .closeProof {
+    border-top: 0;
+    border-left: var(--seam);
+    padding-left: 32px;
+  }
+
+  .close > .seam {
+    position: absolute;
+    left: 50%;
+    top: auto;
+    bottom: 48px;
+    margin: 0;
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rowProof .stamp {
+    transition: none;
+  }
+}
