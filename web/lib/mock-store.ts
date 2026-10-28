@@ -9,7 +9,7 @@
  */
 import type { Clip, ClipStatus, CreatedProject, CreateProject, Document, Project, ProjectLinks, ProjectOverview, Report, Room } from "@siteproof/contract";
 import { detections, flat302 } from "@/mocks/flat-302";
-import type { NewDocument, Registered } from "./types";
+import type { NewDocument } from "./types";
 
 // v2: one record per project, cut into an overview and per-flat reports (contract of 28 October).
 const KEY = "siteproof-mock-v2";
@@ -178,6 +178,18 @@ function fillGap(report: MockProject, clip: Clip, roomId: string) {
   for (const g of report.gap_requests) if (g.room_id === roomId) g.status = "cleared";
 }
 
+/** Reports progress in steps, as a real upload would, then starts the status clock. */
+async function pretendToSend(id: string, file: File, onProgress: (fraction: number) => void) {
+  const steps = Math.min(20, Math.max(5, Math.round(file.size / 2_000_000)));
+  for (let i = 1; i <= steps; i++) {
+    await delay(120);
+    onProgress(i / steps);
+  }
+  const upload = load().uploads[id];
+  if (upload) upload.uploaded_at = Date.now();
+  save();
+}
+
 export const mockSource = {
   async listProjects(): Promise<Project[]> {
     await delay(100);
@@ -241,7 +253,8 @@ export const mockSource = {
     return { project, rooms };
   },
 
-  async registerClip(projectId: string, file: File, roomHint: string | null = null): Promise<Registered<Clip>> {
+  /** Registers the clip at once, then pretends to send it and starts its status clock. */
+  async uploadClip(projectId: string, file: File, onProgress: (fraction: number) => void, roomHint: string | null = null): Promise<Clip> {
     await delay(200);
     const report = projectOf(projectId);
     const clip: Clip = {
@@ -254,30 +267,19 @@ export const mockSource = {
     report.clips.push(clip);
     load().uploads[clip.id] = { kind: "clip", project_id: projectId, uploaded_at: null, room_hint: roomHint };
     save();
-    return { item: clip, upload_url: `mock://${clip.id}` };
+    await pretendToSend(clip.id, file, onProgress);
+    return clip;
   },
 
-  async registerDocument(input: NewDocument): Promise<Registered<Document>> {
+  async uploadDocument(input: NewDocument, file: File, onProgress: (fraction: number) => void): Promise<Document> {
     await delay(200);
     const report = projectOf(input.project_id);
     const doc: Document = { id: crypto.randomUUID(), ...input, status: "uploaded", reason: null };
     report.documents.push(doc);
     load().uploads[doc.id] = { kind: "document", project_id: input.project_id, uploaded_at: null, room_hint: null };
     save();
-    return { item: doc, upload_url: `mock://${doc.id}` };
-  },
-
-  /** Pretends to PUT the file: reports progress in steps, then starts the status clock. */
-  async upload(url: string, file: File, onProgress: (fraction: number) => void): Promise<void> {
-    const id = url.replace("mock://", "");
-    const steps = Math.min(20, Math.max(5, Math.round(file.size / 2_000_000)));
-    for (let i = 1; i <= steps; i++) {
-      await delay(120);
-      onProgress(i / steps);
-    }
-    const upload = load().uploads[id];
-    if (upload) upload.uploaded_at = Date.now();
-    save();
+    await pretendToSend(doc.id, file, onProgress);
+    return doc;
   },
 
   async clipStatus(clipId: string): Promise<ClipStatus> {

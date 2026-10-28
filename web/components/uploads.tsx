@@ -2,7 +2,7 @@
 
 import type { ClipStatus } from "@siteproof/contract";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { data } from "@/lib/data";
+import { data, DataError } from "@/lib/data";
 import type { NewDocument } from "@/lib/types";
 import { StatusBadge, ui } from "./ui";
 
@@ -107,8 +107,12 @@ export function useUploads(projectId: string, onSettled?: () => void) {
     (key: string, kind: UploadItem["kind"], id: string) => {
       const tick = async () => {
         try {
-          const status = kind === "clip" ? await data.clipStatus(projectId, id) : (await data.documentStatus(projectId, id)).status;
-          patch(key, { status });
+          let status: ClipStatus;
+          let reason: string | null = null;
+          if (kind === "clip") status = await data.clipStatus(projectId, id);
+          else ({ status, reason } = await data.documentStatus(projectId, id));
+          // A document that can't be read says why, in words chosen by the server.
+          patch(key, status === "failed" ? { status, error: reason ?? "This file couldn't be read. Upload it again, or a clearer copy." } : { status });
           if (status === "done" || status === "failed") {
             onSettled?.();
             return;
@@ -125,31 +129,37 @@ export function useUploads(projectId: string, onSettled?: () => void) {
   );
 
   const run = useCallback(
-    async (key: string, kind: UploadItem["kind"], file: File, register: () => Promise<{ id: string; upload_url: string }>) => {
+    async (key: string, kind: UploadItem["kind"], sendFile: (onProgress: (p: number) => void) => Promise<{ id: string }>) => {
       try {
-        const { id, upload_url } = await register();
-        patch(key, { id });
-        await data.upload(upload_url, file, (p) => patch(key, { progress: p }));
+        const { id } = await sendFile((p) => patch(key, { progress: p }));
         retries.current.delete(key);
-        patch(key, { progress: 1, status: "uploaded" });
+        patch(key, { id, progress: 1, status: "uploaded" });
         onSettled?.();
         poll(key, kind, id);
       } catch (e) {
-        const message = e instanceof Error ? e.message : "The upload didn't finish.";
-        patch(key, { status: "failed", error: message, retryable: retries.current.has(key) });
+        const message =
+          e instanceof DataError && e.message === "no_link"
+            ? "This phone hasn't opened the project's builder link. Open it, then upload again."
+            : e instanceof Error
+              ? e.message
+              : "The upload didn't finish.";
+        // Sending the same file again only helps when the transfer failed, not the file:
+        // never for one refused as unreadable, too large, over today's limit, or without a link.
+        const refused = e instanceof DataError && [400, 401, 404, 413, 429].includes(e.status);
+        patch(key, { status: "failed", error: message, retryable: !refused && retries.current.has(key) });
       }
     },
     [onSettled, patch, poll],
   );
 
   const start = useCallback(
-    (item: UploadItem, file: File, register: () => Promise<{ id: string; upload_url: string }>) => {
+    (item: UploadItem, sendFile: (onProgress: (p: number) => void) => Promise<{ id: string }>) => {
       const go = () => {
         patch(item.key, { status: "uploading", progress: 0, error: null, retryable: false });
-        void run(item.key, item.kind, file, register);
+        void run(item.key, item.kind, sendFile);
       };
       retries.current.set(item.key, go);
-      void run(item.key, item.kind, file, register);
+      void run(item.key, item.kind, sendFile);
     },
     [patch, run],
   );
@@ -178,10 +188,7 @@ export function useUploads(projectId: string, onSettled?: () => void) {
           });
           return;
         }
-        start(item, file, async () => {
-          const r = await data.registerClip(projectId, file, roomHint);
-          return { id: r.item.id, upload_url: r.upload_url };
-        });
+        start(item, (onProgress) => data.uploadClip(projectId, file, onProgress, roomHint));
       });
     },
     [patch, start],
@@ -203,10 +210,7 @@ export function useUploads(projectId: string, onSettled?: () => void) {
       const problem = documentProblem(file);
       setItems((xs) => [problem ? { ...item, status: "failed", error: problem } : item, ...xs]);
       if (problem) return;
-      start(item, file, async () => {
-        const r = await data.registerDocument(input, file);
-        return { id: r.item.id, upload_url: r.upload_url };
-      });
+      start(item, (onProgress) => data.uploadDocument(input, file, onProgress));
     },
     [start],
   );
