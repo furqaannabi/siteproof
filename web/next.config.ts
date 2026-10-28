@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@siteproof/contract"],
   cacheComponents: true,
   partialPrefetching: true,
+  // The development badge sits bottom-right, clear of the builder's sidebar.
+  devIndicators: { position: "bottom-right" },
 };
 
 export default nextConfig;

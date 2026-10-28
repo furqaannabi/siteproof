@@ -109,13 +109,13 @@
 .bandGhost {
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
-  padding: 0 14px;
-  border-radius: 6px;
+  min-height: 38px;
+  padding: 0 18px;
+  border-radius: 999px;
   font-weight: 600;
   font-size: 15px;
   text-decoration: none;
-  border: 1px solid var(--binding-ink);
+  border: 0;
 }
 
 .bandBtn {
@@ -128,13 +128,12 @@
 }
 
 .bandGhost {
-  background: transparent;
+  background: rgba(233, 241, 236, 0.12);
   color: var(--binding-ink);
-  border-color: rgba(233, 241, 236, 0.5);
 }
 
 .bandGhost:hover {
-  background: rgba(233, 241, 236, 0.1);
+  background: rgba(233, 241, 236, 0.2);
 }
 
 .sendCompact {

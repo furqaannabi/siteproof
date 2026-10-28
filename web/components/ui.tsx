@@ -1,7 +1,9 @@
 "use client";
 
 import type { ClipStatus, ProjectOverview, Report } from "@siteproof/contract";
+import { Building2, ChevronDown, ChevronRight, FileCheck2, FolderOpen, type LucideIcon, Plus, Upload } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { takeBuilderLink } from "@/lib/access";
 import { data, DataError, usingMock } from "@/lib/data";
@@ -21,55 +23,217 @@ export function Brand({ href = "/projects" }: { href?: string }) {
   );
 }
 
+export type NavKey = "projects" | "new" | "project" | "upload" | "report";
+
+/** Where the builder is: inside a project (with its id and, once loaded, its name) or on the projects list. */
+export interface NavPlace {
+  current: NavKey;
+  projectId?: string;
+  projectName?: string;
+  builder?: string;
+}
+
+interface NavLink {
+  key: NavKey;
+  href: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+const APP_LINKS: NavLink[] = [
+  { key: "projects", href: "/projects", label: "All projects", icon: FolderOpen },
+  { key: "new", href: "/projects/new", label: "New project", icon: Plus },
+];
+
+function projectLinks(projectId: string): NavLink[] {
+  return [
+    { key: "project", href: `/projects/${projectId}`, label: "Overview", icon: Building2 },
+    { key: "upload", href: `/projects/${projectId}/upload`, label: "Upload", icon: Upload },
+    { key: "report", href: `/projects/${projectId}/report`, label: "Report", icon: FileCheck2 },
+  ];
+}
+
+function NavItem({ link, active }: { link: NavLink; active: boolean }) {
+  const Icon = link.icon;
+  return (
+    <Link href={link.href} className={styles.navItem} aria-current={active ? "page" : undefined}>
+      <Icon size={20} strokeWidth={2} aria-hidden="true" />
+      <span>{link.label}</span>
+    </Link>
+  );
+}
+
+// The sidebar's project list, kept between pages so it doesn't flash empty on each one.
+let knownProjects: { id: string; name: string }[] | null = null;
+
+function useProjectList(place: NavPlace) {
+  const [projects, setProjects] = useState(knownProjects);
+  useEffect(() => {
+    let live = true;
+    data
+      .listProjects()
+      .then((list) => {
+        knownProjects = list.map((p) => ({ id: p.id, name: p.name }));
+        if (live) setProjects(knownProjects);
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
+  // Until the list arrives, the project you're in is still shown, so nothing jumps.
+  const list = projects ?? [];
+  if (place.projectId && !list.some((p) => p.id === place.projectId)) {
+    return [...list, { id: place.projectId, name: place.projectName ?? "This project" }];
+  }
+  return list;
+}
+
 /**
- * The top bar, fixed while the page scrolls. `title` and `eyebrow` name where you are;
- * `children` go on the right; `band` is a full-width strip under it, such as the next step.
+ * The builder's navigation. On a computer, a sidebar that is the same on every page: all
+ * projects, each project with its three pages under it, and a new project. On a phone or
+ * tablet, the current project's pages as a bar along the bottom edge, in thumb reach.
+ * Buyers and banks never see it: a report link opens one flat and nothing else.
+ */
+function AppNav({ place }: { place: NavPlace }) {
+  const projects = useProjectList(place);
+  if (place.projectName === undefined && place.projectId) {
+    place = { ...place, projectName: projects.find((p) => p.id === place.projectId)?.name };
+  }
+  const bottom = place.projectId ? [...projectLinks(place.projectId), { ...APP_LINKS[0], label: "Projects" }] : APP_LINKS;
+  return (
+    <>
+      <aside className={styles.sidebar}>
+        <Brand />
+        <nav aria-label="SiteProof" className={styles.sideNav}>
+          <NavItem link={APP_LINKS[0]} active={place.current === "projects"} />
+          {projects.length > 0 && <span className={styles.sideLabel}>Projects</span>}
+          {projects.map((p) => (
+            <div key={p.id} className={styles.sideGroup}>
+              <Link href={`/projects/${p.id}`} className={styles.sideProject} data-here={p.id === place.projectId || undefined}>
+                <ChevronDown size={16} aria-hidden="true" />
+                <span>{p.name}</span>
+              </Link>
+              {projectLinks(p.id).map((l) => (
+                <NavItem key={l.key} link={l} active={p.id === place.projectId && l.key === place.current} />
+              ))}
+            </div>
+          ))}
+          <NavItem link={APP_LINKS[1]} active={place.current === "new"} />
+        </nav>
+      </aside>
+      <nav aria-label="Pages" className={styles.tabBar}>
+        {bottom.map((l) => (
+          <NavItem key={l.key} link={l} active={l.key === place.current} />
+        ))}
+      </nav>
+    </>
+  );
+}
+
+/** Where a builder page's path puts you, or null for a page that has no sidebar. */
+function placeFromPath(path: string): NavPlace | null {
+  const parts = path.split("/").filter(Boolean);
+  if (parts[0] !== "projects") return null;
+  if (parts.length === 1) return { current: "projects" };
+  if (parts[1] === "new") return { current: "new" };
+  const projectId = decodeURIComponent(parts[1]);
+  if (parts.length === 2) return { current: "project", projectId };
+  if (parts.length === 3 && (parts[2] === "upload" || parts[2] === "report")) return { current: parts[2], projectId };
+  // A gap request is the site supervisor's own full-screen page.
+  return null;
+}
+
+/**
+ * The builder's sidebar, drawn once by the projects layout so it stays put while the page
+ * beside it changes.
+ */
+export function BuilderNav() {
+  const place = placeFromPath(usePathname());
+  return place ? <AppNav place={place} /> : null;
+}
+
+/**
+ * The sidebar's empty frame, shown for the moment before the address is known, so the
+ * page beside it doesn't shift when the links arrive.
+ */
+export function BuilderNavFrame() {
+  return (
+    <aside className={styles.sidebar} aria-hidden="true">
+      <Brand />
+    </aside>
+  );
+}
+
+/**
+ * The top of every page. `title` and `eyebrow` name where you are; `children` go on the
+ * right; `band` is a full-width strip under it, such as the next step. With `nav` it is
+ * the light strip beside the builder's sidebar, saying where you are; without it, as on a
+ * buyer's report, it is the dark bar with the mark.
  */
 export function AppHeader({
   eyebrow,
   title,
   brandHref,
   band,
+  nav,
   children,
 }: {
   eyebrow?: string;
   title?: string;
   brandHref?: string;
   band?: React.ReactNode;
+  nav?: NavPlace;
   children?: React.ReactNode;
 }) {
   return (
-    <header className={styles.header}>
-      <div className={styles.headerInner}>
-        <Brand href={brandHref} />
-        {(eyebrow || title) && (
-          <div className={styles.headerTitle}>
-            {eyebrow && <span className={styles.eyebrow}>{eyebrow}</span>}
-            {title && <span className={styles.headerMain}>{title}</span>}
-          </div>
-        )}
-        {children}
-      </div>
-      {band}
-      {usingMock && <div className={styles.mockBar}>Demo data · not real site footage</div>}
-    </header>
+    <>
+      <header className={styles.header} data-nav={nav ? "true" : undefined}>
+        <div className={styles.headerInner}>
+          <span className={nav ? styles.headerBrand : undefined}>
+            <Brand href={brandHref} />
+          </span>
+          {nav && <Crumbs place={nav} title={title} />}
+          {(eyebrow || title) && (
+            <div className={`${styles.headerTitle} ${nav ? styles.headerTitleNav : ""}`}>
+              {eyebrow && <span className={styles.eyebrow}>{eyebrow}</span>}
+              {title && <span className={styles.headerMain}>{title}</span>}
+            </div>
+          )}
+          {children}
+          {usingMock && nav && <span className={styles.demoTag}>Demo data · not real site footage</span>}
+        </div>
+        {band}
+        {usingMock && <div className={`${styles.mockBar} ${nav ? styles.mockBarNav : ""}`}>Demo data · not real site footage</div>}
+      </header>
+    </>
   );
 }
 
-/** Project / Upload / Report, with the current one marked. */
-export function ProjectNav({ projectId, current }: { projectId: string; current: "project" | "upload" | "report" }) {
-  const links = [
-    { key: "project", href: `/projects/${projectId}`, label: "Project" },
-    { key: "upload", href: `/projects/${projectId}/upload`, label: "Upload" },
-    { key: "report", href: `/projects/${projectId}/report`, label: "Report" },
-  ] as const;
+const PAGE_LABEL: Record<NavKey, string> = {
+  projects: "All projects",
+  new: "New project",
+  project: "Overview",
+  upload: "Upload",
+  report: "Report",
+};
+
+/** Where you are, on a computer beside the sidebar: All projects / the project / this page. */
+function Crumbs({ place, title }: { place: NavPlace; title?: string }) {
+  const here = place.current === "report" && title ? `Report · ${title}` : PAGE_LABEL[place.current];
   return (
-    <nav aria-label="Project" className={styles.projectNav}>
-      {links.map((l) => (
-        <Link key={l.key} href={l.href} aria-current={l.key === current ? "page" : undefined}>
-          {l.label}
-        </Link>
-      ))}
+    <nav aria-label="You are here" className={styles.crumbs}>
+      {place.projectId && (
+        <>
+          <Link href="/projects">All projects</Link>
+          <ChevronRight size={16} aria-hidden="true" />
+          <Link href={`/projects/${place.projectId}`}>
+            {place.projectName ?? knownProjects?.find((p) => p.id === place.projectId)?.name ?? "Project"}
+          </Link>
+          <ChevronRight size={16} aria-hidden="true" />
+        </>
+      )}
+      <span aria-current="page">{here}</span>
     </nav>
   );
 }
@@ -130,8 +294,12 @@ const RETRY_MS = [3000, 6000, 12000, 30000];
  * screen: `stale` turns on, the hook retries with backoff and as soon as the phone is
  * back online, and `error` is reserved for a first load that never worked.
  */
+// The last copy of each thing loaded, so going back to a page shows it at once while it
+// reloads, instead of a loading screen on every switch.
+const lastLoaded = new Map<string, unknown>();
+
 function useLive<T>(key: string | null, load: (() => Promise<T>) | null, busy: (value: T) => boolean) {
-  const [value, setValue] = useState<T | null>(null);
+  const [value, setValue] = useState<T | null>(() => (key ? ((lastLoaded.get(key) as T | undefined) ?? null) : null));
   const [error, setError] = useState<unknown>(null);
   const [stale, setStale] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -149,6 +317,7 @@ function useLive<T>(key: string | null, load: (() => Promise<T>) | null, busy: (
       const next = await load();
       loaded.current = true;
       failures.current = 0;
+      if (key) lastLoaded.set(key, next);
       setValue(next);
       setError(null);
       setStale(false);
@@ -167,9 +336,11 @@ function useLive<T>(key: string | null, load: (() => Promise<T>) | null, busy: (
   }, [key]);
 
   useEffect(() => {
-    // Something new to load: never show the last one's data or error meanwhile.
-    loaded.current = false;
-    setValue(null);
+    // Something new to load: never show another one's data or error meanwhile; its own
+    // last copy, if there is one, stands until the reload lands.
+    const kept = key ? ((lastLoaded.get(key) as T | undefined) ?? null) : null;
+    loaded.current = kept !== null;
+    setValue(kept);
     setError(null);
     setStale(false);
     void reload();
@@ -179,7 +350,7 @@ function useLive<T>(key: string | null, load: (() => Promise<T>) | null, busy: (
       window.removeEventListener("online", online);
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [reload]);
+  }, [key, reload]);
 
   return { value, error, stale, reload };
 }

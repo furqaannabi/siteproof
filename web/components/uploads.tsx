@@ -71,6 +71,8 @@ export interface UploadItem {
   label: string;
   detail?: string;
   kind: "clip" | "document";
+  /** For a document, which one it is, so a page can draw it before the server has it. */
+  docKind?: NewDocument["kind"];
   id: string | null;
   progress: number;
   status: ClipStatus | "uploading";
@@ -201,6 +203,7 @@ export function useUploads(projectId: string, onSettled?: () => void) {
         label: file.name,
         detail,
         kind: "document",
+        docKind: input.kind,
         id: null,
         progress: 0,
         status: "uploading",
@@ -279,6 +282,7 @@ export function DropZone({
   accept,
   multiple,
   capture,
+  className,
   onFiles,
 }: {
   title: string;
@@ -286,12 +290,14 @@ export function DropZone({
   accept: string;
   multiple?: boolean;
   capture?: boolean;
+  /** Added to the zone's own class, for a page that draws it its own way. */
+  className?: string;
   onFiles: (files: File[]) => void;
 }) {
   const [over, setOver] = useState(false);
   return (
     <label
-      className={ui.drop}
+      className={className ? `${ui.drop} ${className}` : ui.drop}
       data-over={over}
       onDragOver={(e) => {
         e.preventDefault();

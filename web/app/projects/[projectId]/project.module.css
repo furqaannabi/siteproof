@@ -124,12 +124,13 @@
   color: var(--binding-ink);
 }
 
+/* The box always keeps the drawing's own proportions, so nothing below it is ever overlapped. */
 .plan {
   display: block;
   width: 100%;
+  max-width: 760px;
   height: auto;
-  max-height: 520px;
-  margin-top: 4px;
+  margin: 8px auto 20px;
   overflow: visible;
 }
 

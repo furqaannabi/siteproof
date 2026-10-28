@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function ProjectsHome() {
   return (
     <>
-      <AppHeader />
+      <AppHeader title="All projects" nav={{ current: "projects" }} />
       <main className={`${ui.main} ${s.main}`}>
         <h1 className={ui.h1}>Your projects</h1>
         <ProjectCards />

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function NewProjectPage() {
   return (
     <>
-      <AppHeader eyebrow="Set up" title="New project" />
+      <AppHeader eyebrow="Set up" title="New project" nav={{ current: "new" }} />
       <main className={`${ui.main} ${ui.narrow}`}>
         <div>
           <h1 className={ui.h1}>Set up a project</h1>

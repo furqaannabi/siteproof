@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { EvidenceFrame } from "@/components/evidence-frame";
-import { AppHeader, captureTime, CopyButton, ErrorPanel, Loading, ProjectNav, StaleNotice, StatusBadge, ui, useFlatReport, useOverview } from "@/components/ui";
+import { AppHeader, captureTime, CopyButton, ErrorPanel, Loading, StaleNotice, StatusBadge, ui, useFlatReport, useOverview } from "@/components/ui";
 import { builderLink, reportLink } from "@/lib/access";
 import { data } from "@/lib/data";
 import { autoLayout, type Rect } from "@/lib/room-layout";
@@ -39,7 +39,7 @@ export function ProjectPage({ projectId }: { projectId: string }) {
   if (error) {
     return (
       <>
-        <AppHeader />
+        <AppHeader nav={{ current: "project", projectId }} />
         <main className={ui.main}>
           <ErrorPanel error={error} retry={reload} />
         </main>
@@ -49,7 +49,7 @@ export function ProjectPage({ projectId }: { projectId: string }) {
   if (!report) {
     return (
       <>
-        <AppHeader />
+        <AppHeader nav={{ current: "project", projectId }} />
         <Loading what="Loading the project" />
       </>
     );
@@ -132,9 +132,12 @@ function ProjectView({ overview, created }: { overview: ProjectOverview; created
 
   return (
     <>
-      <AppHeader eyebrow={project.builder} title={project.name} band={<NextStep key={flatId ?? ""} steps={steps} />}>
-        <ProjectNav projectId={project.id} current="project" />
-      </AppHeader>
+      <AppHeader
+        eyebrow={project.builder}
+        title={project.name}
+        band={<NextStep key={flatId ?? ""} steps={steps} />}
+        nav={{ current: "project", projectId: project.id, projectName: project.name, builder: project.builder }}
+      />
       <main className={styles.main}>
         {created && (
           <div className={styles.created} role="status">
@@ -294,16 +297,23 @@ function FlatPlan({
 }) {
   const layout = autoLayout(rooms.length, CELL_W, CELL_D);
   if (layout.length === 0) return null;
-  const corners = layout.flatMap((q) => [iso(q.x, q.z, WALL_H), iso(q.x + q.w, q.z), iso(q.x, q.z + q.d), iso(q.x + q.w, q.z + q.d, -0.4)]);
-  const pad = 24;
-  const minX = Math.min(...corners.map((c) => c[0])) - pad;
-  const minY = Math.min(...corners.map((c) => c[1])) - pad;
-  const w = Math.max(...corners.map((c) => c[0])) - minX + pad;
-  const h = Math.max(...corners.map((c) => c[1])) - minY + pad;
   const all = { x: Math.min(...layout.map((q) => q.x)), z: Math.min(...layout.map((q) => q.z)) };
   const end = { x: Math.max(...layout.map((q) => q.x + q.w)), z: Math.max(...layout.map((q) => q.z + q.d)) };
   const bounds = { x: all.x, z: all.z, w: end.x - all.x, d: end.z - all.z };
   const slab = 0.35;
+  const slabDepth = 0.4;
+  // The box is fitted to the slab under the rooms, which reaches past them on every side,
+  // and to the tops of the walls; the bottom pad leaves room for the slab's shadow.
+  const corners = [
+    iso(all.x - slab, all.z - slab, WALL_H),
+    iso(end.x + slab, all.z - slab, -slabDepth),
+    iso(end.x + slab, end.z + slab, -slabDepth),
+    iso(all.x - slab, end.z + slab, -slabDepth),
+  ];
+  const minX = Math.min(...corners.map((c) => c[0])) - 16;
+  const minY = Math.min(...corners.map((c) => c[1])) - 16;
+  const w = Math.max(...corners.map((c) => c[0])) - minX + 16;
+  const h = Math.max(...corners.map((c) => c[1])) - minY + 34;
   const order = layout.map((q, i) => ({ q, room: rooms[i] })).sort((a, b) => a.q.x + a.q.z - (b.q.x + b.q.z));
 
   return (
@@ -317,11 +327,11 @@ function FlatPlan({
       <polygon className={styles.slabTop} points={pts([iso(all.x - slab, all.z - slab), iso(end.x + slab, all.z - slab), iso(end.x + slab, end.z + slab), iso(all.x - slab, end.z + slab)])} />
       <polygon
         className={styles.slabFront}
-        points={pts([iso(all.x - slab, end.z + slab), iso(end.x + slab, end.z + slab), iso(end.x + slab, end.z + slab, -0.4), iso(all.x - slab, end.z + slab, -0.4)])}
+        points={pts([iso(all.x - slab, end.z + slab), iso(end.x + slab, end.z + slab), iso(end.x + slab, end.z + slab, -slabDepth), iso(all.x - slab, end.z + slab, -slabDepth)])}
       />
       <polygon
         className={styles.slabSide}
-        points={pts([iso(end.x + slab, all.z - slab), iso(end.x + slab, end.z + slab), iso(end.x + slab, end.z + slab, -0.4), iso(end.x + slab, all.z - slab, -0.4)])}
+        points={pts([iso(end.x + slab, all.z - slab), iso(end.x + slab, end.z + slab), iso(end.x + slab, end.z + slab, -slabDepth), iso(end.x + slab, all.z - slab, -slabDepth)])}
       />
       {order.map(({ q, room }, i) => {
         const outcome = outcomeOf(room.id);

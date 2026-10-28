@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { EvidenceFrame } from "@/components/evidence-frame";
-import { AppHeader, CopyButton, ErrorPanel, Loading, ProjectNav, StaleNotice, ui, useFlatReport, useOverview, useReportByLink } from "@/components/ui";
+import { AppHeader, CopyButton, ErrorPanel, Loading, StaleNotice, ui, useFlatReport, useOverview, useReportByLink } from "@/components/ui";
 import { builderToken, reportTokenFromHash } from "@/lib/access";
 import { data, DataError } from "@/lib/data";
 import type { Room3D } from "./plan-3d";
@@ -135,7 +135,7 @@ export function ReportPage({ projectId }: { projectId: string }) {
   if (project.overview && flats.length === 0) {
     return (
       <>
-        <AppHeader />
+        <AppHeader nav={{ current: "report", projectId }} />
         <main className={ui.main}>
           <section className={ui.empty}>
             <h1 className={ui.h2}>This project has no flats</h1>
@@ -147,7 +147,7 @@ export function ReportPage({ projectId }: { projectId: string }) {
   if (error) {
     return (
       <>
-        <AppHeader />
+        <AppHeader nav={{ current: "report", projectId }} />
         <main className={ui.main}>
           <ErrorPanel error={error} retry={reload} />
         </main>
@@ -157,7 +157,7 @@ export function ReportPage({ projectId }: { projectId: string }) {
   if (!report) {
     return (
       <>
-        <AppHeader />
+        <AppHeader nav={{ current: "report", projectId }} />
         <Loading what="Loading the report" />
       </>
     );
@@ -356,6 +356,7 @@ function ReportView({
         title={flat}
         brandHref={buyer ? "/" : undefined}
         band={steps.length > 0 ? <NextStep steps={steps} /> : undefined}
+        nav={buyer ? undefined : { current: "report", projectId: report.project.id, projectName: report.project.name, builder: report.project.builder }}
       >
         {!buyer && (
           <div role="group" aria-label="Report view" className={ui.toggle}>
@@ -367,7 +368,6 @@ function ReportView({
             </button>
           </div>
         )}
-        {view === "builder" && <ProjectNav projectId={report.project.id} current="report" />}
         <button type="button" className={`${ui.primaryButton} ${styles.exportButton}`} onClick={() => window.print()}>
           <Icon d={ICON.download} />
           <span className={ui.phoneHidden}>Print or save PDF</span>
