@@ -53,7 +53,11 @@
 }
 
 .itemTabs button,
+.itemTabs a,
 .modeToggle button {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   min-height: 44px;
   padding: 0 16px;
   border: 0;
@@ -64,6 +68,7 @@
 }
 
 .itemTabs button[aria-pressed="true"],
+.itemTabs a[aria-current="page"],
 .modeToggle button[aria-pressed="true"] {
   background: var(--inverse-bg);
   color: var(--inverse-ink);
@@ -72,6 +77,7 @@
 
 @media (hover: hover) {
   .itemTabs button:not([aria-pressed="true"]):hover,
+  .itemTabs a:not([aria-current="page"]):hover,
   .modeToggle button:not([aria-pressed="true"]):hover {
     background: var(--panel);
   }

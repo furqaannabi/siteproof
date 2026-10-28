@@ -1,13 +1,13 @@
 "use client";
 
-import type { Claim, Detection, ItemKind, Outcome, Result, Room, Segment } from "@siteproof/contract";
+import type { Claim, Detection, Flat, ItemKind, NotCheckedReason, Outcome, QueryLetter, Report, Result, Room, Segment } from "@siteproof/contract";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { EvidenceFrame } from "@/components/evidence-frame";
-import { AppHeader, captureTime, ErrorPanel, Loading, ProjectNav, StaleNotice, ui, useReport } from "@/components/ui";
+import { AppHeader, ErrorPanel, Loading, ProjectNav, StaleNotice, ui, useFlatReport, useOverview } from "@/components/ui";
 import { data } from "@/lib/data";
-import type { Report } from "@/lib/types";
 import type { Room3D } from "./plan-3d";
 import styles from "./report.module.css";
 
@@ -79,12 +79,10 @@ function seconds(t: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
-function clipCaption(report: Report, row: RoomRow) {
+// The report carries evidence frames, not clips, so a clip's capture time isn't in it.
+function clipCaption(row: RoomRow) {
   const sweep = row.segments.find((s) => s.full_sweep);
-  if (sweep) {
-    const clip = report.clips.find((c) => c.id === sweep.clip_id);
-    return `Clip filmed ${captureTime(clip?.captured_at ?? null)} · one-way sweep ${seconds(sweep.t_start)}–${seconds(sweep.t_end)} · best frame per object`;
-  }
+  if (sweep) return `One-way sweep ${seconds(sweep.t_start)}–${seconds(sweep.t_end)} of its clip · best frame per object`;
   if (row.segments.length > 0) return "A clip reached this room, but not as one sweep starting at its room tag.";
   return "No clip has passed this room's tag yet.";
 }
@@ -108,6 +106,31 @@ function shortNote(row: RoomRow, item: ItemKind) {
   const one = missing === 1;
   return `${missing} ${itemWord(item, missing)} ${one ? "wasn't" : "weren't"} found in a one-way sweep. If ${one ? "it's" : "they're"} installed somewhere the sweep missed, film one slow sweep from the ${row.room.name} room tag. If ${one ? "it's" : "they're"} still to come, correct the demand letter before buyers pay.`;
 }
+
+/**
+ * A query letter, only if every citation in it resolves in this report: the billed line
+ * and the plan line are claims here, and each frame is the best frame of a detection.
+ * The server sends only letters that passed its re-check; this is the same check again,
+ * because a citation that fails it is never shown.
+ */
+function checkedLetter(report: Report, claimId: string): QueryLetter | null {
+  const letter = report.query_letters.find((q) => q.claim_id === claimId);
+  if (!letter) return null;
+  const { invoice_claim_id, plan_claim_id, evidence } = letter.citations;
+  const claim = (id: string) => report.claims.some((c) => c.id === id && c.quote_verified);
+  const frames = new Set(report.detections.map((d) => d.best_frame_url));
+  const resolves = claim(invoice_claim_id) && (plan_claim_id === null || claim(plan_claim_id)) && evidence.length > 0 && evidence.every((f) => frames.has(f));
+  return resolves ? letter : null;
+}
+
+function citationCount(letter: QueryLetter) {
+  return 1 + (letter.citations.plan_claim_id ? 1 : 0) + letter.citations.evidence.length;
+}
+
+const NOT_CHECKED: Record<NotCheckedReason, string> = {
+  not_countable: "Not checked from footage in this version",
+  exceeds_plan: "More than the bill of quantities holds. A person compares the two lines",
+};
 
 /** Detections grouped by the frame they're best seen in, so each frame shows every outline it holds. */
 function framesFor(report: Report, row: RoomRow): { frame: string; masks: Detection[] }[] {
@@ -135,7 +158,33 @@ function Camera({ size = 26 }: { size?: number }) {
 }
 
 export function ReportPage({ projectId }: { projectId: string }) {
-  const { report, error, stale, reload } = useReport(projectId);
+  const project = useOverview(projectId);
+  const flats = project.overview?.project.flats ?? [];
+  const asked = useSearchParams().get("flat");
+  const flatId = (flats.find((f) => f.id === asked) ?? flats[0])?.id ?? null;
+  const flatReport = useFlatReport(flatId);
+  // The report is read first by a buyer or bank deciding to pay; the builder's view is one
+  // tap away, and stays chosen when the builder switches flats.
+  const [view, setView] = useState<View>("bank");
+  const report = flatReport.report?.flat.id === flatId ? flatReport.report : null;
+  const error = project.error ?? flatReport.error;
+  const stale = project.stale || flatReport.stale;
+  const reload = useCallback(() => {
+    void project.reload();
+    void flatReport.reload();
+  }, [project.reload, flatReport.reload]);
+  if (project.overview && flats.length === 0) {
+    return (
+      <>
+        <AppHeader />
+        <main className={ui.main}>
+          <section className={ui.empty}>
+            <h1 className={ui.h2}>This project has no flats</h1>
+          </section>
+        </main>
+      </>
+    );
+  }
   if (error) {
     return (
       <>
@@ -157,14 +206,24 @@ export function ReportPage({ projectId }: { projectId: string }) {
   return (
     <>
       <StaleNotice stale={stale} onRetry={reload} />
-      <ReportView report={report} onChange={reload} />
+      <ReportView key={report.flat.id} report={report} flats={flats} view={view} setView={setView} onChange={reload} />
     </>
   );
 }
 
-function ReportView({ report, onChange }: { report: Report; onChange: () => void }) {
-  // The report is read first by a buyer or bank deciding to pay; the builder's view is one tap away.
-  const [view, setView] = useState<View>("bank");
+function ReportView({
+  report,
+  flats,
+  view,
+  setView,
+  onChange,
+}: {
+  report: Report;
+  flats: Flat[];
+  view: View;
+  setView: (view: View) => void;
+  onChange: () => void;
+}) {
   const [item, setItem] = useState<ItemKind>("window");
   const [planMode, setPlanMode] = useState<"plan" | "3d">("plan");
   const evidenceRef = useRef<HTMLElement>(null);
@@ -193,7 +252,17 @@ function ReportView({ report, onChange }: { report: Report; onChange: () => void
 
   const letter = report.documents.find((d) => d.kind === "demand_letter");
   const letterClaim = report.claims.find((c) => c.doc_id === letter?.id && c.item === item && c.room_id === null);
-  const notCountable = report.claims.filter((c) => c.doc_id === letter?.id && c.item === "not_countable" && c.quote_verified);
+  // Claims in this report that weren't judged, each with why; never shown as Not seen yet.
+  const notChecked = report.not_checked.flatMap((n) => {
+    const claim = report.claims.find((c) => c.id === n.claim_id && c.quote_verified);
+    if (!claim) return [];
+    // For a claim over the plan, the plan line goes beside it.
+    const plan =
+      n.reason === "exceeds_plan"
+        ? report.claims.find((c) => c.doc_id !== claim.doc_id && c.item === claim.item && c.room_id === claim.room_id && c.quote_verified)
+        : undefined;
+    return [{ claim, reason: n.reason, plan }];
+  });
 
   // Objects counted with frames, in rooms that were judged; the gap in covered rooms; everything in rooms not seen yet.
   const seen = rows.filter((r) => r.result.outcome !== "not_seen").reduce((n, r) => n + Math.min(r.result.counted, r.claim.qty), 0);
@@ -203,9 +272,8 @@ function ReportView({ report, onChange }: { report: Report; onChange: () => void
 
   const gapRooms = rows.filter((r) => r.result.outcome === "not_seen");
   const shortRooms = rows.filter((r) => r.result.outcome === "short");
-  const gap = selected && report.gap_requests.find((g) => g.room_id === selected.room.id);
-  const letterForSelected =
-    selected && report.query_letters.find((q) => q.claim_id === selected.claim.id && q.citations_rechecked);
+  const gap = selected && report.gap_requests.find((g) => g.room_id === selected.room.id && g.status !== "cleared");
+  const letterForSelected = selected && checkedLetter(report, selected.claim.id);
   const flat = `Flat ${report.flat.name}`;
 
   const clearDetail = [
@@ -219,7 +287,7 @@ function ReportView({ report, onChange }: { report: Report; onChange: () => void
 
   return (
     <div className={styles.page}>
-      <AppHeader title={`${flat}${report.stage ? ` · ${report.stage}` : ""} · ${keepLastWord(report.project.name)}`}>
+      <AppHeader title={`${flat} · ${keepLastWord(report.project.name)}`}>
         <div role="group" aria-label="Report view" className={ui.toggle}>
           <button type="button" aria-pressed={view === "bank"} onClick={() => setView("bank")}>
             Buyer / bank
@@ -238,6 +306,15 @@ function ReportView({ report, onChange }: { report: Report; onChange: () => void
       </AppHeader>
 
       <main className={styles.main}>
+        {view === "builder" && flats.length > 1 && (
+          <nav aria-label="Flat" className={styles.itemTabs}>
+            {flats.map((f) => (
+              <Link key={f.id} href={`/projects/${report.project.id}/report?flat=${f.id}`} aria-current={f.id === report.flat.id ? "page" : undefined}>
+                Flat {f.name}
+              </Link>
+            ))}
+          </nav>
+        )}
         {!letter || rows.length === 0 ? (
           <>
             {letter && <ItemSwitch item={item} onChange={setItem} />}
@@ -344,7 +421,6 @@ function ReportView({ report, onChange }: { report: Report; onChange: () => void
                     </div>
                     <div className={styles.titleBlock}>
                       <span>{flat}</span>
-                      {report.stage && <span>{report.stage}</span>}
                       <span>{ITEM_PLURAL[item]}</span>
                       <span>
                         R1–R{report.rooms.length}
@@ -406,7 +482,7 @@ function ReportView({ report, onChange }: { report: Report; onChange: () => void
                       {selected.result.outcome === "not_seen" ? (
                         <div className={styles.noFrame}>
                           <span className={styles.noFrameTitle}>No one-way sweep yet</span>
-                          <span>{clipCaption(report, selected)}</span>
+                          <span>{clipCaption(selected)}</span>
                         </div>
                       ) : (
                         framesFor(report, selected).map(({ frame, masks }) => (
@@ -425,7 +501,7 @@ function ReportView({ report, onChange }: { report: Report; onChange: () => void
                         {selected.result.outcome === "short" ? ` ${selected.claim.qty - selected.result.counted}` : ""}
                       </span>
                     </div>
-                    {selected.result.outcome !== "not_seen" && <p className={styles.monoNote}>{clipCaption(report, selected)}</p>}
+                    {selected.result.outcome !== "not_seen" && <p className={styles.monoNote}>{clipCaption(selected)}</p>}
 
                     <p className={styles.summary}>{summary(selected, item)}</p>
                   </div>
@@ -454,7 +530,7 @@ function ReportView({ report, onChange }: { report: Report; onChange: () => void
                     {selected.result.outcome === "short" && view === "bank" && letterForSelected && (
                       <div className={styles.query}>
                         <h3 className={styles.queryTitle}>Draft query letter</h3>
-                        <span className={styles.queryChecked}>{letterForSelected.citation_count} citations re-checked</span>
+                        <span className={styles.queryChecked}>{citationCount(letterForSelected)} citations re-checked</span>
                         <p>{letterForSelected.body}</p>
                         <div className={styles.queryActions}>
                           <CopyButton text={letterForSelected.body} label="Copy letter" />
@@ -475,16 +551,17 @@ function ReportView({ report, onChange }: { report: Report; onChange: () => void
           </>
         )}
 
-        {notCountable.length > 0 && (
+        {notChecked.length > 0 && (
           <section className={styles.notCountable} aria-labelledby="also-title">
             <h2 id="also-title" className={styles.h2}>
               Also in this demand letter
             </h2>
             <ul>
-              {notCountable.map((c) => (
-                <li key={c.id}>
-                  <span className={styles.quote}>&ldquo;{c.source_quote}&rdquo;</span>
-                  <span className={styles.notCountableTag}>Not checked from footage in this version</span>
+              {notChecked.map(({ claim, reason, plan }) => (
+                <li key={claim.id}>
+                  <span className={styles.quote}>&ldquo;{claim.source_quote}&rdquo;</span>
+                  {plan && <span className={styles.quote}>Bill of quantities: &ldquo;{plan.source_quote}&rdquo;</span>}
+                  <span className={styles.notCountableTag}>{NOT_CHECKED[reason]}</span>
                 </li>
               ))}
             </ul>

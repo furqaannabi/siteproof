@@ -1,16 +1,15 @@
 "use client";
 
-import type { DocumentKind } from "@siteproof/contract";
+import type { DocumentKind, ProjectOverview } from "@siteproof/contract";
 import Link from "next/link";
 import { useState } from "react";
-import { AppHeader, ErrorPanel, Loading, ProjectNav, StaleNotice, ui, useReport } from "@/components/ui";
+import { AppHeader, ErrorPanel, Loading, ProjectNav, StaleNotice, ui, useOverview } from "@/components/ui";
 import { CLIP_ACCEPT, DOCUMENT_ACCEPT, DropZone, UploadList, useUploads } from "@/components/uploads";
-import type { Report } from "@/lib/types";
 import { DOCUMENT_LABEL } from "../project-view";
 import styles from "./upload.module.css";
 
 export function UploadPage({ projectId }: { projectId: string }) {
-  const { report, error, stale, reload } = useReport(projectId);
+  const { overview: report, error, stale, reload } = useOverview(projectId);
   if (error) {
     return (
       <>
@@ -37,7 +36,7 @@ export function UploadPage({ projectId }: { projectId: string }) {
   );
 }
 
-function UploadView({ report, onSettled }: { report: Report; onSettled: () => void }) {
+function UploadView({ report, onSettled }: { report: ProjectOverview; onSettled: () => void }) {
   const { project } = report;
   const clips = useUploads(onSettled);
   const docs = useUploads(onSettled);

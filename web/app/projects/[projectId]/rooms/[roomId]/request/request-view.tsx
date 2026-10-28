@@ -3,13 +3,23 @@
 import Link from "next/link";
 import { useCallback } from "react";
 import { usingMock } from "@/lib/data";
-import { ErrorPanel, Loading, StaleNotice, useReport } from "@/components/ui";
+import type { Report, Room } from "@siteproof/contract";
+import { ErrorPanel, Loading, StaleNotice, useFlatReport, useOverview } from "@/components/ui";
 import { CLIP_ACCEPT, UploadList, useUploads } from "@/components/uploads";
-import type { Report } from "@/lib/types";
 import styles from "./request.module.css";
 
 export function RequestPage({ projectId, roomId }: { projectId: string; roomId: string }) {
-  const { report, error, stale, reload } = useReport(projectId);
+  // The project says which flat the room is in; that flat's report holds its gap request.
+  const project = useOverview(projectId);
+  const room = project.overview?.rooms.find((r) => r.id === roomId) ?? null;
+  const flatReport = useFlatReport(room?.flat ?? null);
+  const error = project.error ?? flatReport.error;
+  const stale = project.stale || flatReport.stale;
+  const reload = useCallback(() => {
+    void project.reload();
+    void flatReport.reload();
+  }, [project.reload, flatReport.reload]);
+
   if (error) {
     return (
       <main className={styles.screen}>
@@ -17,25 +27,36 @@ export function RequestPage({ projectId, roomId }: { projectId: string; roomId: 
       </main>
     );
   }
-  if (!report) return <Loading what="Loading the request" />;
+  if (!project.overview || (room && !flatReport.report)) return <Loading what="Loading the request" />;
   return (
     <>
       <StaleNotice stale={stale} onRetry={reload} />
-      <RequestView report={report} roomId={roomId} onSettled={reload} />
+      <RequestView projectId={projectId} room={room} report={flatReport.report} onSettled={reload} />
     </>
   );
 }
 
-function RequestView({ report, roomId, onSettled }: { report: Report; roomId: string; onSettled: () => void }) {
+function RequestView({
+  projectId,
+  room,
+  report,
+  onSettled,
+}: {
+  projectId: string;
+  room: Room | null;
+  report: Report | null;
+  onSettled: () => void;
+}) {
   const settled = useCallback(() => onSettled(), [onSettled]);
   const uploads = useUploads(settled);
-  const room = report.rooms.find((r) => r.id === roomId);
-  const flat = report.project.flats.find((f) => f.id === room?.flat);
-  const gap = report.gap_requests.find((g) => g.room_id === roomId);
+  const roomId = room?.id ?? "";
+  const flat = report?.flat;
+  // A cleared request has done its job: the room's footage arrived.
+  const gap = report?.gap_requests.find((g) => g.room_id === roomId && g.status !== "cleared");
   const roomName = room?.name ?? "this room";
   const lower = roomName.toLowerCase();
   const sentDone = uploads.items.some((x) => x.status === "done");
-  const reportHref = `/projects/${report.project.id}/report`;
+  const reportHref = `/projects/${projectId}/report${flat ? `?flat=${flat.id}` : ""}`;
 
   return (
     <main className={styles.screen}>
@@ -116,7 +137,7 @@ function RequestView({ report, roomId, onSettled }: { report: Report; roomId: st
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   // In the mock, the clip is credited to this room. The real pipeline reads the room tag in the footage.
-                  if (file) uploads.addClip(report.project.id, file, usingMock ? roomId : null);
+                  if (file) uploads.addClip(projectId, file, usingMock ? roomId : null);
                   e.target.value = "";
                 }}
               />

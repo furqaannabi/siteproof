@@ -1,17 +1,16 @@
 "use client";
 
-import type { ClipStatus } from "@siteproof/contract";
+import type { ClipStatus, ProjectOverview, Report } from "@siteproof/contract";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { data, DEMO_PROJECT_ID, resetMockData, usingMock } from "@/lib/data";
-import type { Report } from "@/lib/types";
 import s from "./projects.module.css";
 
 const PENDING: ClipStatus[] = ["uploaded", "processing"];
 const TALLY_SEGMENT_LIMIT = 40;
 
-/** What one project's card says, worked out from its report the same way the report does. */
-function summarise(report: Report) {
+/** What one flat's card says, worked out from its report the same way the report does. */
+function summarise(report: Report, overview: ProjectOverview) {
   const letter = report.documents.find((d) => d.kind === "demand_letter" && d.status !== "failed");
   const claim = report.claims.find((c) => c.doc_id === letter?.id && c.item === "window" && c.room_id === null && c.quote_verified);
   const rows = report.rooms.flatMap((room) => {
@@ -26,12 +25,15 @@ function summarise(report: Report) {
     ...rows.filter((r) => r.result.outcome === "not_seen").map((r) => `film the ${r.room.name.toLowerCase()}`),
     ...rows.filter((r) => r.result.outcome === "short").map((r) => `explain ${r.room.name}`),
   ];
-  const checking = [...report.clips, ...report.documents].filter((x) => PENDING.includes(x.status)).length;
+  // Clips belong to the project, not a flat, so every flat's card counts the project's.
+  const checking = [...overview.clips, ...report.documents].filter((x) => PENDING.includes(x.status)).length;
   return { letter, claimed: claim?.qty ?? null, seen, short, notSeen, todo, checking, judged: rows.length > 0 };
 }
 
 interface Loaded {
   report: Report;
+  /** The project has more than one flat, so the card names which. */
+  oneOfMany: boolean;
   summary: ReturnType<typeof summarise>;
 }
 
@@ -42,8 +44,18 @@ export function ProjectCards() {
   const load = useCallback(async () => {
     try {
       const projects = await data.listProjects();
-      const reports = await Promise.all(projects.map((p) => data.getReport(p.id).catch(() => null)));
-      setCards(reports.filter((r): r is Report => r !== null).map((report) => ({ report, summary: summarise(report) })));
+      // One card per flat: each project's overview, then each of its flats' reports.
+      const perProject = await Promise.all(
+        projects.map(async (p): Promise<Loaded[]> => {
+          const overview = await data.getOverview(p.id).catch(() => null);
+          if (!overview) return [];
+          const reports = await Promise.all(overview.project.flats.map((f) => data.getFlatReport(f.id).catch(() => null)));
+          return reports
+            .filter((r): r is Report => r !== null)
+            .map((report) => ({ report, oneOfMany: overview.project.flats.length > 1, summary: summarise(report, overview) }));
+        }),
+      );
+      setCards(perProject.flat());
     } catch {
       // The API has no list of projects yet; the page still offers setting one up.
       setListable(false);
@@ -66,9 +78,9 @@ export function ProjectCards() {
           </Link>
         </li>
         {cards === null && <li className={s.loading}>Loading your projects…</li>}
-        {cards?.map(({ report, summary }) => (
-          <li key={report.project.id} className={s.card}>
-            <ProjectCard report={report} summary={summary} />
+        {cards?.map(({ report, summary, oneOfMany }) => (
+          <li key={report.flat.id} className={s.card}>
+            <ProjectCard report={report} summary={summary} oneOfMany={oneOfMany} />
           </li>
         ))}
       </ul>
@@ -92,8 +104,8 @@ export function ProjectCards() {
   );
 }
 
-function ProjectCard({ report, summary }: Loaded) {
-  const { project, flat, stage } = report;
+function ProjectCard({ report, summary, oneOfMany }: Loaded) {
+  const { project, flat } = report;
   const { letter, claimed, seen, short, notSeen, todo, checking, judged } = summary;
   const base = `/projects/${project.id}`;
   const demo = project.id === DEMO_PROJECT_ID;
@@ -106,7 +118,6 @@ function ProjectCard({ report, summary }: Loaded) {
         </h2>
         <p className={s.cardMeta}>
           Flat {flat.name}
-          {stage ? ` · ${stage}` : ""}
           {` · ${report.rooms.length} ${report.rooms.length === 1 ? "room" : "rooms"}`}
           {demo ? " · demo data" : ""}
         </p>
@@ -153,7 +164,7 @@ function ProjectCard({ report, summary }: Loaded) {
       <div className={s.actions}>
         {letter ? (
           <>
-            <Link href={`${base}/report`} className={s.primaryAction}>
+            <Link href={`${base}/report${oneOfMany ? `?flat=${flat.id}` : ""}`} className={s.primaryAction}>
               Open the report
             </Link>
             <Link href={`${base}/upload`} className={s.secondaryAction}>

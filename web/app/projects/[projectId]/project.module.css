@@ -138,12 +138,6 @@
   }
 }
 
-.placed {
-  display: block;
-  font-size: var(--text-small);
-  color: var(--muted);
-}
-
 /* Printing this page prints the tag sheet only. */
 @media print {
   .created,
