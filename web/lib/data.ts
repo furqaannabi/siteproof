@@ -7,7 +7,6 @@
  * guessing at a shape nobody has agreed.
  */
 import { api, type Clip, type ClipStatus, type Document, type Project } from "@siteproof/contract";
-import { MockError, mockSource } from "./mock-store";
 import type { CreateProject, CreateProjectResponse, NewDocument, Registered, Report } from "./types";
 
 export interface DataSource {
@@ -92,32 +91,45 @@ const apiSource: DataSource = {
   },
 };
 
-function fromMock(source: typeof mockSource): DataSource {
+/**
+ * The in-browser mock, loaded only when it's in use, so a build pointed at the real
+ * API never ships the demo data or the pretend backend.
+ */
+const loadMock = () => import("./mock-store");
+
+function fromMock(): DataSource {
+  type Mock = Awaited<ReturnType<typeof loadMock>>;
   const wrap =
-    <A extends unknown[], R>(fn: (...args: A) => Promise<R>) =>
+    <A extends unknown[], R>(fn: (mock: Mock["mockSource"], ...args: A) => Promise<R>) =>
     async (...args: A): Promise<R> => {
+      const mock = await loadMock();
       try {
-        return await fn(...args);
+        return await fn(mock.mockSource, ...args);
       } catch (e) {
-        if (e instanceof MockError) throw new DataError(e.status, e.message);
+        if (e instanceof mock.MockError) throw new DataError(e.status, e.message);
         throw e;
       }
     };
   return {
-    listProjects: wrap(source.listProjects),
-    getReport: wrap(source.getReport),
-    createProject: wrap(source.createProject),
-    registerClip: wrap((projectId: string, file: File, roomHint?: string | null) => source.registerClip(projectId, file, roomHint ?? null)),
-    registerDocument: wrap((input: NewDocument) => source.registerDocument(input)),
-    upload: wrap(source.upload),
-    clipStatus: wrap(source.clipStatus),
-    documentStatus: wrap(source.documentStatus),
-    requestFootage: wrap(source.requestFootage),
+    listProjects: wrap((m) => m.listProjects()),
+    getReport: wrap((m, projectId: string) => m.getReport(projectId)),
+    createProject: wrap((m, body: CreateProject) => m.createProject(body)),
+    registerClip: wrap((m, projectId: string, file: File, roomHint?: string | null) => m.registerClip(projectId, file, roomHint ?? null)),
+    registerDocument: wrap((m, input: NewDocument) => m.registerDocument(input)),
+    upload: wrap((m, url: string, file: File, onProgress: (fraction: number) => void) => m.upload(url, file, onProgress)),
+    clipStatus: wrap((m, clipId: string) => m.clipStatus(clipId)),
+    documentStatus: wrap((m, documentId: string) => m.documentStatus(documentId)),
+    requestFootage: wrap((m, roomId: string) => m.requestFootage(roomId)),
   };
+}
+
+/** Mock mode only: forget everything made in the demo and restore Flat 302. */
+export async function resetMockData() {
+  (await loadMock()).resetMock();
 }
 
 export const usingMock = process.env.NEXT_PUBLIC_DATA_SOURCE !== "api";
 
-export const data: DataSource = usingMock ? fromMock(mockSource) : apiSource;
+export const data: DataSource = usingMock ? fromMock() : apiSource;
 
 export const DEMO_PROJECT_ID = "p-northfield";

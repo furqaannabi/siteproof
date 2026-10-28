@@ -173,7 +173,7 @@ export const flat302: Report = {
       room_id: "r-kitchen",
       text: "Need 5 s of Flat 302 kitchen, east wall",
       steps: [
-        "Point the phone at the tag on the kitchen door.",
+        "Start with the kitchen's room tag in view, at the door.",
         "Turn slowly toward the east wall window.",
         "Stop there. Don't pan back.",
       ],
@@ -185,7 +185,7 @@ export const flat302: Report = {
       claim_id: "cl-boq-bed2-window",
       body:
         "Re: your demand letter for Stage 6, \"Windows complete: 12\". The bill of quantities lists 4 windows in Bedroom 2 (item W-4). " +
-        "One complete sweep from the Bedroom 2 door tag, filmed on 26 October, shows 2 installed. " +
+        "A one-way sweep from the Bedroom 2 room tag, filmed on 26 October, shows 2 installed. " +
         "Could you confirm the status of the remaining 2, or share footage of them? We'll update the report as soon as they're visible.",
       citations_rechecked: true,
       citation_count: 3,
