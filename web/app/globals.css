@@ -1,48 +1,66 @@
 /*
- * SiteProof design tokens, from the report mockup (light and dark artboards).
- * Blueprint blue for the plan, safety orange for marks, three outcome colours that
- * also differ in pattern, so Verified / Short / Not seen yet never rely on hue alone.
+ * SiteProof design tokens: the measurement book.
+ * A bottle-green cloth binding for the shell, cool form stock for the ground, one hairline
+ * printed rule, and rubber-stamp violet meaning "checked by code" and nothing else: a
+ * matched quote, a counted number, a re-checked citation. Verified / Short / Not seen yet
+ * differ in pattern as well as colour (solid, hatched, dashed), never by hue alone.
+ * Light only: builders read this on a phone on site, in sunlight.
  */
 :root {
-  --ground: #f4f1ea;
-  --grid-line: rgba(22, 58, 107, 0.07);
-  --ink: #1e1d1a;
-  --ink-2: #3e3b35;
-  --muted: #5c5850;
-  --rule: #cfcac0;
-  --panel: #fffdf8;
-  --panel-border: #1e1d1a;
-  --panel-border-width: 2px;
-  --inverse-bg: #1e1d1a;
-  --inverse-ink: #f4f1ea;
-  --quote-bg: #fff3c4;
-  --quote-mark: #ffe7a8;
+  --binding: #1d4a3c; /* the shell: header, primary actions */
+  --binding-2: #2a5d4d; /* the next-step band, hover */
+  --binding-ink: #e9f1ec;
 
-  --mark: #e8590c;
-  --mark-ink: #1e1d1a;
-  --link: #b4440a;
+  --ground: #eef2ed;
+  --ink: #15201b;
+  --ink-2: #3c4a43;
+  --muted: #56645d;
+  --rule: #9db8aa; /* the form's printed rule, one hairline */
+  --rule-strong: #2f6b57;
+  --panel: #f8faf6;
+  --panel-border: var(--rule);
+  --panel-border-width: 1px;
+  --radius: 8px;
+  --inverse-bg: var(--binding);
+  --inverse-ink: var(--binding-ink);
+  --focus: #15201b;
 
-  --verified: #2f6b3a;
-  --short: #b4440a;
-  --short-fill: #fbe3d2;
-  --short-panel: #fff6ef;
-  --not-seen: #4f4b44;
-  --hatch: #cfcac0;
+  /* Checked by code. */
+  --check: #5a3d9a;
+  --check-tint: #ece6f7;
+  --quote-bg: var(--check-tint);
+  --quote-mark: var(--check-tint);
 
-  --plan-bg: #163a6b;
-  --plan-deep: #0f2a4f;
-  --plan-line: #dce9f7;
-  --plan-ink: #f4f8fc;
-  --plan-verified: #1d5550;
-  --plan-short: #5b3524;
-  --plan-label-verified: #9be7b0;
-  --plan-label-short: #ffb37a;
-  --plan-label-not-seen: #dce9f7;
-  --plan-amber: #f59e5b; /* the Short rule on the plan; blueprint eyebrows */
-  --plan-ink-soft: #c5d2e0; /* secondary text on the 3D stage */
+  --mark: var(--binding);
+  --mark-ink: var(--binding-ink);
+  --link: #1f5c49;
+
+  --verified: #1f6b45;
+  --verified-tint: #dcefe3;
+  --short: #a35408;
+  --short-fill: #f8e7d2;
+  --short-panel: #fbf1e6;
+  --not-seen: #4c5a54;
+  --hatch: var(--rule);
+
+  /* Outlines over evidence frames: the one colour that must read on any photo. */
+  --outline: #ff7a1a;
+
+  /* The plan and 3D stage, in the binding's greens. */
+  --plan-bg: #1d4a3c;
+  --plan-deep: #133428;
+  --plan-line: #cfe3d8;
+  --plan-ink: #f2f8f4;
+  --plan-verified: #2a6b4f;
+  --plan-short: #6b4120;
+  --plan-label-verified: #a8ecc0;
+  --plan-label-short: #ffc27a;
+  --plan-label-not-seen: #cfe3d8;
+  --plan-amber: #f2a65a;
+  --plan-ink-soft: #b9d0c4;
   --tag-paper: #ffffff; /* printed room tags and printed reports stay white */
-  --overlay-bg: rgba(0, 0, 0, 0.55); /* badges drawn over evidence frames */
-  --overlay-ink: #e9e5dc;
+  --overlay-bg: rgba(21, 32, 27, 0.72); /* badges drawn over evidence frames */
+  --overlay-ink: #ffffff;
 
   /* Type roles. Every font-size in the app is one of these. */
   --text-label: 12px; /* mono or uppercase labels: the floor, nothing smaller */
@@ -60,42 +78,11 @@
   --text-display: clamp(44px, 10vw, 72px);
   --text-answer: clamp(64px, 16vw, 128px); /* the report's one verified count */
 
-  --font-display: var(--font-barlow), "Arial Narrow", sans-serif;
-  --font-body: var(--font-plex-sans), system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --font-display: var(--font-anek), "Arial Narrow", sans-serif;
+  --font-body: var(--font-mukta), system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ground: #0b1b30;
-    --grid-line: rgba(140, 180, 230, 0.06);
-    --ink: #e8eef5;
-    --ink-2: #c5d2e0;
-    --muted: #9db0c6;
-    --rule: rgba(220, 233, 247, 0.25);
-    --panel: #102641;
-    --panel-border: rgba(220, 233, 247, 0.45);
-    --panel-border-width: 1px;
-    --inverse-bg: #dce9f7;
-    --inverse-ink: #0b1b30;
-    --quote-bg: #07172b;
-    --quote-mark: #ffe08a;
-
-    --mark: #f26b1d;
-    --mark-ink: #0b1b30;
-    --link: #ff9a5c;
-
-    --verified: #6fd08c;
-    --short: #ff9a5c;
-    --short-fill: rgba(242, 107, 29, 0.25);
-    --short-panel: rgba(242, 107, 29, 0.1);
-    --not-seen: #b8c7d8;
-    --hatch: rgba(220, 233, 247, 0.35);
-
-    color-scheme: dark;
-  }
 }
 
 * {
@@ -105,14 +92,15 @@
 body {
   margin: 0;
   background-color: var(--ground);
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 24px 24px;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: var(--text-body);
   line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+
+html {
+  scrollbar-color: var(--rule-strong) var(--ground);
 }
 
 a {
@@ -121,15 +109,14 @@ a {
   text-underline-offset: 3px;
 }
 
-/* The browser's own surfaces belong to the drawing set too: selecting text is a highlighter. */
 ::selection {
-  background: var(--quote-mark);
-  color: #1e1d1a;
+  background: var(--check);
+  color: #ffffff;
 }
 
 input,
 textarea {
-  caret-color: var(--mark);
+  caret-color: var(--check);
 }
 
 button {
@@ -156,6 +143,6 @@ p {
 }
 
 :focus-visible {
-  outline: 3px solid var(--mark);
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }

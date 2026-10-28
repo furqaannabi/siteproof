@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Barlow_Condensed, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Anek_Latin, Mukta } from "next/font/google";
 import "./globals.css";
 
-const barlow = Barlow_Condensed({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-barlow" });
-const plexSans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-plex-sans" });
-const plexMono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--font-plex-mono" });
+// Both from Ek Type, an Indian foundry; both have Devanagari siblings for a Hindi version.
+// Anek Latin's width axis gives the condensed figures and headings.
+const anek = Anek_Latin({ subsets: ["latin"], axes: ["wdth"], variable: "--font-anek" });
+const mukta = Mukta({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-mukta" });
 
 export const metadata: Metadata = {
   title: "SiteProof",
@@ -23,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     // Dark-mode browser extensions write a style onto <html> before React loads, which
     // reads as a hydration mismatch. This ignores attribute differences on this one
     // element only; anything inside it is still checked.
-    <html lang="en" className={`${barlow.variable} ${plexSans.variable} ${plexMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${anek.variable} ${mukta.variable}`} suppressHydrationWarning>
       <body>{children}</body>
     </html>
   );

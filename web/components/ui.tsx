@@ -21,16 +21,21 @@ export function Brand({ href = "/projects" }: { href?: string }) {
   );
 }
 
-/** The top bar. `title` and `eyebrow` name where you are; `children` go on the right. */
+/**
+ * The top bar, fixed while the page scrolls. `title` and `eyebrow` name where you are;
+ * `children` go on the right; `band` is a full-width strip under it, such as the next step.
+ */
 export function AppHeader({
   eyebrow,
   title,
   brandHref,
+  band,
   children,
 }: {
   eyebrow?: string;
   title?: string;
   brandHref?: string;
+  band?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   return (
@@ -45,6 +50,7 @@ export function AppHeader({
         )}
         {children}
       </div>
+      {band}
       {usingMock && <div className={styles.mockBar}>Demo data · not real site footage</div>}
     </header>
   );

@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@siteproof/backend", "dev"],
+      "port": 4000
+    },
+    {
+      "name": "studio",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@siteproof/backend", "exec", "prisma", "studio", "--browser", "none", "--port", "5555"],
+      "port": 5555
+    }
+  ]
+}

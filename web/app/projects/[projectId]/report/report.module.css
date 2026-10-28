@@ -1,894 +1,790 @@
-/*
- * The report: one answer line, then rooms and their evidence side by side. A ranked
- * schedule of rooms on the left, the selected room's evidence plate on the right with
- * its sources in the margin. On a phone it stacks: answer, plan, schedule, evidence.
- */
+/* The report as a measurement book: billed against counted, every count stamped. */
 
 .page {
   min-height: 100vh;
 }
 
 .main {
-  max-width: 1320px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 20px 16px 64px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.h2 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--text-section);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.note,
-.monoNote {
-  font-size: var(--text-small);
-  color: var(--muted);
-}
-
-.monoNote {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: var(--text-ref);
+  padding: 28px 20px 64px;
 }
 
 .exportButton {
-  min-width: 44px;
-  padding: 0 13px;
+  min-height: 40px;
 }
 
-/* ---------- Switches ---------- */
-
-.itemTabs,
-.modeToggle {
+/* Flats, for a builder with more than one; Windows / Doors in the empty state and the 3D view. */
+.flatTabs,
+.itemTabs {
   display: flex;
-  border: 2px solid var(--panel-border);
-  align-self: flex-start;
+  flex-wrap: wrap;
+  width: fit-content;
+  margin-bottom: 20px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 6px;
+  overflow: hidden;
 }
 
-.itemTabs button,
-.itemTabs a,
-.modeToggle button {
+.flatTabs > a,
+.itemTabs > button {
   display: inline-flex;
   align-items: center;
-  text-decoration: none;
   min-height: 44px;
   padding: 0 16px;
   border: 0;
-  background: transparent;
-  color: var(--ink);
-  font-weight: 500;
-  font-size: var(--text-control);
-}
-
-.itemTabs button[aria-pressed="true"],
-.itemTabs a[aria-current="page"],
-.modeToggle button[aria-pressed="true"] {
-  background: var(--inverse-bg);
-  color: var(--inverse-ink);
-  font-weight: 600;
-}
-
-@media (hover: hover) {
-  .itemTabs button:not([aria-pressed="true"]):hover,
-  .itemTabs a:not([aria-current="page"]):hover,
-  .modeToggle button:not([aria-pressed="true"]):hover {
-    background: var(--panel);
-  }
-}
-
-/* ---------- The answer ---------- */
-
-.answer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px 32px;
-  padding-bottom: 20px;
-  border-bottom: 2px solid var(--panel-border);
-}
-
-.answerMain {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 8px 28px;
-  min-width: 0;
-}
-
-.answerNumber {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-answer);
-  line-height: 0.82;
-  letter-spacing: -0.01em;
-  font-variant-numeric: tabular-nums;
-}
-
-.answerOf {
-  font-weight: 500;
-  font-size: 0.55em;
-  color: var(--muted);
-}
-
-.answerFallback {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-page);
-  line-height: 0.95;
-  max-width: 18ch;
-}
-
-.answerText {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-bottom: 6px;
-  min-width: min(100%, 300px);
-}
-
-.answerLine {
-  margin: 0;
-  font-size: var(--text-body);
-  color: var(--ink-2);
-}
-
-.answerLine::first-letter {
-  text-transform: uppercase;
-}
-
-/* A count and its outcome stay on one line: "1 Not seen yet" never splits. */
-.keep {
-  white-space: nowrap;
-}
-
-.tally {
-  display: flex;
-  gap: 4px;
-  width: min(100%, 440px);
-}
-
-.tally > span {
-  flex: 1 1 0;
-  height: 18px;
-}
-
-.tallyVerified {
-  background: var(--verified);
-}
-
-.tallyShort {
-  background: var(--short-fill);
-  box-shadow: inset 0 0 0 2px var(--short);
-}
-
-.tallyNotSeen {
-  background: repeating-linear-gradient(45deg, var(--hatch) 0 2px, var(--ground) 2px 5px);
-  box-shadow: inset 0 0 0 2px var(--not-seen);
-}
-
-.clear {
-  margin: 0;
-  padding: 12px 16px;
-  border: var(--panel-border-width) solid var(--panel-border);
   background: var(--panel);
-  font-size: var(--text-body);
-  line-height: 1.5;
+  color: var(--ink);
+  font-size: var(--text-control);
+  font-weight: 500;
+  text-decoration: none;
 }
 
-/* ---------- The sheet: rooms beside evidence ---------- */
-
-.sheet {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 28px;
-  align-items: start;
+.flatTabs > [aria-current="page"],
+.itemTabs > [aria-pressed="true"] {
+  background: var(--binding);
+  color: var(--binding-ink);
+  font-weight: 600;
 }
 
 .roomsColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
   min-width: 0;
 }
 
-.roomsHead {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* The next step, in the fixed header: always one thing, always exact. */
+
+.band {
+  background: var(--binding-2);
+  border-top: 1px solid rgba(233, 241, 236, 0.22);
+  color: var(--binding-ink);
 }
 
-.plan {
-  background-color: var(--plan-bg);
-  background-image:
-    linear-gradient(rgba(220, 233, 247, 0.09) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(220, 233, 247, 0.09) 1px, transparent 1px);
-  background-size: 20px 20px;
-  padding: 14px;
-}
-
-/* Walls are drawn round each room, so a grid slot with no room stays open blueprint. */
-.planGrid {
-  border: 1.5px solid var(--plan-line);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-auto-rows: minmax(84px, auto);
-  gap: 3px;
-}
-
-.planGrid > :first-child {
-  grid-column: span 2;
-}
-
-@media (min-width: 640px) {
-  .planGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .planGrid > :first-child {
-    grid-row: span 2;
-  }
-}
-
-.planRoom {
-  box-shadow: 0 0 0 1.5px var(--plan-line);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 6px;
-  padding: 10px 12px;
-  border: 0;
-  color: var(--plan-ink);
-  text-align: left;
-  min-height: 44px;
-}
-
-.planRoomName {
-  font-weight: 600;
-  font-size: var(--text-control);
-  overflow-wrap: anywhere;
-}
-
-.planRoomName code,
-.scheduleRow code,
-.evidenceTitle code {
-  font-family: var(--font-mono);
-  font-weight: 400;
-  font-size: var(--text-ref);
-}
-
-.planRoomName code {
-  color: var(--plan-ink-soft);
-}
-
-.planFoot {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.planLabel {
-  font-size: var(--text-label);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.label_verified {
-  color: var(--plan-label-verified);
-}
-
-.label_short {
-  color: var(--plan-label-short);
-}
-
-.label_not_seen {
-  color: var(--plan-label-not-seen);
-}
-
-.planCount {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-subhead);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.plan_verified {
-  background: var(--plan-verified);
-}
-
-.plan_short {
-  background: var(--plan-short);
-  box-shadow:
-    0 0 0 1.5px var(--plan-line),
-    inset 0 0 0 3px var(--plan-amber);
-}
-
-.plan_not_seen {
-  background: repeating-linear-gradient(45deg, rgba(220, 233, 247, 0.3) 0 1.5px, var(--plan-bg) 1.5px 10px);
-}
-
-.plan_not_seen .planRoomName,
-.plan_not_seen .planCount,
-.plan_not_seen .planLabel {
-  background: var(--plan-bg);
-  padding: 0 4px;
-  margin-left: -4px;
-}
-
-.planRoom[aria-pressed="true"] {
-  outline: 4px solid var(--mark);
-  outline-offset: -10px;
-}
-
-/* Keyboard focus is white, so it never reads as the orange "selected" mark. */
-.planRoom:focus-visible {
-  outline: 3px solid var(--plan-ink);
-  outline-offset: -4px;
-}
-
-@media (hover: hover) {
-  .planRoom:hover {
-    filter: brightness(1.12);
-  }
-}
-
-/* The drawing's title block along the plan's foot. */
-.titleBlock {
+.bandIn {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 8px 24px;
+  min-height: 56px;
   display: flex;
   flex-wrap: wrap;
-  margin: 12px -14px 0;
-  border-top: 1px solid rgba(220, 233, 247, 0.55);
-  font-family: var(--font-mono);
-  font-size: var(--text-ref);
-  color: var(--plan-ink);
-}
-
-.titleBlock > span {
-  padding: 8px 14px;
-}
-
-.titleBlock > span + span {
-  border-left: 1px solid rgba(220, 233, 247, 0.55);
-}
-
-/* The schedule: rows ranked by weight and rules, open rooms first. */
-.schedule {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 2px solid var(--panel-border);
-}
-
-.schedule li {
-  border-bottom: 1px solid var(--ink);
-}
-
-.scheduleRow {
-  width: 100%;
-  min-height: 52px;
-  display: grid;
-  grid-template-columns: 34px 1fr auto;
-  grid-template-areas:
-    "idx name count"
-    "idx outcome outcome";
   align-items: center;
-  gap: 2px 12px;
-  padding: 10px 8px 10px 12px;
-  border: 0;
-  background: transparent;
-  color: var(--ink);
-  text-align: left;
-  font-size: var(--text-body);
+  gap: 8px 16px;
+  animation: turn 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.scheduleRow code {
-  grid-area: idx;
-  color: var(--muted);
+@keyframes turn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-.scheduleName {
-  grid-area: name;
-  overflow-wrap: anywhere;
-}
-
-.scheduleCount {
-  grid-area: count;
-  font-family: var(--font-mono);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-
-.scheduleOutcome {
-  grid-area: outcome;
-  font-size: var(--text-label);
+.bandLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  color: rgba(233, 241, 236, 0.85);
 }
 
-.scheduleOpen .scheduleName {
+.bandText {
+  flex: 1 1 260px;
+  font-family: var(--font-display);
+  font-stretch: 85%;
   font-weight: 700;
+  font-size: 22px;
+  line-height: 1.15;
 }
 
-/* From 480px each room is one ruled line: index | name | count | outcome. */
-@media (min-width: 480px) {
-  .scheduleRow {
-    grid-template-columns: 34px 1fr auto 112px;
-    grid-template-areas: "idx name count outcome";
-  }
-
-  .scheduleOutcome {
-    justify-self: end;
-  }
+.bandCount {
+  font-size: 14px;
+  color: rgba(233, 241, 236, 0.85);
 }
 
-.out_verified {
-  color: var(--verified);
+.bandBtn,
+.bandGhost {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  border: 1px solid var(--binding-ink);
 }
 
-.out_short {
+.bandBtn {
+  background: var(--binding-ink);
+  color: var(--binding);
+}
+
+.bandBtn:hover {
+  background: #ffffff;
+}
+
+.bandGhost {
+  background: transparent;
+  color: var(--binding-ink);
+  border-color: rgba(233, 241, 236, 0.5);
+}
+
+.bandGhost:hover {
+  background: rgba(233, 241, 236, 0.1);
+}
+
+.sendCompact {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sendCompact .sendNote {
+  color: var(--binding-ink);
+}
+
+/* What the demand letter billed */
+
+.billed {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.bill {
+  padding: 20px 24px 22px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 24px;
+  align-items: end;
+}
+
+.bill + .bill {
+  border-left: 1px solid var(--rule);
+}
+
+.billHead {
+  grid-column: 1 / -1;
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.billUnchecked {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--ink-2);
+  max-width: 44ch;
+}
+
+.src {
+  quotes: "\201C" "\201D";
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--check-tint);
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+
+.chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--check);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.fig {
+  margin: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: 14px;
+}
+
+.figN {
+  font-family: var(--font-display);
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 76px;
+  line-height: 0.85;
+  letter-spacing: -0.02em;
+}
+
+.figOf {
+  font-family: var(--font-display);
+  font-stretch: 75%;
+  font-weight: 600;
+  font-size: 30px;
+  color: var(--ink-2);
+}
+
+.figLabel {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.split {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-2);
+  text-align: right;
+}
+
+.splitShort {
   color: var(--short);
 }
 
-.out_not_seen {
+/* Rooms and their entries */
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 32px;
+  margin-top: 32px;
+  align-items: start;
+}
+
+.secHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
+  margin-bottom: 14px;
+}
+
+.sec {
+  margin: 0;
+  font-family: var(--font-display);
+  font-stretch: 80%;
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.secNote {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--check);
+  font-weight: 500;
+}
+
+.room {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  overflow: hidden;
+  /* Clear the fixed header when the band links here. */
+  scroll-margin-top: 150px;
+}
+
+.roomHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.roomHead h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-stretch: 85%;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.cov,
+.covNo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+.covNo {
   color: var(--not-seen);
 }
 
-.scheduleRow[aria-pressed="true"] {
-  background: var(--panel);
-  outline: 2px solid var(--ink);
-  outline-offset: -2px;
+.when {
+  margin-left: auto;
+  font-size: 14px;
+  color: var(--muted);
 }
 
-.scheduleRow[aria-pressed="true"] code {
-  color: var(--mark);
-  font-weight: 500;
+.entries {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-@media (hover: hover) {
-  .scheduleRow:not([aria-pressed="true"]):hover {
-    background: var(--panel);
-  }
+.entries th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+  padding: 10px 20px 6px;
 }
 
-/* ---------- The evidence ---------- */
-
-.evidence {
-  display: grid;
-  grid-template-columns: 1fr;
-  border: var(--panel-border-width) solid var(--panel-border);
-  background: var(--panel);
-  scroll-margin-top: 12px;
-  min-width: 0;
+.entries td {
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--rule);
+  vertical-align: top;
 }
 
-.evidenceMain {
-  padding: 20px 16px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
+.entries tbody tr:first-child td {
+  border-top: 0;
 }
 
-.evidenceTitle {
-  margin: 0;
+.entries .num {
+  text-align: right;
+}
+
+td.num {
+  width: 88px;
+  padding-top: 16px;
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-headline);
-  line-height: 1.05;
+  font-stretch: 75%;
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1;
 }
 
-.evidenceTitle code {
-  color: var(--muted);
-  margin-right: 4px;
+.item {
+  display: block;
+  font-weight: 600;
 }
 
-.stats {
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+.quote {
+  display: block;
+  margin-top: 2px;
+  max-width: 48ch;
+  font-size: 15px;
+  color: var(--ink-2);
+  quotes: "\201C" "\201D";
 }
 
-.stats > div {
-  display: flex;
-  flex-direction: column;
-  border-top: 3px solid var(--ink);
-  padding-top: 6px;
-}
-
-.stats dt {
-  font-size: var(--text-label);
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.stats dd {
-  margin: 0;
-}
-
-.statNumber {
-  font-family: var(--font-mono);
-  font-size: var(--text-subhead);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-}
-
-.statText {
-  font-family: var(--font-mono);
-  font-size: var(--text-control);
-  font-weight: 500;
-  padding-top: 8px;
-}
-
-/* The plate: registration ticks at two corners, the stamp pressed half off its edge. */
-.plate {
-  position: relative;
-  margin: 8px 8px 28px 0;
-}
-
-.tick {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  border: 0 solid var(--ink);
-  pointer-events: none;
-}
-
-.tickTL {
-  left: -8px;
-  top: -8px;
-  border-left-width: 2px;
-  border-top-width: 2px;
-}
-
-.tickBR {
-  right: -8px;
-  bottom: -8px;
-  border-right-width: 2px;
-  border-bottom-width: 2px;
-}
-
+/* The signature: code presses its check onto every counted number. */
 .stamp {
-  position: absolute;
-  right: -6px;
-  bottom: -22px;
-  z-index: 1;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-section);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  padding: 4px 14px;
-  background: var(--panel);
-  border: 3px solid currentColor;
-  outline: 1px solid currentColor;
-  outline-offset: 3px;
-  transform: rotate(-5deg);
-  animation: press 240ms cubic-bezier(0.2, 0.9, 0.25, 1);
+  display: inline-grid;
+  place-items: center;
+  min-width: 48px;
+  height: 48px;
+  padding: 0 6px;
+  margin-top: -10px;
+  border: 2px solid var(--check);
+  border-radius: 50%;
+  color: var(--check);
+  transform: rotate(-6deg);
+  animation: press 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stampNone {
+  border-style: dashed;
+  border-color: var(--not-seen);
+  color: var(--not-seen);
+  animation: none;
 }
 
 @keyframes press {
   from {
     opacity: 0;
-    transform: rotate(-5deg) scale(1.6);
+    transform: rotate(-6deg) scale(1.35);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(-6deg) scale(1);
   }
 }
 
-.stamp_verified {
-  color: var(--verified);
+@media (prefers-reduced-motion: reduce) {
+  .stamp,
+  .bandIn {
+    animation: none;
+  }
 }
 
-.stamp_short {
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 8px;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge_verified {
+  background: var(--verified);
+  color: #ffffff;
+}
+
+.badge_short {
+  color: var(--short);
+  border: 1.5px solid var(--short);
+  background: repeating-linear-gradient(135deg, var(--short-fill) 0 6px, #ffffff 6px 9px);
+}
+
+.badge_not_seen {
+  color: var(--not-seen);
+  border: 1.5px dashed var(--not-seen);
+}
+
+.gapNote {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--short);
 }
 
-.stamp_not_seen {
+.evCell {
+  width: 180px;
+}
+
+.evs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.evNote {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.noEv {
+  display: block;
+  max-width: 180px;
+  font-size: 14px;
   color: var(--not-seen);
-  border-style: dashed;
 }
 
-.noFrame {
-  aspect-ratio: 16 / 9;
-  border: 2px dashed var(--not-seen);
-  background: repeating-linear-gradient(45deg, var(--hatch) 0 2px, var(--ground) 2px 12px);
+/* Aside */
+
+.aside {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  text-align: center;
-  padding: 16px;
-  font-size: var(--text-small);
+  gap: 20px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 18px 20px 20px;
+  scroll-margin-top: 150px;
+}
+
+.panelTitle {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-stretch: 85%;
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.panelNote {
+  font-size: 15px;
   color: var(--ink-2);
 }
 
-.noFrame > span {
-  background: var(--ground);
-  padding: 2px 8px;
-}
-
-.noFrameTitle {
+.ask {
+  margin: 4px 0 14px;
   font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--text-subhead);
-  color: var(--ink);
-}
-
-.summary {
-  margin: 0;
-  font-size: var(--text-body);
-  line-height: 1.55;
-  max-width: 62ch;
-}
-
-/* The margin: where the claim comes from, and what clears it. */
-.margin {
-  border-top: 1px solid var(--rule);
-  background: var(--ground);
-  padding: 18px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  min-width: 0;
-}
-
-.source {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.sourceTitle {
-  font-size: var(--text-small);
-  font-weight: 600;
-  color: var(--ink-2);
-}
-
-.quote {
-  align-self: flex-start;
-  font-family: var(--font-mono);
-  font-size: var(--text-ref);
-  line-height: 1.5;
-  background: var(--quote-mark);
-  color: #1e1d1a;
-  padding: 4px 10px;
-  overflow-wrap: anywhere;
-}
-
-.matched {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: var(--text-small);
-  color: var(--verified);
-}
-
-/* Gap request, in the margin. */
-.shot {
-  background: var(--plan-bg);
-  color: #f4f1ea;
-  padding: 16px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.shotIcon {
-  width: 48px;
-  height: 48px;
-  border: 2px solid var(--plan-label-short);
-  color: var(--plan-label-short);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-
-.shotText {
-  flex: 1 1 200px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.shotTitle {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--text-subhead);
+  font-stretch: 80%;
+  font-weight: 700;
+  font-size: 30px;
   line-height: 1.05;
 }
 
-.shotHint {
-  font-size: var(--text-small);
-  color: var(--plan-ink-soft);
+.steps {
+  margin: 0 0 16px;
+  padding-left: 22px;
 }
 
-.shotStatus {
-  font-family: var(--font-mono);
-  font-size: var(--text-ref);
-  border: 1px solid var(--plan-ink-soft);
-  padding: 8px 12px;
+.steps li {
+  margin-bottom: 4px;
 }
 
-.sendWrap {
+.letter {
+  margin: 8px 0 14px;
+  padding-left: 14px;
+  border-left: 1px solid var(--rule-strong);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.cites {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-}
-
-.sendNote {
-  font-size: var(--text-small);
-  color: var(--plan-ink-soft);
-  min-height: 1em;
-}
-
-.sendPreview {
-  font-size: var(--text-small);
-  color: var(--plan-label-short);
-}
-
-/* Query letter, or the builder's note on a Short room. */
-.query {
-  border: 2px solid var(--short);
-  background: var(--short-panel);
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.queryTitle {
-  margin: 0;
-  font-family: var(--font-display);
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 14px;
   font-weight: 600;
-  font-size: var(--text-section);
-  color: var(--short);
+  color: var(--check);
 }
 
-.queryChecked {
-  font-size: var(--text-small);
-  color: var(--verified);
-}
-
-.query p {
-  margin: 0;
-  font-size: var(--text-body);
-  line-height: 1.55;
-}
-
-.queryActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-/* ---------- Below the sheet ---------- */
-
-.notCountable {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.notCountable ul {
+.ncList {
   margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
-.notCountable li {
+.ncList q {
+  font-weight: 600;
+  quotes: "\201C" "\201D";
+}
+
+.ncPlan {
+  display: block;
+  margin-top: 4px;
+  font-size: var(--text-small);
+  color: var(--ink-2);
+}
+
+.ncTag {
+  display: block;
+  width: fit-content;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--rule);
+  background: var(--ground);
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.sendWrap {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 16px;
+  gap: 8px 14px;
+}
+
+.sendNote {
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.sendPreview {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* 3D, tucked away: it is illustrative, the frames are the evidence. */
+
+.plan3d {
+  margin-top: 4px;
   border: 1px solid var(--rule);
+  border-radius: var(--radius);
   background: var(--panel);
-  padding: 10px 12px;
 }
 
-.notCountableTag {
-  font-size: var(--text-small);
-  color: var(--muted);
+.plan3d summary {
+  padding: 14px 20px;
+  min-height: 48px;
+  font-weight: 600;
+  color: var(--check);
+  cursor: pointer;
 }
 
-.footer {
-  border-top: 1px solid var(--rule);
-  padding-top: 16px;
-  font-size: var(--text-small);
-  color: var(--muted);
+.plan3dBody {
+  padding: 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .loading3d {
-  height: min(52vh, 420px);
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #07172b;
-  color: var(--plan-ink-soft);
-  font-family: var(--font-mono);
-  font-size: var(--text-ref);
+  padding: 48px 0;
+  text-align: center;
+  color: var(--muted);
 }
 
-/* ---------- Wider screens ---------- */
+.note {
+  font-size: 14px;
+  color: var(--muted);
+  max-width: 72ch;
+}
 
-@media (min-width: 640px) {
+.footer {
+  margin-top: 32px;
+  max-width: 72ch;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+@media (max-width: 960px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+
+  .bill + .bill {
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+  }
+}
+
+@media (max-width: 640px) {
   .main {
-    padding: 28px 24px 64px;
+    padding: 18px 14px 48px;
   }
 
-  .exportButton {
-    padding: 0 16px;
+  .bandIn {
+    padding: 8px 14px;
+    gap: 8px;
   }
 
-  .evidenceMain {
-    padding: 24px 24px 28px;
+  .bandLabel,
+  .bandCount {
+    display: none;
   }
 
-  .margin {
-    padding: 22px 20px;
-  }
-}
-
-@media (min-width: 900px) {
-  .sheet {
-    grid-template-columns: minmax(340px, 440px) minmax(0, 1fr);
+  .bandText {
+    flex-basis: 100%;
+    font-size: 19px;
   }
 
-  .loading3d {
-    height: min(62vh, 560px);
-    min-height: 360px;
-  }
-}
-
-@media (min-width: 1180px) {
-  /* The margin sits beside the evidence once there is room for both. */
-  .evidence {
-    grid-template-columns: minmax(0, 1fr) 280px;
+  .bill {
+    padding: 16px;
+    grid-template-columns: 1fr;
   }
 
-  .margin {
+  .split {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .figN {
+    font-size: 62px;
+  }
+
+  .roomHead {
+    padding: 12px 16px;
+  }
+
+  .when {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .entries,
+  .entries tbody {
+    display: block;
+  }
+
+  .entries,
+  .entries tbody {
+    display: block;
+  }
+
+  .entries thead {
+    display: none;
+  }
+
+  .quote {
+    overflow-wrap: anywhere;
+  }
+
+  .quote {
+    overflow-wrap: anywhere;
+  }
+
+  .entries tr {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    align-items: center;
+    gap: 10px 20px;
+    padding: 14px 16px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .entries tbody tr:first-child {
     border-top: 0;
-    border-left: 1px solid var(--rule);
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
+  .entries td {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .entries td:first-child,
+  .entries td.evCell {
+    grid-column: 1 / -1;
+  }
+
+  td.num {
+    width: auto;
+    text-align: left;
+  }
+
+  .entries .num {
+    text-align: left;
+  }
+
+  td.num::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--ink-2);
+  }
+
   .stamp {
-    animation: none;
+    margin-top: 0;
+  }
+
+  .evCell {
+    width: auto;
+  }
+
+  .noEv {
+    max-width: none;
   }
 }
 
 @media print {
-  .itemTabs,
-  .modeToggle,
-  .shot button,
-  .queryActions,
-  .sendWrap {
+  .band,
+  .plan3d {
     display: none;
   }
 
-  .page {
-    background: var(--tag-paper);
+  .stamp {
+    animation: none;
   }
 }

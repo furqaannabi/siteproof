@@ -1,3 +1,7 @@
 {
-  "clips": []
+  "clips": [
+    { "file": "c01.mp4", "kind": "messy", "counts": { "window": 0, "door": 0 } },
+    { "file": "c02.mp4", "kind": "sweep", "room": "Living Room", "counts": { "window": 2, "door": 1 } },
+    { "file": "c03.mp4", "kind": "sweep", "room": "Living Room", "counts": { "window": 2, "door": 1 } }
+  ]
 }
