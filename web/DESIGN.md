@@ -2,115 +2,113 @@
 name: SiteProof
 description: Verified construction progress from the footage builders already take.
 colors:
-  safety-orange: "#e8590c"
-  safety-orange-night: "#f26b1d"
-  site-paper: "#f4f1ea"
-  sheet-white: "#fffdf8"
-  drafting-ink: "#1e1d1a"
-  drafting-ink-soft: "#3e3b35"
-  drafting-ink-muted: "#5c5850"
-  ruling-grey: "#cfcac0"
-  blueprint-navy: "#163a6b"
-  blueprint-deep: "#0f2a4f"
-  night-blueprint: "#0b1b30"
-  night-sheet: "#102641"
-  tracing-line: "#dce9f7"
-  night-ink: "#e8eef5"
-  night-ink-muted: "#9db0c6"
-  approved-green: "#2f6b3a"
-  approved-green-night: "#6fd08c"
-  approved-green-plan: "#1d5550"
-  shortfall-rust: "#b4440a"
-  shortfall-rust-night: "#ff9a5c"
-  shortfall-wash: "#fbe3d2"
-  shortfall-rust-plan: "#5b3524"
-  pencil-grey: "#4f4b44"
-  pencil-grey-night: "#b8c7d8"
-  highlighter-yellow: "#ffe7a8"
-  highlighter-wash: "#fff3c4"
-  blueprint-amber: "#f59e5b"
-  tracing-line-soft: "#c5d2e0"
-  plan-ink: "#f4f8fc"
-  plan-label-green: "#9be7b0"
-  plan-label-amber: "#ffb37a"
+  binding-green: "#1d4a3c"
+  binding-green-light: "#2a5d4d"
+  binding-ink: "#e9f1ec"
+  form-ground: "#eef2ed"
+  form-panel: "#f8faf6"
+  ticket-paper: "#fffdf7"
+  book-ink: "#15201b"
+  book-ink-soft: "#3c4a43"
+  book-ink-muted: "#56645d"
+  printed-rule: "#9db8aa"
+  printed-rule-strong: "#2f6b57"
+  link-green: "#1f5c49"
+  stamp-violet: "#5a3d9a"
+  stamp-violet-tint: "#ece6f7"
+  verified-green: "#1f6b45"
+  verified-tint: "#dcefe3"
+  short-amber: "#a35408"
+  short-fill: "#f8e7d2"
+  short-panel: "#fbf1e6"
+  not-seen-slate: "#4c5a54"
+  marker-orange: "#ff7a1a"
+  plan-green: "#1d4a3c"
+  plan-deep: "#133428"
+  plan-line: "#cfe3d8"
+  plan-ink: "#f2f8f4"
+  plan-verified: "#2a6b4f"
+  plan-short: "#6b4120"
+  plan-label-verified: "#a8ecc0"
+  plan-label-short: "#ffc27a"
+  plan-amber: "#f2a65a"
   tag-paper: "#ffffff"
-  overlay-ink: "#e9e5dc"
-  overlay-bg: "rgba(0, 0, 0, 0.55)"
 typography:
+  answer:
+    fontFamily: "Anek Latin, Arial Narrow, sans-serif"
+    fontSize: "clamp(64px, 16vw, 128px)"
+    fontWeight: 800
+    lineHeight: 0.9
+    fontFeature: "tnum"
   display:
-    fontFamily: "Barlow Condensed, Arial Narrow, sans-serif"
+    fontFamily: "Anek Latin, Arial Narrow, sans-serif"
     fontSize: "clamp(44px, 10vw, 72px)"
-    fontWeight: 700
+    fontWeight: 800
     lineHeight: 0.95
-    letterSpacing: "-0.01em"
   page:
-    fontFamily: "Barlow Condensed, Arial Narrow, sans-serif"
+    fontFamily: "Anek Latin, Arial Narrow, sans-serif"
     fontSize: "clamp(40px, 9vw, 64px)"
-    fontWeight: 700
-    lineHeight: 0.95
+    fontWeight: 800
+    lineHeight: 1
   headline:
-    fontFamily: "Barlow Condensed, Arial Narrow, sans-serif"
+    fontFamily: "Anek Latin, Arial Narrow, sans-serif"
     fontSize: "36px"
-    fontWeight: 700
+    fontWeight: 800
     lineHeight: 1.05
   numeral:
-    fontFamily: "Barlow Condensed, Arial Narrow, sans-serif"
+    fontFamily: "Anek Latin, Arial Narrow, sans-serif"
     fontSize: "34px"
-    fontWeight: 700
+    fontWeight: 800
     lineHeight: 1
     fontFeature: "tnum"
   subhead:
-    fontFamily: "Barlow Condensed, Arial Narrow, sans-serif"
+    fontFamily: "Anek Latin, Arial Narrow, sans-serif"
     fontSize: "28px"
-    fontWeight: 600
-    lineHeight: 1.05
+    fontWeight: 800
+    lineHeight: 1.08
   brand:
-    fontFamily: "Barlow Condensed, Arial Narrow, sans-serif"
+    fontFamily: "Anek Latin, Arial Narrow, sans-serif"
     fontSize: "26px"
     fontWeight: 700
-    letterSpacing: "0.02em"
-  title:
-    fontFamily: "Barlow Condensed, Arial Narrow, sans-serif"
+  section:
+    fontFamily: "Anek Latin, Arial Narrow, sans-serif"
     fontSize: "24px"
-    fontWeight: 600
+    fontWeight: 800
     lineHeight: 1.1
-    letterSpacing: "0.03em"
   minor-head:
-    fontFamily: "Barlow Condensed, Arial Narrow, sans-serif"
+    fontFamily: "Anek Latin, Arial Narrow, sans-serif"
     fontSize: "20px"
     fontWeight: 700
   body:
-    fontFamily: "IBM Plex Sans, system-ui, sans-serif"
+    fontFamily: "Mukta, system-ui, sans-serif"
     fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.5
+    fontFeature: "tnum"
   control:
-    fontFamily: "IBM Plex Sans, system-ui, sans-serif"
+    fontFamily: "Mukta, system-ui, sans-serif"
     fontSize: "15px"
     fontWeight: 600
   small:
-    fontFamily: "IBM Plex Sans, system-ui, sans-serif"
+    fontFamily: "Mukta, system-ui, sans-serif"
     fontSize: "14px"
     fontWeight: 400
     lineHeight: 1.45
   ref:
-    fontFamily: "IBM Plex Mono, ui-monospace, monospace"
+    fontFamily: "ui-monospace, SF Mono, Menlo, Consolas, monospace"
     fontSize: "13px"
     fontWeight: 400
   label:
-    fontFamily: "IBM Plex Mono, ui-monospace, monospace"
+    fontFamily: "Mukta, system-ui, sans-serif"
     fontSize: "12px"
-    fontWeight: 400
-    lineHeight: 1.4
-    letterSpacing: "0.08em"
-  data:
-    fontFamily: "IBM Plex Mono, ui-monospace, monospace"
-    fontSize: "28px"
-    fontWeight: 500
-    lineHeight: 1.2
-    fontFeature: "tnum"
+    fontWeight: 700
+    letterSpacing: "0.06em"
 rounded:
-  none: "0px"
+  tag: "4px"
+  control: "6px"
+  panel: "8px"
+  card: "16px"
+  pill: "999px"
 spacing:
   xxs: "4px"
   xs: "8px"
@@ -120,54 +118,59 @@ spacing:
   xl: "28px"
 components:
   button-primary:
-    backgroundColor: "{colors.drafting-ink}"
-    textColor: "{colors.site-paper}"
-    rounded: "{rounded.none}"
-    padding: "0 16px"
-    height: "44px"
-  button-mark:
-    backgroundColor: "{colors.safety-orange}"
-    textColor: "{colors.drafting-ink}"
-    rounded: "{rounded.none}"
+    backgroundColor: "{colors.binding-green}"
+    textColor: "{colors.binding-ink}"
+    rounded: "{rounded.control}"
     padding: "0 16px"
     height: "44px"
   button-secondary:
-    backgroundColor: "transparent"
-    textColor: "{colors.drafting-ink}"
-    rounded: "{rounded.none}"
+    backgroundColor: "{colors.form-panel}"
+    textColor: "{colors.book-ink}"
+    rounded: "{rounded.control}"
     padding: "0 16px"
     height: "44px"
-  toggle-segment-active:
-    backgroundColor: "{colors.drafting-ink}"
-    textColor: "{colors.site-paper}"
-    rounded: "{rounded.none}"
-    padding: "0 16px"
+  button-pill:
+    backgroundColor: "{colors.binding-green}"
+    textColor: "{colors.binding-ink}"
+    rounded: "{rounded.pill}"
+    padding: "0 22px"
+    height: "46px"
+  button-record:
+    backgroundColor: "{colors.marker-orange}"
+    textColor: "{colors.book-ink}"
+    rounded: "{rounded.pill}"
+    height: "60px"
+    width: "100%"
+  nav-item-current:
+    backgroundColor: "{colors.binding-green-light}"
+    textColor: "{colors.tag-paper}"
+    rounded: "{rounded.panel}"
+    padding: "0 14px"
     height: "44px"
   panel:
-    backgroundColor: "{colors.sheet-white}"
-    textColor: "{colors.drafting-ink}"
-    rounded: "{rounded.none}"
+    backgroundColor: "{colors.form-panel}"
+    textColor: "{colors.book-ink}"
+    rounded: "{rounded.panel}"
     padding: "18px 20px"
   input:
-    backgroundColor: "{colors.sheet-white}"
-    textColor: "{colors.drafting-ink}"
-    rounded: "{rounded.none}"
+    backgroundColor: "{colors.form-panel}"
+    textColor: "{colors.book-ink}"
+    rounded: "{rounded.control}"
     padding: "0 12px"
     height: "48px"
-  plan-room-verified:
-    backgroundColor: "{colors.approved-green-plan}"
-    textColor: "{colors.tracing-line}"
-    rounded: "{rounded.none}"
-    padding: "12px 14px"
-  plan-room-short:
-    backgroundColor: "{colors.shortfall-rust-plan}"
-    textColor: "{colors.tracing-line}"
-    rounded: "{rounded.none}"
-    padding: "12px 14px"
+  notice:
+    backgroundColor: "{colors.tag-paper}"
+    textColor: "{colors.book-ink}"
+    rounded: "{rounded.card}"
+    padding: "36px 28px 30px"
+  ticket:
+    backgroundColor: "{colors.ticket-paper}"
+    textColor: "{colors.book-ink}"
+    rounded: "{rounded.panel}"
   quote:
-    backgroundColor: "{colors.highlighter-yellow}"
-    textColor: "{colors.drafting-ink}"
-    typography: "{typography.label}"
+    backgroundColor: "{colors.stamp-violet-tint}"
+    textColor: "{colors.book-ink}"
+    typography: "{typography.ref}"
     padding: "0 3px"
 ---
 
@@ -175,153 +178,158 @@ components:
 
 ## Overview
 
-**Creative North Star: "The Site Drawing Set"**
+**Creative North Star: "The Measurement Book"**
 
-SiteProof looks like an architect's drawing set carried onto a construction site. The plan is a blueprint: navy ground, a faint drafting grid, pale tracing lines and a title block along its foot. Judgements are rubber stamps, Verified, Short and Not seen yet, pressed slightly crooked onto the sheet. Evidence reads like a marked-up document: the claim's source line highlighted in yellow, the counted object outlined in safety orange.
+SiteProof looks like the measurement book a site engineer carries: a bottle-green cloth binding round cool, ruled form stock, filled in by hand and checked with a rubber stamp. The binding is the shell (the sidebar, the header, the phone's tab bar, the primary actions). The pages are the ground and the panels, ruled with one printed hairline. A violet stamp means one thing: SiteProof's code checked this. A quote matched word for word, a count with its frames, a citation re-checked.
 
-The world is square, ruled and stamped. Corners are hard, rules are 2px ink, and nothing floats on a shadow. Density is that of a working document, not a dashboard: big condensed numerals for the answer, small mono labels for provenance, plain sans for the sentences in between. It has to hold up on a cheap phone in direct sun, so contrast and pattern do the work that subtle colour would do indoors.
+It is a working book, not a dashboard. Each page opens on what needs the builder first, then the evidence, in big condensed numerals for the answer and a plain, sturdy sans for every sentence. It has to hold up on a cheap phone in direct sun, so contrast, pattern and words do the work that subtle colour would do indoors. It runs in one light theme only.
 
-Two themes share one drawing. The light theme is paper and ink with blueprint inserts; the dark theme is the blueprint itself, navy ground and tracing-line ink. The plan, the 3D model and the gap-request phone screen stay blueprint in both.
+Depth is soft and sparing: cards lift a little off the page, buttons are rounded and quiet, and the flat is drawn as a small plan at an angle so a builder can tell rooms apart at a glance. The plan is never to scale, and nothing on it pretends to know where a wall, a door or a window is.
 
 **Key Characteristics:**
-- Square corners everywhere (0px), 2px ink rules, no drop shadows.
-- Condensed display numerals answer the question; mono labels say where the answer came from.
+- A bottle-green binding for everything that moves you around; cool form stock for everything you read.
+- Violet means checked by code, and nothing else.
 - Three outcomes told apart by fill, pattern and word, never by colour alone.
-- Safety orange marks evidence and the next action; it never decorates.
-- A faint drafting grid on every ground: 24px on pages, 20px on plans.
+- Marker orange outlines evidence and marks the one room to film; it never decorates.
+- Gently rounded (6–8px) controls and panels, pill-shaped actions, soft shadows only under cards that float.
 
 ## Colors
 
-Paper, ink and blueprint, with one marking colour and three outcome colours that each have a day, night and plan shade.
+A green binding, cool paper and one hairline rule, with a violet stamp, three outcome colours and one marker.
 
 ### Primary
-- **Safety Orange** ({colors.safety-orange}; {colors.safety-orange-night} at night): the marker's colour. Object outlines and fills on evidence frames, the selected room's outline, the brand mark, the one most important action on a screen (create the project, record the clip, send the gap request), and focus rings.
+- **Binding Green** ({colors.binding-green}): the sidebar, the header, the phone's tab bar, the next-step band and primary buttons. **Binding Green Light** ({colors.binding-green-light}) is its hover and the band's ground, and **Binding Ink** ({colors.binding-ink}) is text and icons on it.
+- **Stamp Violet** ({colors.stamp-violet}) on **Stamp Violet Tint** ({colors.stamp-violet-tint}): checked by code. Quotes matched word for word, the "quote checked" mark, the counted-number ring, re-checked citations, the text selection and the caret.
 
 ### Secondary
-- **Blueprint Navy** ({colors.blueprint-navy}) with **Blueprint Deep** ({colors.blueprint-deep}): the plan, the 3D stage, the footage-request band and the whole gap-request phone screen. Always carries the drafting grid.
-- **Tracing Line** ({colors.tracing-line}): lines, walls, labels and ink on blueprint. **Plan Ink** ({colors.plan-ink}) for names and counts on the plan, **Tracing Line Soft** ({colors.tracing-line-soft}) for secondary text on the 3D stage, **Plan Label Green** ({colors.plan-label-green}) and **Plan Label Amber** ({colors.plan-label-amber}) for outcome labels on plan tiles, and **Blueprint Amber** ({colors.blueprint-amber}) for the Short rule round a plan tile and for eyebrows on blueprint.
+- **Marker Orange** ({colors.marker-orange}): the one colour that must read on any photo. Object outlines on evidence frames, the selected room's outline on the plan, the room to film on the gap request, the gap request's ticket edge and its record button.
+- **Link Green** ({colors.link-green}): links in running text.
 
 ### Tertiary (the outcomes)
-- **Approved Green** ({colors.approved-green}; {colors.approved-green-night} at night; {colors.approved-green-plan} on the plan): Verified. Solid fill.
-- **Shortfall Rust** ({colors.shortfall-rust}; {colors.shortfall-rust-night} at night; {colors.shortfall-rust-plan} on the plan) with **Shortfall Wash** ({colors.shortfall-wash}): Short. A rust outline round a pale wash. In the light theme it doubles as the link colour.
-- **Pencil Grey** ({colors.pencil-grey}; {colors.pencil-grey-night} at night): Not seen yet. A dashed outline over a 45° hatch, never a solid fill.
-- **Highlighter Yellow** ({colors.highlighter-yellow}) on **Highlighter Wash** ({colors.highlighter-wash}): a document's own words, quoted word for word.
+- **Verified Green** ({colors.verified-green}) on **Verified Tint** ({colors.verified-tint}): Verified. Solid fill.
+- **Short Amber** ({colors.short-amber}) with **Short Fill** ({colors.short-fill}) and **Short Panel** ({colors.short-panel}): Short. An outline round a pale fill; also warnings, errors and the "couldn't refresh" strip.
+- **Not Seen Slate** ({colors.not-seen-slate}): Not seen yet. A dashed outline over a 45° hatch, never a solid fill.
 
 ### Neutral
-- **Site Paper** ({colors.site-paper}): the light page ground, under a blueprint-tinted 24px grid.
-- **Sheet White** ({colors.sheet-white}): panels and inputs on Site Paper.
-- **Drafting Ink** ({colors.drafting-ink}): text, rules and the primary button. **Drafting Ink Soft** ({colors.drafting-ink-soft}) for secondary text, **Drafting Ink Muted** ({colors.drafting-ink-muted}) for labels and notes.
-- **Ruling Grey** ({colors.ruling-grey}): hairline dividers and quiet borders.
-- **Tag Paper** ({colors.tag-paper}): printed room tags and the printed report stay plain white, whatever the theme.
-- **Overlay** ({colors.overlay-ink} on {colors.overlay-bg}): small badges drawn over an evidence frame, where the photo underneath is unknown.
-- **Night Blueprint** ({colors.night-blueprint}), **Night Sheet** ({colors.night-sheet}), **Night Ink** ({colors.night-ink}) and **Night Ink Muted** ({colors.night-ink-muted}): the dark theme's ground, panels and text.
+- **Form Ground** ({colors.form-ground}): the page ground.
+- **Form Panel** ({colors.form-panel}): panels and inputs. **Ticket Paper** ({colors.ticket-paper}): the gap request's ticket. **Tag Paper** ({colors.tag-paper}): notice cards, printed room tags and the printed report, which stay plain white.
+- **Book Ink** ({colors.book-ink}): text and the focus ring. **Book Ink Soft** ({colors.book-ink-soft}) for secondary text, **Book Ink Muted** ({colors.book-ink-muted}) for labels, notes and placeholders.
+- **Printed Rule** ({colors.printed-rule}): the one hairline, on panels, dividers and the plan's unlit rooms. **Printed Rule Strong** ({colors.printed-rule-strong}) for input borders and quiet emphasis.
+- **The plan's greens**: **Plan Green** ({colors.plan-green}) and **Plan Deep** ({colors.plan-deep}) for the 3D stage, **Plan Line** ({colors.plan-line}) and **Plan Ink** ({colors.plan-ink}) for lines and names on it, **Plan Verified** ({colors.plan-verified}) and **Plan Short** ({colors.plan-short}) for room floors, with **Plan Label Verified** ({colors.plan-label-verified}), **Plan Label Short** ({colors.plan-label-short}) and **Plan Amber** ({colors.plan-amber}) for labels and the Short rule.
 
 ### Named Rules
-**The Three Stamps Rule.** Verified is solid, Short is outlined, Not seen yet is hatched. Every outcome mark carries its pattern and its word, so it survives sunlight, greyscale printing and colour blindness.
+**The Stamp Rule.** Violet means SiteProof's code checked it. A model's output, a builder's claim or a link is never violet.
 
-**The One Marker Rule.** Safety Orange marks evidence and the next action, nothing else. If two things on a screen are orange, one of them is wrong.
+**The Three Patterns Rule.** Verified is solid, Short is outlined, Not seen yet is dashed and hatched. Every outcome mark carries its pattern and its word, so it survives sunlight, greyscale printing and colour blindness.
+
+**The One Marker Rule.** Marker Orange outlines evidence or marks the one room to film. If two unrelated things on a screen are orange, one of them is wrong.
 
 ## Typography
 
-**Display Font:** Barlow Condensed (with Arial Narrow)
-**Body Font:** IBM Plex Sans (with system-ui)
-**Label/Mono Font:** IBM Plex Mono (with ui-monospace)
+**Display Font:** Anek Latin, condensed through its width axis (with Arial Narrow)
+**Body Font:** Mukta (with system-ui)
+**Reference Font:** the system monospace (ui-monospace, SF Mono, Menlo, Consolas)
 
-**Character:** Condensed drawing-sheet capitals for answers and headings, a sturdy engineering sans for sentences, and a monospace for anything that is a reference: a quote, a clip time, a tag code, a count.
+**Character:** Tall, condensed figures for answers and headings, like numbers entered in a ruled column; a warm, plain sans for every sentence, drawn for Indian languages as well as Latin; and a monospace for anything copied from somewhere else.
 
 ### Hierarchy
-Every size is a role token on `:root` (`--text-display` … `--text-label`); components use the token, never a raw pixel value.
-- **Display** (700, clamp(44px, 10vw, 72px), 0.95): the report's one answer, "9 of 12 windows verified". The word "of" drops to weight 500 in the muted ink. Tabular figures, so the count doesn't shift as it changes.
-- **Page** (700, clamp(40px, 9vw, 64px)): page titles, and the gap request's ask on the phone.
-- **Headline** (700, 36px, 1.05): a room's name in the evidence panel.
-- **Numeral** (700, 34px, tabular): counts on the plan, "2 / 4".
-- **Subhead** (600, 28px): callout titles, the gap request in the report, empty-frame titles. Balanced wrapping.
-- **Title** (600, 24px, uppercase, 0.03em): section heads such as ROOMS; also the outcome stamp at 0.1em.
-- **Minor head** (700, 20px): a flat's name over its tags, the phone screen's wordmark. **Brand** (26px) is the header wordmark only.
-- **Body** (400, 16px, 1.5): anything that is a sentence, from summaries to the query letter. Ledes run to about 640px. Pretty wrapping.
-- **Control** (600, 15px): buttons, toggles, chips, plan tile names.
-- **Small** (400, 14px): helper text, notes, captions, field errors.
-- **Ref** (mono 400, 13px): quotes, clip times, tag codes, the plan's title block.
-- **Label** (mono 400, 12px, uppercase, 0.08em): eyebrows, stat labels, status badges, outcome labels. **The floor: nothing in the app is smaller.**
-- **Data** (mono 500, 28px, tabular): the In the plan / Counted figures.
+Every size is a role token on `:root` (`--text-answer` … `--text-label`); components use the token, never a raw pixel value. Figures are tabular everywhere, so counts don't shift as they change.
+- **Answer** (800, clamp(64px, 16vw, 128px)): the report's one verified count, "9 of 12".
+- **Display** (800, clamp(44px, 10vw, 72px)) and **Page** (800, clamp(40px, 9vw, 64px)): page titles.
+- **Headline** (800, 36px): a room's name in the evidence panel. **Numeral** (800, 34px): counts.
+- **Subhead** (800, 28px): the gap request's ask, a notice's title, card titles. Balanced wrapping.
+- **Section** (800, 24px): section heads such as "Needs you" and "Room by room".
+- **Minor head** (700, 20px); **Brand** (700, 26px) is the wordmark only.
+- **Body** (Mukta 400, 16px, 1.5): anything that is a sentence.
+- **Control** (Mukta 600, 15px): buttons, toggles, chips, nav items.
+- **Small** (Mukta 400, 14px): helper text, notes, captions, field errors.
+- **Ref** (mono 13px): quotes, clip times, tag codes.
+- **Label** (Mukta 700, 12px, uppercase, 0.06em): eyebrows, stat labels, the ticket's field names. **The floor: nothing in the app is smaller.**
 
 ### Named Rules
-**The Provenance Rule.** Anything that came from somewhere (a quoted line, a clip time, a tag code) is set in mono. Anything SiteProof says in its own voice is set in sans.
+**The Provenance Rule.** Anything copied from somewhere (a quoted line, a clip time, a tag code) is set in mono. Anything SiteProof says in its own voice is set in sans.
 
 **The Twelve Floor Rule.** Nothing renders below 12px, and anything that is a sentence is 16px. On a site in direct sun, small type is the first thing to go.
 
 ## Layout
 
-Pages sit on a 1320px max container with 16px side gutters on phones and 24px from 640px up. Spacing steps are 4, 8, 12, 16, 20 and 28px; sibling groups use flex or grid with gap, and sections are 28px apart.
+On a computer (960px and up) the builder's pages sit beside a fixed 240px sidebar in Binding Green: All projects, then each project with its Overview, Upload and Report under it, then New project. The sidebar is the same on every page, so nothing moves when you switch. Above each page runs a light strip with where you are ("All projects › Northfield Residency, Tower B › Overview") and the page's own controls. Below 960px the sidebar gives way to a tab bar along the bottom edge: the project's three pages and Projects, or All projects and New project.
 
-The report runs in two columns that wrap: the room picker (plan or 3D) on the left at a basis of 440px, the evidence panel on the right at 560px and a larger share of the width. On a phone they stack, picker first. The plan is a 3-column grid at 640px and up, 2 columns below, with the first room spanning two cells; empty cells stay open blueprint.
+Pages sit in a 1240px container with 16px side gutters on phones and 24px from 640px up. Spacing steps are 4, 8, 12, 16, 20 and 28px; sibling groups use flex or grid with gap, and sections are 28px apart. Breakpoints are 520px (tight phone), 640px (gutters and two columns) and 960px (the sidebar).
 
-Forms and step pages narrow to 820px. On a phone the main action sticks to the bottom edge, full width, within thumb reach.
+The pages a buyer, a bank or a site supervisor opens from a link (the report link and the gap request) have no sidebar and no tab bar: a link opens one flat or one room and leads nowhere else in the app. The gap request is a single 560px column with its record button fixed to the bottom edge, full width.
 
 ### Named Rules
 **The Thumb Rule.** Every target is at least 44px tall, and on a phone the screen's main action is reachable without changing grip.
 
+**The Steady Shell Rule.** The sidebar and tab bar never change between a project's pages; only the highlighted item does.
+
 ## Elevation & Depth
 
-Flat. There are no drop shadows anywhere; depth comes from ink rules, tonal panels (Sheet White on Site Paper, Night Sheet on Night Blueprint) and the blueprint inserts. Inset box-shadows are used only as drawn lines: the Short outline, a selected chip's border and the wall lines of the plan.
+Mostly flat, with soft lift where something floats. Panels sit on the ground with a hairline and no shadow. Cards that stand alone (a notice, the gap request's ticket, the to-do list, the projects list's boxes) lift with a soft green-black shadow (0 10–12px 26–30px at 7–10%). The record button carries an orange glow (0 8px 20px, orange at 35%). Insets are drawn lines, not depth: the orange bar on the current nav item and the Short outline.
 
 ### Named Rules
-**The Flat Sheet Rule.** Nothing lifts. State is shown by fill, outline and pattern, never by elevation.
+**The Soft Lift Rule.** Only a card that stands on its own lifts. Rows, panels and anything inside a card stay flat.
 
 ## Shapes
 
-Every corner is square (0px): buttons, panels, inputs, tags, frames and plan rooms. Panels are bounded by 2px Drafting Ink rules in the light theme and 1px Tracing Line rules at night. The only angled element is the outcome stamp, rotated -5° with a double rule (a 3px border and a 1px outline 3px outside it), like a rubber stamp pressed by hand. Not seen yet's stamp and markers use a dashed line.
+Gently rounded. Status badges and tags at 4px, inputs and buttons at 6px, panels, nav items and the ticket at 8px, notice cards at 16px. Actions that lead somewhere (the next-step band, the header's controls, notices, the gap request) are pills (999px). The violet "checked" stamp is a circle, rotated -6°, and Not seen yet's stamp is dashed. The plan is drawn at an angle (isometric) with low walls, so rooms read as rooms without pretending to be to scale.
 
 ## Components
 
 ### Buttons
-- **Shape:** square (0px), 44px minimum height, 0 16px padding, 14px semi-bold label.
-- **Primary:** Drafting Ink fill, Site Paper text. The default action.
-- **Mark:** Safety Orange fill, Drafting Ink text. The one most important action on a screen.
-- **Secondary:** transparent with a 2px Drafting Ink rule.
-- **Focus:** a 3px Safety Orange outline, 2px offset. Disabled buttons drop to 55% opacity.
+- **Primary:** Binding Green fill, Binding Ink text, 6px corners, 44px tall, 0 16px padding. Hover goes to Binding Green Light.
+- **Secondary:** Form Panel fill with a 1px Book Ink border; hover goes white.
+- **Pill:** the same colours at 999px and 46px tall, for the next-step band, the header controls and notices.
+- **Record:** Marker Orange, full width, 60px, pill-shaped, with a camera icon and an orange glow. The gap request's one action.
+- **States:** a press nudges down 1px; disabled drops to 55%; focus is a 3px Book Ink outline, 2px offset (Binding Ink on the dark header).
 
-### Segmented toggles
-- **Style:** a 2px ink frame around flat segments; the active segment fills with Drafting Ink and Site Paper text and is marked `aria-pressed` or `aria-current`. Used for Builder / Buyer-bank view, Project / Upload / Report, Windows / Doors and Plan / 3D.
+### Navigation
+- **Sidebar item:** 44px, 8px corners, Binding Ink at 82% with a 20px icon. Hover lightens the background and keeps the light text. The current item gets a lighter fill, white text and an orange bar on its left edge.
+- **Tab bar:** icons over labels on Binding Green; the current tab has an orange line along its top.
+- **Crumbs:** on the light strip, chevrons between, the current page in Book Ink.
 
 ### Panels
-- **Corner Style:** square.
-- **Background:** Sheet White (Night Sheet at night).
-- **Border:** 2px Drafting Ink (1px Tracing Line at 45% at night).
-- **Internal Padding:** 18px 20px.
+- **Background:** Form Panel, a 1px Printed Rule border, 8px corners, 18px 20px padding, no shadow.
 
 ### Inputs / Fields
-- **Style:** 48px tall, 2px ink rule, Sheet White fill, square, 16px text so phones don't zoom.
-- **Focus:** the Safety Orange focus ring.
-- **Error:** the rule turns Shortfall Rust and a rust message sits under the field.
+- **Style:** 48px tall, 1px Printed Rule Strong border, Form Panel fill, 6px corners, 16px text so phones don't zoom. The label sits above in Small, semi-bold.
+- **Error:** the border turns Short Amber and a message sits under the field.
+- **Room chips:** rooms typed into New project become removable chips; Enter or a comma adds one.
 
 ### Status badges
-- **Style:** 12px mono uppercase in a 1.5px outline of its own colour. Uploaded is muted, Processing is dashed, Done is Approved Green, Failed is Shortfall Rust on its wash.
+- **Style:** 13px semi-bold in a 1.5px outline of its own colour, 4px corners. Processing is violet and dashed, Done is Verified Green filled, Failed is Short Amber on its panel.
 
-### Outcome stamp (signature)
-The room's verdict at the head of the evidence panel: Barlow Condensed 700, 24px, 0.1em tracking, uppercase, rotated -5°, double-ruled in the outcome's colour. Not seen yet's stamp is dashed.
+### Notice (signature)
+Every dead end uses one card: a broken or replaced link, a project that isn't there, no connection, the 404. White, 16px corners, a soft lift, centred: a 68px icon in a circle, a Subhead title, one plain sentence on what to do, and at most two pill buttons. Server trouble and errors turn the icon Short Amber. A report link's notice has no button at all.
+
+### Gap request ticket (signature)
+The site supervisor's page is a job ticket on Ticket Paper with a 6px orange edge: "Footage needed" in amber capitals, Flat and Room in boxes, a small plan of the flat with the room to film lit orange and pinned ("Plan not to scale"), the request's own sentence, and the steps numbered 01, 02, 03 on ruled lines.
 
 ### The plan (signature)
-A blueprint sheet: Blueprint Navy under a 20px grid, rooms as tiles walled in Tracing Line, each tile filled by its outcome (Approved Green Plan, Shortfall Rust Plan with an orange inner rule, or the navy hatch), with the room name, the count in Numeral and the outcome in a small uppercase label. A title block of mono cells runs along its foot. The selected room gets a 4px Safety Orange outline inset 10px.
+The flat drawn at an angle: each room a floor tile coloured by its outcome, with low walls, far outer walls drawn full height, windows and doors as markers set into or standing on the walls, and a pill label with a state dot. The selected room gets a Binding Green label and an orange floor outline. The projects list draws a tiny flat version of the same plan for each flat.
 
 ### Evidence frame (signature)
-The best frame for each counted object, drawn at its real size with the object's mask painted over it as a Safety Orange fill at 25% and a solid Safety Orange outline. A small mono badge in the corner reads "Tracked · 2 outlined". A room that is Not seen yet shows a dashed, hatched box with "No complete sweep yet" instead of a frame.
+The best frame for each counted object at its real size, the object's mask in Marker Orange at 25% with a solid orange outline. A small badge in the corner says how many are outlined. A room that is Not seen yet shows a dashed, hatched box instead of a frame.
 
 ### Tally bar
-One segment per claimed item, 22px tall with 4px gaps, in claim order: Verified solid green, then Short outlined rust, then Not seen yet hatched grey. A legend repeats the counts in words.
+One segment per claimed item, in claim order: Verified solid green, Short outlined amber, Not seen yet hatched. A legend repeats the counts in words.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep every corner square (0px) and every panel ruled in 2px Drafting Ink.
-- **Do** give each outcome its fill, its pattern and its word together: solid Verified, outlined Short, hatched Not seen yet.
-- **Do** set quotes, clip times and tag codes in IBM Plex Mono, with quotes on Highlighter Yellow.
-- **Do** keep the plan, the 3D stage and the gap-request screen on the blueprint in both themes.
+- **Do** keep the sidebar and tab bar identical on every page of a project.
+- **Do** give each outcome its fill, its pattern and its word together: solid Verified, outlined Short, dashed and hatched Not seen yet.
+- **Do** keep violet for what code has checked: matched quotes, counts with frames, re-checked citations.
+- **Do** set quotes, clip times and tag codes in mono, with quotes on Stamp Violet Tint.
+- **Do** say "Plan not to scale" wherever the plan points at a room, and mark the room, never a spot in it.
 - **Do** keep touch targets at 44px or taller; set sentences at 16px and nothing below 12px.
 
 ### Don't:
-- **Don't** add drop shadows, rounded corners or gradients; state is fill, outline and pattern.
-- **Don't** use Safety Orange for decoration or for more than one action on a screen.
+- **Don't** use violet for a model's output, a builder's claim or decoration.
+- **Don't** use Marker Orange for more than evidence and the room to film.
 - **Don't** show Not seen yet as a number or a zero; its count is "–".
 - **Don't** tell outcomes apart by colour alone.
-- **Don't** add motion beyond progress and the 3D camera; respect reduced motion.
+- **Don't** shadow rows or panels; only standalone cards lift.
+- **Don't** put a sidebar, tab bar or link into the builder's pages on a buyer's, bank's or supervisor's link page.
+- **Don't** add motion beyond progress, a card rising in, a stamp pressing and the 3D camera; respect reduced motion.

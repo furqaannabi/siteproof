@@ -1,472 +1,457 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-28T02:19:29.354Z",
+  "generatedAt": "2026-10-28T20:17:10.193Z",
   "title": "Design System: SiteProof",
   "extensions": {
     "colorMeta": {
-      "safety-orange": {
+      "binding-green": {
         "role": "primary",
-        "displayName": "Safety Orange",
-        "canonical": "oklch(64.4% 0.192 41.7)",
+        "displayName": "Binding Green",
+        "canonical": "oklch(37.3% 0.056 170.1)",
         "tonalRamp": [
-          "#150703",
-          "#401706",
-          "#732500",
-          "#aa3200",
-          "#d15720",
-          "#e38b69",
-          "#f2bba6",
-          "#ffe9e0"
+          "#001009",
+          "#012d21",
+          "#1f4c3d",
+          "#3f6c5c",
+          "#608d7d",
+          "#82b1a0",
+          "#a6d5c4",
+          "#cbfbe9"
         ]
       },
-      "safety-orange-night": {
+      "binding-green-light": {
         "role": "primary",
-        "displayName": "Safety Orange (night)",
-        "canonical": "oklch(68.4% 0.185 44.9)",
+        "displayName": "Binding Green Light",
+        "canonical": "oklch(43.8% 0.062 170.4)",
         "tonalRamp": [
-          "#150703",
-          "#3f1805",
-          "#712700",
-          "#a73700",
-          "#ce5b1b",
-          "#e08d67",
-          "#f0bca5",
-          "#ffe9e0"
+          "#001009",
+          "#002d21",
+          "#184c3d",
+          "#3a6d5c",
+          "#5b8f7d",
+          "#7eb29f",
+          "#a1d7c3",
+          "#c6fde9"
         ]
       },
-      "site-paper": {
+      "binding-ink": {
+        "role": "primary",
+        "displayName": "Binding Ink",
+        "canonical": "oklch(95.1% 0.011 158.8)",
+        "tonalRamp": [
+          "#080d09",
+          "#212723",
+          "#3d4440",
+          "#5c635f",
+          "#7d8480",
+          "#a0a7a2",
+          "#c4cbc6",
+          "#e9f1ec"
+        ]
+      },
+      "form-ground": {
         "role": "neutral",
-        "displayName": "Site Paper",
-        "canonical": "oklch(95.9% 0.010 87.5)",
+        "displayName": "Form Ground",
+        "canonical": "oklch(95.7% 0.008 139.4)",
         "tonalRamp": [
-          "#0b0b0a",
-          "#262523",
-          "#43423e",
-          "#63615c",
-          "#84827d",
-          "#a7a5a1",
-          "#cac9c6",
-          "#efeeed"
+          "#090c09",
+          "#232622",
+          "#40433f",
+          "#5f625e",
+          "#80837f",
+          "#a2a6a2",
+          "#c6cac6",
+          "#ecf0eb"
         ]
       },
-      "sheet-white": {
+      "form-panel": {
         "role": "neutral",
-        "displayName": "Sheet White",
-        "canonical": "oklch(99.4% 0.007 88.6)",
+        "displayName": "Form Panel",
+        "canonical": "oklch(98.2% 0.006 128.5)",
         "tonalRamp": [
-          "#0b0b0b",
-          "#252524",
-          "#43423f",
-          "#62615d",
-          "#84827e",
-          "#a6a5a2",
-          "#cac9c7",
-          "#efeeee"
+          "#0a0c09",
+          "#242623",
+          "#41433f",
+          "#60625e",
+          "#81837f",
+          "#a4a6a2",
+          "#c8cac6",
+          "#edefeb"
         ]
       },
-      "drafting-ink": {
+      "ticket-paper": {
         "role": "neutral",
-        "displayName": "Drafting Ink",
-        "canonical": "oklch(23.1% 0.006 91.6)",
-        "tonalRamp": [
-          "#0b0b0b",
-          "#252524",
-          "#434240",
-          "#62615e",
-          "#83827f",
-          "#a6a5a2",
-          "#c9c9c7",
-          "#efeeee"
-        ]
-      },
-      "drafting-ink-soft": {
-        "role": "neutral",
-        "displayName": "Drafting Ink Soft",
-        "canonical": "oklch(35.3% 0.011 84.6)",
-        "tonalRamp": [
-          "#0b0b0a",
-          "#262523",
-          "#44423e",
-          "#64615b",
-          "#85827c",
-          "#a7a5a0",
-          "#cac9c6",
-          "#efeeed"
-        ]
-      },
-      "drafting-ink-muted": {
-        "role": "neutral",
-        "displayName": "Drafting Ink Muted",
-        "canonical": "oklch(46.2% 0.014 84.6)",
-        "tonalRamp": [
-          "#0c0b0a",
-          "#262522",
-          "#44423d",
-          "#64615a",
-          "#86827a",
-          "#a7a59f",
-          "#cac9c5",
-          "#efeeed"
-        ]
-      },
-      "ruling-grey": {
-        "role": "neutral",
-        "displayName": "Ruling Grey",
-        "canonical": "oklch(84.0% 0.015 84.6)",
-        "tonalRamp": [
-          "#0c0b0a",
-          "#262522",
-          "#44423d",
-          "#656159",
-          "#86827a",
-          "#a8a59f",
-          "#cbc9c5",
-          "#efeeed"
-        ]
-      },
-      "blueprint-navy": {
-        "role": "secondary",
-        "displayName": "Blueprint Navy",
-        "canonical": "oklch(35.1% 0.095 257.1)",
-        "tonalRamp": [
-          "#080b11",
-          "#1a2636",
-          "#2d4361",
-          "#426290",
-          "#6284b4",
-          "#8ea7ca",
-          "#bbcae0",
-          "#e9eff8"
-        ]
-      },
-      "blueprint-deep": {
-        "role": "secondary",
-        "displayName": "Blueprint Deep",
-        "canonical": "oklch(28.7% 0.075 257.1)",
-        "tonalRamp": [
-          "#080b10",
-          "#1c2632",
-          "#32435b",
-          "#496287",
-          "#6984aa",
-          "#93a7c3",
-          "#becadb",
-          "#eaeff6"
-        ]
-      },
-      "night-blueprint": {
-        "role": "neutral",
-        "displayName": "Night Blueprint",
-        "canonical": "oklch(22.1% 0.047 255.9)",
-        "tonalRamp": [
-          "#090b0e",
-          "#20262d",
-          "#384352",
-          "#526379",
-          "#73849b",
-          "#99a6b7",
-          "#c2cad4",
-          "#ebeff3"
-        ]
-      },
-      "night-sheet": {
-        "role": "neutral",
-        "displayName": "Night Sheet",
-        "canonical": "oklch(26.6% 0.058 254.7)",
-        "tonalRamp": [
-          "#090b0f",
-          "#1e262f",
-          "#354355",
-          "#4e637e",
-          "#6e84a1",
-          "#96a7bc",
-          "#c0cad7",
-          "#ebeff4"
-        ]
-      },
-      "tracing-line": {
-        "role": "secondary",
-        "displayName": "Tracing Line",
-        "canonical": "oklch(92.8% 0.024 250.1)",
-        "tonalRamp": [
-          "#0a0b0d",
-          "#222529",
-          "#3c434a",
-          "#59626d",
-          "#79848f",
-          "#9ea6ae",
-          "#c5cacf",
-          "#edeff1"
-        ]
-      },
-      "night-ink": {
-        "role": "neutral",
-        "displayName": "Night Ink",
-        "canonical": "oklch(94.7% 0.011 252.1)",
-        "tonalRamp": [
-          "#0b0b0c",
-          "#242527",
-          "#3f4246",
-          "#5d6267",
-          "#7e8388",
-          "#a2a5a9",
-          "#c7c9cc",
-          "#eeeeef"
-        ]
-      },
-      "night-ink-muted": {
-        "role": "neutral",
-        "displayName": "Night Ink Muted",
-        "canonical": "oklch(75.0% 0.038 252.2)",
-        "tonalRamp": [
-          "#090b0e",
-          "#20262c",
-          "#39434e",
-          "#546374",
-          "#748496",
-          "#9ba6b4",
-          "#c3cad2",
-          "#eceff2"
-        ]
-      },
-      "approved-green": {
-        "role": "tertiary",
-        "displayName": "Approved Green",
-        "canonical": "oklch(47.5% 0.100 147.7)",
-        "tonalRamp": [
-          "#070d08",
-          "#192a1b",
-          "#2a4b2f",
-          "#3c6f44",
-          "#5d9164",
-          "#8bb08f",
-          "#bad0bc",
-          "#e8f1e9"
-        ]
-      },
-      "approved-green-night": {
-        "role": "tertiary",
-        "displayName": "Approved Green (night)",
-        "canonical": "oklch(78.1% 0.134 151.9)",
-        "tonalRamp": [
-          "#050e07",
-          "#102c19",
-          "#174e2b",
-          "#1b733e",
-          "#44965e",
-          "#7db48b",
-          "#b2d3ba",
-          "#e5f3e8"
-        ]
-      },
-      "approved-green-plan": {
-        "role": "tertiary",
-        "displayName": "Approved Green (plan)",
-        "canonical": "oklch(41.1% 0.059 187.0)",
-        "tonalRamp": [
-          "#070c0c",
-          "#192927",
-          "#2b4845",
-          "#3d6b66",
-          "#5e8d87",
-          "#8cada9",
-          "#bacecb",
-          "#e8f0ef"
-        ]
-      },
-      "shortfall-rust": {
-        "role": "tertiary",
-        "displayName": "Shortfall Rust",
-        "canonical": "oklch(53.4% 0.157 41.7)",
-        "tonalRamp": [
-          "#140804",
-          "#3c1a0d",
-          "#6b2c12",
-          "#9f3f14",
-          "#c5623a",
-          "#d99075",
-          "#ebbead",
-          "#fdeae2"
-        ]
-      },
-      "shortfall-rust-night": {
-        "role": "tertiary",
-        "displayName": "Shortfall Rust (night)",
-        "canonical": "oklch(77.9% 0.144 50.8)",
-        "tonalRamp": [
-          "#120804",
-          "#391d0b",
-          "#66320d",
-          "#974807",
-          "#bd6934",
-          "#d29572",
-          "#e6c0ab",
-          "#fbebe2"
-        ]
-      },
-      "shortfall-wash": {
-        "role": "tertiary",
-        "displayName": "Shortfall Wash",
-        "canonical": "oklch(93.1% 0.035 57.6)",
-        "tonalRamp": [
-          "#0d0b09",
-          "#2a241f",
-          "#4b3f37",
-          "#6f5d50",
-          "#917e71",
-          "#b0a298",
-          "#d0c7c1",
-          "#f1eeeb"
-        ]
-      },
-      "shortfall-rust-plan": {
-        "role": "tertiary",
-        "displayName": "Shortfall Rust (plan)",
-        "canonical": "oklch(37.2% 0.061 44.5)",
-        "tonalRamp": [
-          "#0f0a08",
-          "#2f221c",
-          "#533c31",
-          "#7b5848",
-          "#9e7968",
-          "#ba9e92",
-          "#d7c5bd",
-          "#f4ede9"
-        ]
-      },
-      "pencil-grey": {
-        "role": "tertiary",
-        "displayName": "Pencil Grey",
-        "canonical": "oklch(41.4% 0.013 81.8)",
-        "tonalRamp": [
-          "#0c0b0a",
-          "#262523",
-          "#44423d",
-          "#64615a",
-          "#86827b",
-          "#a7a5a0",
-          "#cbc9c6",
-          "#efeeed"
-        ]
-      },
-      "pencil-grey-night": {
-        "role": "tertiary",
-        "displayName": "Pencil Grey (night)",
-        "canonical": "oklch(82.4% 0.029 251.5)",
-        "tonalRamp": [
-          "#0a0b0d",
-          "#21252a",
-          "#3b434b",
-          "#576370",
-          "#788491",
-          "#9da6b0",
-          "#c4cad0",
-          "#eceff1"
-        ]
-      },
-      "highlighter-yellow": {
-        "role": "tertiary",
-        "displayName": "Highlighter Yellow",
-        "canonical": "oklch(93.3% 0.084 89.6)",
-        "tonalRamp": [
-          "#0d0b06",
-          "#2b2413",
-          "#4d4120",
-          "#725f2c",
-          "#94804d",
-          "#b2a480",
-          "#d1c9b3",
-          "#f2eee5"
-        ]
-      },
-      "highlighter-wash": {
-        "role": "tertiary",
-        "displayName": "Highlighter Wash",
-        "canonical": "oklch(96.2% 0.062 95.4)",
+        "displayName": "Ticket Paper",
+        "canonical": "oklch(99.4% 0.008 91.5)",
         "tonalRamp": [
           "#0c0b07",
-          "#282518",
-          "#48422a",
-          "#6b613d",
-          "#8c825d",
-          "#aca58a",
-          "#cdc9b9",
+          "#262521",
+          "#43423d",
+          "#63615c",
+          "#84827d",
+          "#a7a59f",
+          "#cbc9c3",
           "#f0eee8"
         ]
       },
-      "blueprint-amber": {
-        "role": "secondary",
-        "displayName": "Blueprint Amber",
-        "canonical": "oklch(77.4% 0.133 56.7)",
+      "book-ink": {
+        "role": "neutral",
+        "displayName": "Book Ink",
+        "canonical": "oklch(23.1% 0.018 165.1)",
         "tonalRamp": [
-          "#120904",
-          "#371e0b",
-          "#62350d",
-          "#914d08",
-          "#b66e35",
-          "#cd9872",
-          "#e3c2ab",
-          "#faebe2"
+          "#040e09",
+          "#1d2823",
+          "#394540",
+          "#58655f",
+          "#798680",
+          "#9ba9a2",
+          "#bfcdc6",
+          "#e4f3eb"
         ]
       },
-      "tracing-line-soft": {
-        "role": "secondary",
-        "displayName": "Tracing Line Soft",
-        "canonical": "oklch(85.8% 0.024 250.1)",
+      "book-ink-soft": {
+        "role": "neutral",
+        "displayName": "Book Ink Soft",
+        "canonical": "oklch(39.4% 0.021 163.6)",
         "tonalRamp": [
-          "#0a0b0d",
-          "#222529",
-          "#3c434a",
-          "#58626d",
-          "#79848f",
-          "#9ea6ae",
-          "#c5cacf",
-          "#edeff1"
+          "#040e09",
+          "#1b2822",
+          "#38463f",
+          "#57655e",
+          "#77877f",
+          "#9aa9a1",
+          "#bdcec5",
+          "#e2f3ea"
+        ]
+      },
+      "book-ink-muted": {
+        "role": "neutral",
+        "displayName": "Book Ink Muted",
+        "canonical": "oklch(48.9% 0.020 164.0)",
+        "tonalRamp": [
+          "#040e09",
+          "#1c2822",
+          "#38463f",
+          "#57655e",
+          "#78867f",
+          "#9aa9a2",
+          "#becec6",
+          "#e3f3eb"
+        ]
+      },
+      "printed-rule": {
+        "role": "neutral",
+        "displayName": "Printed Rule",
+        "canonical": "oklch(75.8% 0.036 162.9)",
+        "tonalRamp": [
+          "#001007",
+          "#132b20",
+          "#30483c",
+          "#4f685b",
+          "#70897c",
+          "#92ac9f",
+          "#b5d1c2",
+          "#daf6e8"
+        ]
+      },
+      "printed-rule-strong": {
+        "role": "neutral",
+        "displayName": "Printed Rule Strong",
+        "canonical": "oklch(48.2% 0.071 168.9)",
+        "tonalRamp": [
+          "#001008",
+          "#002d20",
+          "#0b4e3b",
+          "#326e5a",
+          "#55907b",
+          "#77b49d",
+          "#9bd9c1",
+          "#c0ffe6"
+        ]
+      },
+      "link-green": {
+        "role": "secondary",
+        "displayName": "Link Green",
+        "canonical": "oklch(43.0% 0.070 169.1)",
+        "tonalRamp": [
+          "#001008",
+          "#002d20",
+          "#0c4e3b",
+          "#336e5a",
+          "#55907b",
+          "#78b49d",
+          "#9cd8c1",
+          "#c0fee6"
+        ]
+      },
+      "stamp-violet": {
+        "role": "primary",
+        "displayName": "Stamp Violet",
+        "canonical": "oklch(44.3% 0.145 294.0)",
+        "tonalRamp": [
+          "#10002e",
+          "#2d0062",
+          "#492a86",
+          "#684caa",
+          "#886ed0",
+          "#ab91f6",
+          "#ccbffe",
+          "#efecfe"
+        ]
+      },
+      "stamp-violet-tint": {
+        "role": "primary",
+        "displayName": "Stamp Violet Tint",
+        "canonical": "oklch(93.5% 0.024 301.9)",
+        "tonalRamp": [
+          "#0d0913",
+          "#27222f",
+          "#443f4d",
+          "#635e6d",
+          "#857f8e",
+          "#a7a2b2",
+          "#ccc6d6",
+          "#f1ebfc"
+        ]
+      },
+      "verified-green": {
+        "role": "tertiary",
+        "displayName": "Verified Green",
+        "canonical": "oklch(47.1% 0.096 157.3)",
+        "tonalRamp": [
+          "#001004",
+          "#002e18",
+          "#02502e",
+          "#27714b",
+          "#4b946b",
+          "#6fb78d",
+          "#93ddb0",
+          "#c5fedb"
+        ]
+      },
+      "verified-tint": {
+        "role": "tertiary",
+        "displayName": "Verified Tint",
+        "canonical": "oklch(93.5% 0.026 158.2)",
+        "tonalRamp": [
+          "#030e07",
+          "#1a2920",
+          "#37463d",
+          "#55665c",
+          "#76877d",
+          "#98aa9f",
+          "#bccfc3",
+          "#e1f4e8"
+        ]
+      },
+      "short-amber": {
+        "role": "tertiary",
+        "displayName": "Short Amber",
+        "canonical": "oklch(53.2% 0.129 55.0)",
+        "tonalRamp": [
+          "#1c0300",
+          "#3d1a00",
+          "#663202",
+          "#934b08",
+          "#bc6b2a",
+          "#e28e50",
+          "#fcb88a",
+          "#ffeadd"
+        ]
+      },
+      "short-fill": {
+        "role": "tertiary",
+        "displayName": "Short Fill",
+        "canonical": "oklch(93.6% 0.033 73.2)",
+        "tonalRamp": [
+          "#130900",
+          "#2f2212",
+          "#4d3f2e",
+          "#6d5f4c",
+          "#8f806d",
+          "#b2a28f",
+          "#d7c6b2",
+          "#fdecd7"
+        ]
+      },
+      "short-panel": {
+        "role": "tertiary",
+        "displayName": "Short Panel",
+        "canonical": "oklch(96.3% 0.018 70.2)",
+        "tonalRamp": [
+          "#100a04",
+          "#2b241b",
+          "#484038",
+          "#686056",
+          "#8a8177",
+          "#ada399",
+          "#d1c7bd",
+          "#f7ede2"
+        ]
+      },
+      "not-seen-slate": {
+        "role": "tertiary",
+        "displayName": "Not Seen Slate",
+        "canonical": "oklch(45.4% 0.020 167.7)",
+        "tonalRamp": [
+          "#040e09",
+          "#1c2823",
+          "#384640",
+          "#57655f",
+          "#778680",
+          "#9aa9a2",
+          "#bdcec6",
+          "#e3f3ec"
+        ]
+      },
+      "marker-orange": {
+        "role": "secondary",
+        "displayName": "Marker Orange",
+        "canonical": "oklch(72.4% 0.187 48.9)",
+        "tonalRamp": [
+          "#1d0200",
+          "#401700",
+          "#6c2d00",
+          "#9b4400",
+          "#cb5f0f",
+          "#fe7919",
+          "#fdb792",
+          "#ffeadf"
+        ]
+      },
+      "plan-green": {
+        "role": "neutral",
+        "displayName": "Plan Green",
+        "canonical": "oklch(37.3% 0.056 170.1)",
+        "tonalRamp": [
+          "#001009",
+          "#012d21",
+          "#1f4c3d",
+          "#3f6c5c",
+          "#608d7d",
+          "#82b1a0",
+          "#a6d5c4",
+          "#cbfbe9"
+        ]
+      },
+      "plan-deep": {
+        "role": "neutral",
+        "displayName": "Plan Deep",
+        "canonical": "oklch(29.6% 0.045 166.9)",
+        "tonalRamp": [
+          "#001008",
+          "#0a2c20",
+          "#294a3d",
+          "#486a5c",
+          "#698b7d",
+          "#8bae9f",
+          "#aed3c3",
+          "#d3f9e8"
+        ]
+      },
+      "plan-line": {
+        "role": "neutral",
+        "displayName": "Plan Line",
+        "canonical": "oklch(89.8% 0.026 161.9)",
+        "tonalRamp": [
+          "#020e08",
+          "#192921",
+          "#36463e",
+          "#55665d",
+          "#75877e",
+          "#97aaa0",
+          "#bbcfc4",
+          "#e0f4e9"
         ]
       },
       "plan-ink": {
-        "role": "secondary",
+        "role": "neutral",
         "displayName": "Plan Ink",
-        "canonical": "oklch(97.7% 0.007 247.9)",
+        "canonical": "oklch(97.3% 0.008 157.1)",
         "tonalRamp": [
-          "#0b0b0c",
-          "#242526",
-          "#404244",
-          "#5f6264",
-          "#808386",
-          "#a3a5a8",
-          "#c8c9cb",
-          "#eeeeef"
+          "#080c0a",
+          "#222623",
+          "#3f4340",
+          "#5e635f",
+          "#7e8480",
+          "#a1a7a3",
+          "#c5cbc7",
+          "#eaf0ec"
         ]
       },
-      "plan-label-green": {
-        "role": "tertiary",
-        "displayName": "Plan Label Green",
-        "canonical": "oklch(86.4% 0.107 152.4)",
+      "plan-verified": {
+        "role": "neutral",
+        "displayName": "Plan Verified",
+        "canonical": "oklch(47.7% 0.081 162.4)",
         "tonalRamp": [
-          "#060d08",
-          "#152b1c",
-          "#234c30",
-          "#317046",
-          "#549367",
-          "#86b291",
-          "#b7d1bd",
-          "#e7f2e9"
+          "#001006",
+          "#002d1c",
+          "#034f35",
+          "#2f6f53",
+          "#529274",
+          "#75b596",
+          "#99dab9",
+          "#c2ffe0"
         ]
       },
-      "plan-label-amber": {
-        "role": "tertiary",
-        "displayName": "Plan Label Amber",
-        "canonical": "oklch(82.7% 0.115 57.2)",
+      "plan-short": {
+        "role": "neutral",
+        "displayName": "Plan Short",
+        "canonical": "oklch(41.8% 0.075 56.9)",
         "tonalRamp": [
-          "#110905",
-          "#34200f",
-          "#5e3718",
-          "#8b511f",
-          "#af7242",
-          "#c89a79",
-          "#dfc3af",
-          "#f8ece4"
+          "#1b0400",
+          "#3d1a00",
+          "#5f3615",
+          "#825635",
+          "#a57755",
+          "#ca9977",
+          "#f0bd9a",
+          "#ffeadc"
+        ]
+      },
+      "plan-label-verified": {
+        "role": "neutral",
+        "displayName": "Plan Label Verified",
+        "canonical": "oklch(88.6% 0.091 155.7)",
+        "tonalRamp": [
+          "#001004",
+          "#002e17",
+          "#02502c",
+          "#2e704b",
+          "#51936b",
+          "#74b68d",
+          "#98dbb0",
+          "#c5ffd9"
+        ]
+      },
+      "plan-label-short": {
+        "role": "neutral",
+        "displayName": "Plan Label Short",
+        "canonical": "oklch(85.4% 0.113 69.9)",
+        "tonalRamp": [
+          "#180600",
+          "#371f00",
+          "#5d3901",
+          "#865506",
+          "#ad7529",
+          "#d29850",
+          "#f9bc74",
+          "#feebd6"
+        ]
+      },
+      "plan-amber": {
+        "role": "neutral",
+        "displayName": "Plan Amber",
+        "canonical": "oklch(78.5% 0.129 63.9)",
+        "tonalRamp": [
+          "#190500",
+          "#391d00",
+          "#603601",
+          "#8b5106",
+          "#b76f19",
+          "#dd9245",
+          "#fbba7c",
+          "#feebd9"
         ]
       },
       "tag-paper": {
@@ -483,31 +468,20 @@
           "#c9c9c9",
           "#eeeeee"
         ]
-      },
-      "overlay-ink": {
-        "role": "neutral",
-        "displayName": "Overlay Ink",
-        "canonical": "oklch(92.3% 0.013 86.8)",
-        "tonalRamp": [
-          "#0b0b0a",
-          "#262522",
-          "#44423d",
-          "#64615a",
-          "#85827b",
-          "#a7a59f",
-          "#cac9c6",
-          "#efeeed"
-        ]
       }
     },
     "typographyMeta": {
+      "answer": {
+        "displayName": "Answer",
+        "purpose": "The report's one verified count, such as \"9 of 12\"."
+      },
       "display": {
         "displayName": "Display",
-        "purpose": "The report's one answer, such as \"9 of 12 windows verified\"."
+        "purpose": "Page titles at their largest."
       },
       "page": {
         "displayName": "Page",
-        "purpose": "Page titles and the gap request's ask on the phone."
+        "purpose": "Page titles."
       },
       "headline": {
         "displayName": "Headline",
@@ -515,23 +489,23 @@
       },
       "numeral": {
         "displayName": "Numeral",
-        "purpose": "Counts on the plan, such as \"2 / 4\"; tabular."
+        "purpose": "Counts, tabular."
       },
       "subhead": {
         "displayName": "Subhead",
-        "purpose": "Callout titles and the gap request in the report."
+        "purpose": "The gap request's ask, a notice's title, card titles."
       },
       "brand": {
         "displayName": "Brand",
-        "purpose": "The header wordmark only."
+        "purpose": "The wordmark only."
       },
-      "title": {
-        "displayName": "Title",
-        "purpose": "Uppercase section heads such as ROOMS."
+      "section": {
+        "displayName": "Section",
+        "purpose": "Section heads such as \"Needs you\" and \"Room by room\"."
       },
       "minor-head": {
-        "displayName": "Minor head",
-        "purpose": "A flat's name over its tags; the phone wordmark."
+        "displayName": "Minor Head",
+        "purpose": "Small headings inside panels."
       },
       "body": {
         "displayName": "Body",
@@ -539,7 +513,7 @@
       },
       "control": {
         "displayName": "Control",
-        "purpose": "Buttons, toggles, chips, plan tile names."
+        "purpose": "Buttons, toggles, chips, nav items."
       },
       "small": {
         "displayName": "Small",
@@ -547,23 +521,55 @@
       },
       "ref": {
         "displayName": "Ref",
-        "purpose": "Mono references: quotes, clip times, tag codes."
+        "purpose": "Quotes, clip times, tag codes: anything copied from somewhere."
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Uppercase mono labels; the 12px floor."
-      },
-      "data": {
-        "displayName": "Data",
-        "purpose": "In the plan / Counted figures; tabular."
+        "purpose": "Eyebrows, stat labels, the ticket's field names. The floor: nothing is smaller."
       }
     },
-    "shadows": [],
+    "shadows": [
+      {
+        "name": "card-lift",
+        "value": "0 12px 30px rgba(21, 32, 27, 0.08)",
+        "purpose": "Standalone cards: notices, the to-do list, the projects boxes."
+      },
+      {
+        "name": "ticket-lift",
+        "value": "0 12px 28px rgba(21, 32, 27, 0.1)",
+        "purpose": "The gap request's ticket."
+      },
+      {
+        "name": "record-glow",
+        "value": "0 8px 20px rgba(255, 122, 26, 0.35)",
+        "purpose": "The record button only."
+      },
+      {
+        "name": "nav-current",
+        "value": "inset 3px 0 0 #ff7a1a",
+        "purpose": "The current sidebar item's orange bar; a drawn line, not depth."
+      }
+    ],
     "motion": [
+      {
+        "name": "nav-hover",
+        "value": "background-color 120ms ease",
+        "purpose": "Sidebar and tab bar items."
+      },
       {
         "name": "progress",
         "value": "width 120ms linear",
-        "purpose": "Upload progress bars only."
+        "purpose": "Upload progress bars."
+      },
+      {
+        "name": "rise",
+        "value": "400ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "A notice or ticket rising 10-12px into place."
+      },
+      {
+        "name": "stamp-press",
+        "value": "420ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The checked stamp pressing down."
       },
       {
         "name": "camera-fly",
@@ -573,7 +579,7 @@
     ],
     "breakpoints": [
       {
-        "name": "phone-legend",
+        "name": "tight-phone",
         "value": "520px"
       },
       {
@@ -581,8 +587,8 @@
         "value": "640px"
       },
       {
-        "name": "md",
-        "value": "900px"
+        "name": "sidebar",
+        "value": "960px"
       }
     ]
   },
@@ -591,97 +597,96 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The default action: ink on paper.",
-      "html": "<button class=\"ds-btn-primary\">Open the report</button>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; font-family: var(--font-body, 'IBM Plex Sans', system-ui, sans-serif); font-weight: 600; font-size: 15px; border: 0; border-radius: 0; cursor: pointer; background: var(--inverse-bg, #1e1d1a); color: var(--inverse-ink, #f4f1ea); } .ds-btn-primary:hover { background: #3e3b35; } .ds-btn-primary:focus-visible { outline: 3px solid var(--mark, #e8590c); outline-offset: 2px; }"
-    },
-    {
-      "name": "Mark Button",
-      "kind": "button",
-      "refersTo": "button-mark",
-      "description": "The one most important action on a screen, in Safety Orange.",
-      "html": "<button class=\"ds-btn-mark\"><svg aria-hidden=\"true\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 8h3l2-3h8l2 3h3v11H3z\"/><circle cx=\"12\" cy=\"13\" r=\"3.5\"/></svg>Record or upload clip</button>",
-      "css": ".ds-btn-mark { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; font-family: var(--font-body, 'IBM Plex Sans', system-ui, sans-serif); font-weight: 600; font-size: 15px; border: 0; border-radius: 0; cursor: pointer; background: var(--mark, #e8590c); color: var(--mark-ink, #1e1d1a); } .ds-btn-mark:hover { filter: brightness(1.06); } .ds-btn-mark:focus-visible { outline: 3px solid var(--ink, #1e1d1a); outline-offset: 2px; }"
+      "description": "The default action: binding green.",
+      "html": "<button class=\"ds-btn-primary\">Save the project</button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 16px; border:1px solid transparent; border-radius:6px; background:#1d4a3c; color:#e9f1ec; font:600 15px Mukta, system-ui, sans-serif; cursor:pointer; } .ds-btn-primary:hover { background:#2a5d4d; } .ds-btn-primary:active { translate:0 1px; } .ds-btn-primary:focus-visible { outline:3px solid #15201b; outline-offset:2px; }"
     },
     {
       "name": "Secondary Button",
       "kind": "button",
       "refersTo": "button-secondary",
-      "description": "A quieter action, ruled in ink.",
-      "html": "<button class=\"ds-btn-secondary\">Back to project</button>",
-      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 16px; font-family: var(--font-body, 'IBM Plex Sans', system-ui, sans-serif); font-weight: 600; font-size: 15px; border: 0; border-radius: 0; cursor: pointer; background: transparent; color: var(--ink, #1e1d1a); border: 2px solid var(--panel-border, #1e1d1a); } .ds-btn-secondary:hover { background: var(--panel, #fffdf8); } .ds-btn-secondary:focus-visible { outline: 3px solid var(--mark, #e8590c); outline-offset: 2px; }"
+      "description": "A quieter action beside a primary one.",
+      "html": "<button class=\"ds-btn-secondary\">See the room</button>",
+      "css": ".ds-btn-secondary { display:inline-flex; align-items:center; min-height:44px; padding:0 16px; border:1px solid #15201b; border-radius:6px; background:#f8faf6; color:#15201b; font:600 15px Mukta, system-ui, sans-serif; cursor:pointer; } .ds-btn-secondary:hover { background:#ffffff; } .ds-btn-secondary:active { translate:0 1px; } .ds-btn-secondary:focus-visible { outline:3px solid #15201b; outline-offset:2px; }"
     },
     {
-      "name": "Segmented Toggle",
-      "kind": "nav",
-      "refersTo": "toggle-segment-active",
-      "description": "Project / Upload / Report, Builder / Buyer-bank, Windows / Doors, Plan / 3D.",
-      "html": "<div class=\"ds-toggle\" role=\"group\" aria-label=\"Report view\"><button aria-pressed=\"true\">Builder view</button><button aria-pressed=\"false\">Buyer / bank view</button></div>",
-      "css": ".ds-toggle { display: inline-flex; border: 2px solid var(--panel-border, #1e1d1a); } .ds-toggle button { min-height: 44px; padding: 0 16px; border: 0; background: transparent; color: var(--ink, #1e1d1a); font: 500 15px var(--font-body, 'IBM Plex Sans', sans-serif); cursor: pointer; } .ds-toggle button[aria-pressed=\"true\"] { background: var(--inverse-bg, #1e1d1a); color: var(--inverse-ink, #f4f1ea); font-weight: 600; } .ds-toggle button:hover:not([aria-pressed=\"true\"]) { background: var(--panel, #fffdf8); } .ds-toggle button:focus-visible { outline: 3px solid var(--mark, #e8590c); outline-offset: 2px; }"
+      "name": "Record Button",
+      "kind": "button",
+      "refersTo": "button-record",
+      "description": "The gap request's one action, fixed to the bottom edge.",
+      "html": "<button class=\"ds-btn-record\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z\"/><circle cx=\"12\" cy=\"13\" r=\"3\"/></svg>Record or upload clip</button>",
+      "css": ".ds-btn-record { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; max-width:360px; min-height:60px; border:0; border-radius:999px; background:#ff7a1a; color:#1b0f04; font:700 19px Mukta, system-ui, sans-serif; box-shadow:0 8px 20px rgba(255,122,26,.35); cursor:pointer; } .ds-btn-record:hover { filter:brightness(1.06); } .ds-btn-record:focus-visible { outline:3px solid #15201b; outline-offset:3px; }"
     },
     {
       "name": "Text Field",
       "kind": "input",
       "refersTo": "input",
-      "description": "48px tall, ruled, square; 16px text so phones don't zoom.",
-      "html": "<label class=\"ds-field\"><span>Room 1</span><input placeholder=\"Bedroom 2\"></label>",
-      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; font-family: var(--font-body, 'IBM Plex Sans', sans-serif); color: var(--ink, #1e1d1a); } .ds-field span { font-size: 14px; font-weight: 600; } .ds-field input { min-height: 48px; padding: 0 12px; font: inherit; font-size: 16px; color: inherit; background: var(--panel, #fffdf8); border: 2px solid var(--panel-border, #1e1d1a); border-radius: 0; } .ds-field input:focus-visible { outline: 3px solid var(--mark, #e8590c); outline-offset: 2px; } .ds-field input[aria-invalid=\"true\"] { border-color: var(--short, #b4440a); }"
+      "description": "A labelled field, 16px text so phones do not zoom.",
+      "html": "<label class=\"ds-field\"><span>Project name</span><input class=\"ds-input\" placeholder=\"e.g. Green Park, Tower B\"></label>",
+      "css": ".ds-field { display:flex; flex-direction:column; gap:6px; font:600 14px Mukta, system-ui, sans-serif; color:#15201b; max-width:320px; } .ds-input { min-height:48px; padding:0 12px; border:1px solid #2f6b57; border-radius:6px; background:#f8faf6; color:#15201b; font:400 16px Mukta, system-ui, sans-serif; } .ds-input::placeholder { color:#56645d; } .ds-input:focus-visible { outline:3px solid #15201b; outline-offset:2px; }"
     },
     {
-      "name": "Status Badge",
+      "name": "Sidebar",
+      "kind": "nav",
+      "refersTo": "nav-item-current",
+      "description": "The steady projects tree on a computer.",
+      "html": "<nav class=\"ds-side\"><a class=\"ds-nav\" href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2\"/></svg>All projects</a><a class=\"ds-nav\" aria-current=\"page\" href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2\"/></svg>Overview</a><a class=\"ds-nav\" href=\"#\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2\"/></svg>Upload</a></nav>",
+      "css": ".ds-side { display:flex; flex-direction:column; gap:4px; width:240px; padding:14px; background:#1d4a3c; } .ds-nav { display:flex; align-items:center; gap:12px; min-height:44px; padding:0 14px; border-radius:8px; color:rgba(233,241,236,.82); font:500 15px Mukta, system-ui, sans-serif; text-decoration:none; transition:background-color 120ms ease; } .ds-nav:hover { background:rgba(233,241,236,.1); color:#fff; } .ds-nav[aria-current=page] { background:rgba(233,241,236,.14); color:#fff; font-weight:600; box-shadow:inset 3px 0 0 #ff7a1a; } .ds-nav:focus-visible { outline:3px solid #e9f1ec; outline-offset:2px; }"
+    },
+    {
+      "name": "Status Badges",
       "kind": "chip",
-      "description": "An upload's place in the pipeline, in mono capitals.",
-      "html": "<span class=\"ds-badge ds-badge-processing\">Processing</span> <span class=\"ds-badge ds-badge-done\">Done</span> <span class=\"ds-badge ds-badge-failed\">Failed</span>",
-      "css": ".ds-badge { font: 500 12px var(--font-mono, 'IBM Plex Mono', monospace); text-transform: uppercase; letter-spacing: 0.06em; padding: 3px 8px; border: 1.5px solid currentColor; } .ds-badge-processing { color: var(--link, #b4440a); border-style: dashed; } .ds-badge-done { color: var(--verified, #2f6b3a); } .ds-badge-failed { color: var(--short, #b4440a); background: var(--short-panel, #fff6ef); }"
-    },
-    {
-      "name": "Outcome Stamp",
-      "kind": "custom",
-      "description": "The room's verdict, pressed like a rubber stamp. Not seen yet is dashed.",
-      "html": "<span class=\"ds-stamp ds-stamp-verified\">Verified</span> <span class=\"ds-stamp ds-stamp-short\">Short</span> <span class=\"ds-stamp ds-stamp-not-seen\">Not seen yet</span>",
-      "css": ".ds-stamp { display: inline-block; margin: 12px; font: 700 24px var(--font-display, 'Barlow Condensed', sans-serif); letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 14px; border: 3px solid currentColor; outline: 1px solid currentColor; outline-offset: 3px; transform: rotate(-5deg); } .ds-stamp-verified { color: var(--verified, #2f6b3a); } .ds-stamp-short { color: var(--short, #b4440a); } .ds-stamp-not-seen { color: var(--not-seen, #4f4b44); border-style: dashed; }"
-    },
-    {
-      "name": "Plan Room Tile",
-      "kind": "card",
-      "refersTo": "plan-room-short",
-      "description": "A room on the blueprint plan, filled by its outcome; selected rooms get an orange inner outline.",
-      "html": "<div class=\"ds-plan\"><button class=\"ds-room ds-room-verified\">Living Room<span><b>3 / 3</b><i>Verified</i></span></button><button class=\"ds-room ds-room-short\" aria-pressed=\"true\">Bedroom 2<span><b>2 / 4</b><i>Short by 2</i></span></button><button class=\"ds-room ds-room-not-seen\">Kitchen<span><b>– / 1</b><i>Not seen yet</i></span></button></div>",
-      "css": ".ds-plan { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 16px; background-color: #163a6b; background-image: linear-gradient(rgba(220,233,247,0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(220,233,247,0.09) 1px, transparent 1px); background-size: 20px 20px; } .ds-room { display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; min-height: 132px; padding: 12px 14px; border: 0; color: #f4f8fc; font: 600 15px var(--font-body, 'IBM Plex Sans', sans-serif); text-align: left; box-shadow: 0 0 0 1.5px #dce9f7; cursor: pointer; } .ds-room span { display: flex; flex-direction: column; } .ds-room b { font: 700 34px/1 var(--font-display, 'Barlow Condensed', sans-serif); } .ds-room i { font-style: normal; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; } .ds-room-verified { background: #1d5550; } .ds-room-verified i { color: #9be7b0; } .ds-room-short { background: #5b3524; box-shadow: 0 0 0 1.5px #dce9f7, inset 0 0 0 3px #f59e5b; } .ds-room-short i { color: #ffb37a; } .ds-room-not-seen { background: repeating-linear-gradient(45deg, rgba(220,233,247,0.3) 0 1.5px, #163a6b 1.5px 10px); } .ds-room[aria-pressed=\"true\"] { outline: 4px solid #e8590c; outline-offset: -10px; } .ds-room:focus-visible { outline: 3px solid #f4f1ea; outline-offset: -6px; }"
-    },
-    {
-      "name": "Quoted Source",
-      "kind": "custom",
       "refersTo": "quote",
-      "description": "A document's own words, word for word, with the check that proved it.",
-      "html": "<div class=\"ds-source\"><span class=\"ds-source-title\">Demand letter</span><span class=\"ds-quote\">“Windows complete: 12”</span><span class=\"ds-matched\"><svg aria-hidden=\"true\" width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 12l5 5L20 6\"/></svg>Quote matched word for word</span></div>",
-      "css": ".ds-source { display: inline-flex; flex-direction: column; gap: 4px; padding: 10px 12px; background: var(--quote-bg, #fff3c4); border: 1px solid var(--rule, #cfcac0); font-family: var(--font-body, 'IBM Plex Sans', sans-serif); } .ds-source-title { font-size: 12px; color: var(--muted, #5c5850); } .ds-quote { align-self: flex-start; font: 13px var(--font-mono, 'IBM Plex Mono', monospace); background: var(--quote-mark, #ffe7a8); color: #1e1d1a; padding: 0 3px; } .ds-matched { display: inline-flex; align-items: center; gap: 5px; font-size: 14px; color: var(--verified, #2f6b3a); }"
+      "description": "Upload states, and a quote checked word for word.",
+      "html": "<div class=\"ds-badges\"><span class=\"ds-badge ds-proc\">Processing</span><span class=\"ds-badge ds-done\">Done</span><span class=\"ds-badge ds-fail\">Failed</span><span class=\"ds-quote\">“Windows complete: 12”</span></div>",
+      "css": ".ds-badges { display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-family:Mukta, system-ui, sans-serif; } .ds-badge { padding:2px 9px; border:1.5px solid currentColor; border-radius:4px; font-size:13px; font-weight:600; } .ds-proc { color:#5a3d9a; border-style:dashed; } .ds-done { color:#fff; background:#1f6b45; border-color:#1f6b45; } .ds-fail { color:#a35408; background:#fbf1e6; } .ds-quote { padding:0 3px; background:#ece6f7; color:#15201b; font:13px ui-monospace, Menlo, monospace; }"
+    },
+    {
+      "name": "Notice",
+      "kind": "card",
+      "refersTo": "notice",
+      "description": "One card for every dead end: a link that does not open, a missing page.",
+      "html": "<section class=\"ds-notice\"><span class=\"ds-notice-icon\"><svg width=\"30\" height=\"30\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71\"/><path d=\"m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71\"/><line x1=\"8\" x2=\"8\" y1=\"2\" y2=\"5\"/><line x1=\"2\" x2=\"5\" y1=\"8\" y2=\"8\"/><line x1=\"16\" x2=\"16\" y1=\"19\" y2=\"22\"/><line x1=\"19\" x2=\"22\" y1=\"16\" y2=\"16\"/></svg></span><h1>This link doesn't open anything</h1><p>It may have been replaced by a new one. Ask whoever sent it for the current link.</p><a class=\"ds-pill\" href=\"#\">Back to your projects</a></section>",
+      "css": ".ds-notice { max-width:420px; padding:36px 28px 30px; border-radius:16px; background:#fff; box-shadow:0 12px 30px rgba(21,32,27,.08); display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; font-family:Mukta, system-ui, sans-serif; color:#3c4a43; } .ds-notice h1 { margin:0; font:800 28px/1.08 'Anek Latin', 'Arial Narrow', sans-serif; font-stretch:80%; color:#15201b; } .ds-notice p { margin:0; } .ds-notice-icon { width:68px; height:68px; border-radius:50%; display:grid; place-items:center; background:#eef2ed; color:#1d4a3c; } .ds-pill { display:inline-flex; align-items:center; min-height:46px; margin-top:12px; padding:0 22px; border-radius:999px; background:#1d4a3c; color:#e9f1ec; font-weight:600; text-decoration:none; } .ds-pill:hover { background:#2a5d4d; } .ds-pill:focus-visible { outline:3px solid #15201b; outline-offset:2px; }"
+    },
+    {
+      "name": "Gap Request Ticket",
+      "kind": "card",
+      "refersTo": "ticket",
+      "description": "The site supervisor's job ticket: what to film, and how.",
+      "html": "<article class=\"ds-ticket\"><div class=\"ds-thead\"><b>Footage needed</b><span>From the builder</span></div><div class=\"ds-grid\"><div><small>Flat</small><b>302</b></div><div><small>Room</small><b>Kitchen</b></div></div><div class=\"ds-what\"><small>Film</small><h1>Need 5 s of Flat 302 kitchen, east wall</h1></div><ol class=\"ds-steps\"><li>Start with the kitchen's room tag in view, at the door.</li><li>Turn slowly toward the east wall window.</li><li>Stop there. Don't pan back.</li></ol></article>",
+      "css": ".ds-ticket { position:relative; overflow:hidden; max-width:400px; border-radius:8px; background:#fffdf7; box-shadow:0 12px 28px rgba(21,32,27,.1); font-family:Mukta, system-ui, sans-serif; color:#15201b; } .ds-ticket::before { content:''; position:absolute; inset:0 auto 0 0; width:6px; background:#ff7a1a; } .ds-thead { display:flex; justify-content:space-between; padding:14px 18px 10px 24px; border-bottom:1.5px dashed #d8d1c0; font-size:13px; color:#56645d; } .ds-thead b { font:800 15px 'Anek Latin', 'Arial Narrow', sans-serif; letter-spacing:.06em; text-transform:uppercase; color:#a35408; } .ds-grid { display:grid; grid-template-columns:1fr 2fr; border-bottom:1px solid #e6e0d2; } .ds-grid div { padding:12px 18px 12px 24px; } .ds-grid div+div { border-left:1px solid #e6e0d2; padding-left:18px; } .ds-grid small, .ds-what small { display:block; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#56645d; } .ds-grid b { font:800 28px/1.1 'Anek Latin', 'Arial Narrow', sans-serif; font-stretch:80%; } .ds-what { padding:16px 18px 4px 24px; } .ds-what h1 { margin:2px 0 0; font:800 28px/1.08 'Anek Latin', 'Arial Narrow', sans-serif; font-stretch:80%; } .ds-steps { margin:0; padding:8px 18px 16px 24px; list-style:none; counter-reset:s; } .ds-steps li { display:grid; grid-template-columns:32px 1fr; gap:10px; padding:11px 0; border-top:1px solid #efe9dc; font-size:16px; } .ds-steps li::before { counter-increment:s; content:counter(s, decimal-leading-zero); font:800 19px 'Anek Latin', 'Arial Narrow', sans-serif; color:#ff7a1a; }"
     }
   ],
   "narrative": {
-    "northStar": "The Site Drawing Set",
-    "overview": "SiteProof looks like an architect's drawing set carried onto a construction site. The plan is a blueprint: navy ground, a faint drafting grid, pale tracing lines and a title block along its foot. Judgements are rubber stamps, Verified, Short and Not seen yet, pressed slightly crooked onto the sheet. Evidence reads like a marked-up document: the claim's source line highlighted in yellow, the counted object outlined in safety orange.\n\nThe world is square, ruled and stamped. Corners are hard, rules are 2px ink, and nothing floats on a shadow. Density is that of a working document, not a dashboard: big condensed numerals for the answer, small mono labels for provenance, plain sans for the sentences in between. It has to hold up on a cheap phone in direct sun, so contrast and pattern do the work that subtle colour would do indoors.\n\nTwo themes share one drawing. The light theme is paper and ink with blueprint inserts; the dark theme is the blueprint itself, navy ground and tracing-line ink. The plan, the 3D model and the gap-request phone screen stay blueprint in both.",
+    "northStar": "The Measurement Book",
+    "overview": "SiteProof looks like the measurement book a site engineer carries: a bottle-green cloth binding round cool, ruled form stock, filled in by hand and checked with a rubber stamp. The binding is the shell (the sidebar, the header, the phone's tab bar, the primary actions). The pages are the ground and the panels, ruled with one printed hairline. A violet stamp means one thing: SiteProof's code checked this. A quote matched word for word, a count with its frames, a citation re-checked.\n\nIt is a working book, not a dashboard. Each page opens on what needs the builder first, then the evidence, in big condensed numerals for the answer and a plain, sturdy sans for every sentence. It has to hold up on a cheap phone in direct sun, so contrast, pattern and words do the work that subtle colour would do indoors. It runs in one light theme only.\n\nDepth is soft and sparing: cards lift a little off the page, buttons are rounded and quiet, and the flat is drawn as a small plan at an angle so a builder can tell rooms apart at a glance. The plan is never to scale, and nothing on it pretends to know where a wall, a door or a window is.",
     "keyCharacteristics": [
-      "Square corners everywhere (0px), 2px ink rules, no drop shadows.",
-      "Condensed display numerals answer the question; mono labels say where the answer came from.",
+      "A bottle-green binding for everything that moves you around; cool form stock for everything you read.",
+      "Violet means checked by code, and nothing else.",
       "Three outcomes told apart by fill, pattern and word, never by colour alone.",
-      "Safety orange marks evidence and the next action; it never decorates.",
-      "A faint drafting grid on every ground: 24px on pages, 20px on plans."
+      "Marker orange outlines evidence and marks the one room to film; it never decorates.",
+      "Gently rounded (6–8px) controls and panels, pill-shaped actions, soft shadows only under cards that float."
     ],
     "rules": [
       {
-        "name": "The Three Stamps Rule",
-        "body": "Verified is solid, Short is outlined, Not seen yet is hatched. Every outcome mark carries its pattern and its word, so it survives sunlight, greyscale printing and colour blindness.",
+        "name": "The Stamp Rule",
+        "body": "Violet means SiteProof's code checked it. A model's output, a builder's claim or a link is never violet.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Patterns Rule",
+        "body": "Verified is solid, Short is outlined, Not seen yet is dashed and hatched. Every outcome mark carries its pattern and its word, so it survives sunlight, greyscale printing and colour blindness.",
         "section": "colors"
       },
       {
         "name": "The One Marker Rule",
-        "body": "Safety Orange marks evidence and the next action, nothing else. If two things on a screen are orange, one of them is wrong.",
+        "body": "Marker Orange outlines evidence or marks the one room to film. If two unrelated things on a screen are orange, one of them is wrong.",
         "section": "colors"
       },
       {
         "name": "The Provenance Rule",
-        "body": "Anything that came from somewhere (a quoted line, a clip time, a tag code) is set in mono. Anything SiteProof says in its own voice is set in sans.",
+        "body": "Anything copied from somewhere (a quoted line, a clip time, a tag code) is set in mono. Anything SiteProof says in its own voice is set in sans.",
         "section": "typography"
       },
       {
@@ -695,24 +700,32 @@
         "section": "layout"
       },
       {
-        "name": "The Flat Sheet Rule",
-        "body": "Nothing lifts. State is shown by fill, outline and pattern, never by elevation.",
+        "name": "The Steady Shell Rule",
+        "body": "The sidebar and tab bar never change between a project's pages; only the highlighted item does.",
+        "section": "layout"
+      },
+      {
+        "name": "The Soft Lift Rule",
+        "body": "Only a card that stands on its own lifts. Rows, panels and anything inside a card stay flat.",
         "section": "elevation"
       }
     ],
     "dos": [
-      "Do keep every corner square (0px) and every panel ruled in 2px Drafting Ink.",
-      "Do give each outcome its fill, its pattern and its word together: solid Verified, outlined Short, hatched Not seen yet.",
-      "Do set quotes, clip times and tag codes in IBM Plex Mono, with quotes on Highlighter Yellow.",
-      "Do keep the plan, the 3D stage and the gap-request screen on the blueprint in both themes.",
-      "Do keep touch targets at 44px or taller; set sentences at 16px and nothing below 12px."
+      "**Do** keep the sidebar and tab bar identical on every page of a project.",
+      "**Do** give each outcome its fill, its pattern and its word together: solid Verified, outlined Short, dashed and hatched Not seen yet.",
+      "**Do** keep violet for what code has checked: matched quotes, counts with frames, re-checked citations.",
+      "**Do** set quotes, clip times and tag codes in mono, with quotes on Stamp Violet Tint.",
+      "**Do** say \"Plan not to scale\" wherever the plan points at a room, and mark the room, never a spot in it.",
+      "**Do** keep touch targets at 44px or taller; set sentences at 16px and nothing below 12px."
     ],
     "donts": [
-      "Don't add drop shadows, rounded corners or gradients; state is fill, outline and pattern.",
-      "Don't use Safety Orange for decoration or for more than one action on a screen.",
-      "Don't show Not seen yet as a number or a zero; its count is \"–\".",
-      "Don't tell outcomes apart by colour alone.",
-      "Don't add motion beyond progress and the 3D camera; respect reduced motion."
+      "**Don't** use violet for a model's output, a builder's claim or decoration.",
+      "**Don't** use Marker Orange for more than evidence and the room to film.",
+      "**Don't** show Not seen yet as a number or a zero; its count is \"–\".",
+      "**Don't** tell outcomes apart by colour alone.",
+      "**Don't** shadow rows or panels; only standalone cards lift.",
+      "**Don't** put a sidebar, tab bar or link into the builder's pages on a buyer's, bank's or supervisor's link page.",
+      "**Don't** add motion beyond progress, a card rising in, a stamp pressing and the 3D camera; respect reduced motion."
     ]
   }
 }
