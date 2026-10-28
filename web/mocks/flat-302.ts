@@ -1,15 +1,15 @@
 /**
- * Mock report for the demo story: Flat 302, the sample demand letter and BOQ in
+ * Mock data for the demo story: Flat 302, the sample demand letter and BOQ in
  * `backend/fixtures/documents/`. The UI is built against this until
- * `GET /projects/:id/report` is real (29 October).
+ * `GET /projects/:id` and `GET /flats/:id/report` are real.
  *
- * Every shape from `@siteproof/contract` is used as is. The report envelope, gap
- * requests and query letters are proposals in `lib/types.ts`.
+ * Every shape is from `@siteproof/contract`, as is. The mock store cuts the builder's
+ * `ProjectOverview` and each flat's `Report` from this one record, as the server will.
  *
  * Frames and masks are drawn placeholders in `public/mock/`, never site footage.
  */
 import type { Claim, Clip, Detection, ItemKind, Result, Room, Segment } from "@siteproof/contract";
-import type { Report } from "@/lib/types";
+import type { MockProject } from "@/lib/mock-store";
 
 const PROJECT = "p-northfield";
 const FLAT = "f-302";
@@ -149,15 +149,13 @@ for (const p of plan) {
   }
 }
 
-export const flat302: Report = {
+export const flat302: MockProject = {
   project: {
     id: PROJECT,
     name: "Northfield Residency, Tower B",
     builder: "Northfield Constructions Pvt. Ltd.",
     flats: [{ id: FLAT, name: "302" }],
   },
-  flat: { id: FLAT, name: "302" },
-  stage: "Stage 6",
   rooms,
   documents: [
     { id: DL, project_id: PROJECT, flat_id: FLAT, kind: "demand_letter", status: "done", reason: null },
@@ -167,9 +165,11 @@ export const flat302: Report = {
   segments,
   claims,
   results,
+  not_checked: [{ claim_id: "cl-dl-plaster", reason: "not_countable" }],
   detections: allDetections,
   gap_requests: [
     {
+      id: "g-kitchen",
       room_id: "r-kitchen",
       text: "Need 5 s of Flat 302 kitchen, east wall",
       steps: [
@@ -182,13 +182,17 @@ export const flat302: Report = {
   ],
   query_letters: [
     {
+      id: "q-bed2-window",
       claim_id: "cl-boq-bed2-window",
       body:
-        "Re: your demand letter for Stage 6, \"Windows complete: 12\". The bill of quantities lists 4 windows in Bedroom 2 (item W-4). " +
-        "A one-way sweep from the Bedroom 2 room tag, filmed on 26 October, shows 2 installed. " +
+        "Re: your demand letter, \"Windows complete: 12\". The bill of quantities lists 4 windows in Bedroom 2 (item W-4). " +
+        "A one-way sweep from the Bedroom 2 room tag shows 2 installed. " +
         "Could you confirm the status of the remaining 2, or share footage of them? We'll update the report as soon as they're visible.",
-      citations_rechecked: true,
-      citation_count: 3,
+      citations: {
+        invoice_claim_id: "cl-dl-windows",
+        plan_claim_id: "cl-boq-bed2-window",
+        evidence: ["/mock/frame-bed2.svg"],
+      },
     },
   ],
 };

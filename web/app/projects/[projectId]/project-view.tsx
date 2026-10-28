@@ -1,10 +1,9 @@
 "use client";
 
-import type { DocumentKind } from "@siteproof/contract";
+import type { DocumentKind, ProjectOverview } from "@siteproof/contract";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { AppHeader, captureTime, ErrorPanel, Loading, ProjectNav, StaleNotice, StatusBadge, ui, useReport } from "@/components/ui";
-import type { Report } from "@/lib/types";
+import { AppHeader, captureTime, ErrorPanel, Loading, ProjectNav, StaleNotice, StatusBadge, ui, useOverview } from "@/components/ui";
 import styles from "./project.module.css";
 
 export const DOCUMENT_LABEL: Record<DocumentKind, string> = {
@@ -14,7 +13,7 @@ export const DOCUMENT_LABEL: Record<DocumentKind, string> = {
 };
 
 export function ProjectPage({ projectId }: { projectId: string }) {
-  const { report, error, stale, reload } = useReport(projectId);
+  const { overview: report, error, stale, reload } = useOverview(projectId);
   const created = useSearchParams().get("created") === "1";
 
   if (error) {
@@ -43,13 +42,14 @@ export function ProjectPage({ projectId }: { projectId: string }) {
   );
 }
 
-function ProjectView({ report, created }: { report: Report; created: boolean }) {
+function ProjectView({ report, created }: { report: ProjectOverview; created: boolean }) {
   const { project } = report;
   const flatName = new Map(project.flats.map((f) => [f.id, f.name]));
   const hasLetter = report.documents.some((d) => d.kind === "demand_letter" && d.status !== "failed");
   const hasBoq = report.documents.some((d) => d.kind === "boq" && d.status !== "failed");
   const hasClips = report.clips.some((c) => c.status !== "failed");
-  const hasResults = report.results.length > 0;
+  // The report has something to show once a demand letter is read and a clip has gone through.
+  const hasResults = report.documents.some((d) => d.kind === "demand_letter" && d.status === "done") && report.clips.some((c) => c.status === "done");
 
   const steps = [
     // Printing happens off-screen, so this step is a reminder, never ticked.
@@ -149,24 +149,16 @@ function ProjectView({ report, created }: { report: Report; created: boolean }) 
               <p className={ui.muted}>No clips yet. Forward the progress videos you already share with buyers.</p>
             ) : (
               <ul className={ui.list}>
-                {report.clips.map((c, i) => {
-                  const placed = report.segments
-                    .filter((s) => s.clip_id === c.id && s.room_id)
-                    .map((s) => report.rooms.find((r) => r.id === s.room_id)?.name)
-                    .filter(Boolean);
-                  return (
-                    <li key={c.id}>
-                      <span className={ui.grow}>
-                        Clip {i + 1}
-                        <span className={ui.muted}> · {captureTime(c.captured_at)}</span>
-                        {c.status === "done" && (
-                          <span className={styles.placed}>{placed.length > 0 ? `Placed in ${[...new Set(placed)].join(", ")}` : "No room tag seen, so it isn't used for any room"}</span>
-                        )}
-                      </span>
-                      <StatusBadge status={c.status} />
-                    </li>
-                  );
-                })}
+                {/* Which rooms a clip was placed in isn't in the project overview yet; asked of Furqaan. */}
+                {report.clips.map((c, i) => (
+                  <li key={c.id}>
+                    <span className={ui.grow}>
+                      Clip {i + 1}
+                      <span className={ui.muted}> · {captureTime(c.captured_at)}</span>
+                    </span>
+                    <StatusBadge status={c.status} />
+                  </li>
+                ))}
               </ul>
             )}
           </section>

@@ -6,14 +6,27 @@
  * the contract isn't ready, the API source fails with a plain message instead of
  * guessing at a shape nobody has agreed.
  */
-import { api, type Clip, type ClipStatus, type Document, type Project } from "@siteproof/contract";
-import type { CreateProject, CreateProjectResponse, NewDocument, Registered, Report } from "./types";
+import {
+  api,
+  type Clip,
+  type ClipStatus,
+  type CreatedProject,
+  type CreateProject,
+  type Document,
+  type Project,
+  type ProjectOverview,
+  type Report,
+} from "@siteproof/contract";
+import type { NewDocument, Registered } from "./types";
 
 export interface DataSource {
   /** There is no list endpoint in the contract. The API source fails, and the home page shows no list. */
   listProjects(): Promise<Project[]>;
-  getReport(projectId: string): Promise<Report>;
-  createProject(body: CreateProject): Promise<CreateProjectResponse>;
+  /** The builder's whole project: flats, rooms, documents and clips. */
+  getOverview(projectId: string): Promise<ProjectOverview>;
+  /** One flat's report, for its builder. */
+  getFlatReport(flatId: string): Promise<Report>;
+  createProject(body: CreateProject): Promise<CreatedProject>;
   /** `roomHint` is used by the mock only. The real pipeline places a clip by its room tag. */
   registerClip(projectId: string, file: File, roomHint?: string | null): Promise<Registered<Clip>>;
   registerDocument(input: NewDocument, file: File): Promise<Registered<Document>>;
@@ -70,8 +83,9 @@ const apiSource: DataSource = {
   listProjects: async () => {
     throw new DataError(501, NOT_READY);
   },
-  getReport: (projectId) => call<Report>(api.projectReport(projectId)),
-  createProject: (body) => call<CreateProjectResponse>(api.createProject(), { method: "POST", body: JSON.stringify(body) }),
+  getOverview: (projectId) => call<ProjectOverview>(api.projectOverview(projectId)),
+  getFlatReport: (flatId) => call<Report>(api.flatReport(flatId)),
+  createProject: (body) => call<CreatedProject>(api.createProject(), { method: "POST", body: JSON.stringify(body) }),
   // The request and response of POST /clips and POST /documents aren't agreed yet (William).
   registerClip: async () => {
     throw new DataError(501, NOT_READY);
@@ -85,7 +99,7 @@ const apiSource: DataSource = {
     return typeof body === "string" ? body : body.status;
   },
   documentStatus: (documentId) => call<Document>(api.documentStatus(documentId)),
-  // The gap-request shape isn't agreed yet (Apurva + Furqaan).
+  // POST /rooms/:id/request-footage isn't built on the backend yet (Apurva).
   requestFootage: async () => {
     throw new DataError(501, NOT_READY);
   },
@@ -112,7 +126,8 @@ function fromMock(): DataSource {
     };
   return {
     listProjects: wrap((m) => m.listProjects()),
-    getReport: wrap((m, projectId: string) => m.getReport(projectId)),
+    getOverview: wrap((m, projectId: string) => m.getOverview(projectId)),
+    getFlatReport: wrap((m, flatId: string) => m.getFlatReport(flatId)),
     createProject: wrap((m, body: CreateProject) => m.createProject(body)),
     registerClip: wrap((m, projectId: string, file: File, roomHint?: string | null) => m.registerClip(projectId, file, roomHint ?? null)),
     registerDocument: wrap((m, input: NewDocument) => m.registerDocument(input)),

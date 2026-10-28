@@ -7,11 +7,15 @@
  * "pipeline" it fakes is the demo story's last step: a clip filmed from a gap request
  * in the demo project clears that room, as the real kitchen clip will on stage.
  */
-import type { Clip, ClipStatus, Document, Project, Room } from "@siteproof/contract";
+import type { Clip, ClipStatus, CreatedProject, CreateProject, Document, Project, ProjectOverview, Report, Room } from "@siteproof/contract";
 import { detections, flat302 } from "@/mocks/flat-302";
-import type { CreateProject, CreateProjectResponse, NewDocument, Registered, Report } from "./types";
+import type { NewDocument, Registered } from "./types";
 
-const KEY = "siteproof-mock-v1";
+// v2: one record per project, cut into an overview and per-flat reports (contract of 28 October).
+const KEY = "siteproof-mock-v2";
+
+/** Everything the mock holds for one project. The server keeps the same, in tables. */
+export type MockProject = ProjectOverview & Omit<Report, "project" | "flat" | "rooms" | "documents">;
 const UPLOADED_FOR_MS = 1500;
 const PROCESSING_FOR_MS = 5000;
 
@@ -25,7 +29,7 @@ interface Upload {
 }
 
 interface State {
-  reports: Record<string, Report>;
+  projects: Record<string, MockProject>;
   uploads: Record<string, Upload>;
   /** Which version of the demo seed the saved demo project was copied from. */
   seed?: string;
@@ -50,9 +54,9 @@ function load(): State {
   } catch {
     // Private window or blocked storage: start fresh, in memory only.
   }
-  state ??= { reports: {}, uploads: {} };
-  if (state.seed !== SEED || !state.reports[flat302.project.id]) {
-    state.reports[flat302.project.id] = structuredClone(flat302);
+  state ??= { projects: {}, uploads: {} };
+  if (state.seed !== SEED || !state.projects[flat302.project.id]) {
+    state.projects[flat302.project.id] = structuredClone(flat302);
     state.seed = SEED;
   }
   return state;
@@ -68,8 +72,8 @@ function save() {
 
 /** Forget everything created in mock mode and restore the demo project. */
 export function resetMock() {
-  state = { reports: {}, uploads: {}, seed: SEED };
-  state.reports[flat302.project.id] = structuredClone(flat302);
+  state = { projects: {}, uploads: {}, seed: SEED };
+  state.projects[flat302.project.id] = structuredClone(flat302);
   save();
 }
 
@@ -101,14 +105,46 @@ function statusOf(upload: Upload | undefined): ClipStatus {
   return "done";
 }
 
-function reportOf(projectId: string): Report {
-  const report = load().reports[projectId];
-  if (!report) throw new MockError(404, "not_found");
-  return report;
+function projectOf(projectId: string): MockProject {
+  const project = load().projects[projectId];
+  if (!project) throw new MockError(404, "not_found");
+  return project;
+}
+
+/** One flat's report, holding nothing of any other flat: what `GET /flats/:id/report` returns. */
+function cutReport(p: MockProject, flatId: string): Report {
+  const flat = p.project.flats.find((f) => f.id === flatId);
+  if (!flat) throw new MockError(404, "not_found");
+  const rooms = p.rooms.filter((r) => r.flat === flatId);
+  const roomIds = new Set(rooms.map((r) => r.id));
+  // The documents that bill this flat, plus the project's BOQ.
+  const documents = p.documents.filter((d) => d.flat_id === flatId || (d.flat_id === null && d.kind === "boq"));
+  const docIds = new Set(documents.map((d) => d.id));
+  const claims = p.claims.filter((c) => docIds.has(c.doc_id) && (c.room_id === null || roomIds.has(c.room_id)));
+  const claimIds = new Set(claims.map((c) => c.id));
+  return {
+    project: { id: p.project.id, name: p.project.name, builder: p.project.builder },
+    flat,
+    rooms,
+    documents,
+    claims,
+    results: p.results.filter((r) => claimIds.has(r.claim_id)),
+    not_checked: p.not_checked.filter((n) => claimIds.has(n.claim_id)),
+    detections: p.detections.filter((d) => roomIds.has(d.room_id)),
+    segments: p.segments.filter((s) => s.room_id !== null && roomIds.has(s.room_id)),
+    gap_requests: p.gap_requests.filter((g) => roomIds.has(g.room_id)),
+    query_letters: p.query_letters.filter((q) => claimIds.has(q.claim_id)),
+  };
+}
+
+function projectOfFlat(flatId: string): MockProject {
+  const project = Object.values(load().projects).find((p) => p.project.flats.some((f) => f.id === flatId));
+  if (!project) throw new MockError(404, "not_found");
+  return project;
 }
 
 /** Bring every upload's status up to date, and apply the demo's gap-filling clip once it is done. */
-function settle(report: Report) {
+function settle(report: MockProject) {
   const uploads = load().uploads;
   for (const clip of report.clips) {
     const upload = uploads[clip.id];
@@ -123,7 +159,7 @@ function settle(report: Report) {
   }
 }
 
-function fillGap(report: Report, clip: Clip, roomId: string) {
+function fillGap(report: MockProject, clip: Clip, roomId: string) {
   if (report.project.id !== flat302.project.id) return;
   report.segments.push({ clip_id: clip.id, room_id: roomId, t_start: 0, t_end: 5, full_sweep: true });
   for (const claim of report.claims.filter((c) => c.room_id === roomId)) {
@@ -139,24 +175,32 @@ function fillGap(report: Report, clip: Clip, roomId: string) {
       evidence: [...new Set(found.map((d) => d.best_frame_url))],
     });
   }
-  report.gap_requests = report.gap_requests.filter((g) => g.room_id !== roomId);
+  for (const g of report.gap_requests) if (g.room_id === roomId) g.status = "cleared";
 }
 
 export const mockSource = {
   async listProjects(): Promise<Project[]> {
     await delay(100);
-    return Object.values(load().reports).map((r) => r.project);
+    return Object.values(load().projects).map((p) => p.project);
   },
 
-  async getReport(projectId: string): Promise<Report> {
-    await delay(200);
-    const report = reportOf(projectId);
-    settle(report);
+  async getOverview(projectId: string): Promise<ProjectOverview> {
+    await delay(150);
+    const p = projectOf(projectId);
+    settle(p);
     save();
-    return structuredClone(report);
+    return structuredClone({ project: p.project, rooms: p.rooms, documents: p.documents, clips: p.clips });
   },
 
-  async createProject(body: CreateProject): Promise<CreateProjectResponse> {
+  async getFlatReport(flatId: string): Promise<Report> {
+    await delay(200);
+    const p = projectOfFlat(flatId);
+    settle(p);
+    save();
+    return structuredClone(cutReport(p, flatId));
+  },
+
+  async createProject(body: CreateProject): Promise<CreatedProject> {
     await delay(400);
     const s = load();
     const projectId = crypto.randomUUID();
@@ -165,16 +209,15 @@ export const mockSource = {
       f.rooms.map((r) => ({ id: crypto.randomUUID(), flat: flats[i].id, name: r.name.trim(), qr_code: tagCode() })),
     );
     const project = { id: projectId, name: body.name.trim(), builder: body.builder.trim(), flats };
-    s.reports[projectId] = {
+    s.projects[projectId] = {
       project,
-      flat: flats[0],
-      stage: null,
       rooms,
       documents: [],
       clips: [],
       segments: [],
       claims: [],
       results: [],
+      not_checked: [],
       detections: [],
       gap_requests: [],
       query_letters: [],
@@ -185,7 +228,7 @@ export const mockSource = {
 
   async registerClip(projectId: string, file: File, roomHint: string | null = null): Promise<Registered<Clip>> {
     await delay(200);
-    const report = reportOf(projectId);
+    const report = projectOf(projectId);
     const clip: Clip = {
       id: crypto.randomUUID(),
       project_id: projectId,
@@ -201,7 +244,7 @@ export const mockSource = {
 
   async registerDocument(input: NewDocument): Promise<Registered<Document>> {
     await delay(200);
-    const report = reportOf(input.project_id);
+    const report = projectOf(input.project_id);
     const doc: Document = { id: crypto.randomUUID(), ...input, status: "uploaded", reason: null };
     report.documents.push(doc);
     load().uploads[doc.id] = { kind: "document", project_id: input.project_id, uploaded_at: null, room_hint: null };
@@ -229,7 +272,7 @@ export const mockSource = {
 
   async documentStatus(documentId: string): Promise<Document> {
     await delay(100);
-    for (const report of Object.values(load().reports)) {
+    for (const report of Object.values(load().projects)) {
       const doc = report.documents.find((d) => d.id === documentId);
       if (doc) return { ...doc, status: statusOf(load().uploads[doc.id]) };
     }
@@ -238,8 +281,8 @@ export const mockSource = {
 
   async requestFootage(roomId: string): Promise<void> {
     await delay(200);
-    for (const report of Object.values(load().reports)) {
-      for (const g of report.gap_requests) if (g.room_id === roomId) g.status = "sent";
+    for (const report of Object.values(load().projects)) {
+      for (const g of report.gap_requests) if (g.room_id === roomId && g.status === "open") g.status = "sent";
     }
     save();
   },

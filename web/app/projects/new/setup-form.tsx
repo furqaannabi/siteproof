@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useId, useRef, useState } from "react";
 import { ui } from "@/components/ui";
 import { data } from "@/lib/data";
-import type { CreateProject } from "@/lib/types";
+import type { CreateProject } from "@siteproof/contract";
 import styles from "./setup.module.css";
 
 const COMMON_ROOMS = ["Living Room", "Kitchen", "Bedroom 1", "Bedroom 2", "Bedroom 3", "Bathroom"];
