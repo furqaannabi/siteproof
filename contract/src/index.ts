@@ -201,6 +201,88 @@ export interface Result {
 }
 
 /**
+ * Why a claim has no `Result`. Never shown as Not seen yet: no footage will clear it.
+ * - `not_countable`: this version cannot count the item (plastering, tiling, paint).
+ * - `exceeds_plan`: the claim asks for more than the BOQ holds for that item and room;
+ *   it goes to a person with both quotes side by side.
+ */
+export type NotCheckedReason = "not_countable" | "exceeds_plan";
+
+export interface NotChecked {
+  claim_id: string;
+  reason: NotCheckedReason;
+}
+
+/**
+ * An exact, small ask for footage of a room that is Not seen yet, such as "Need 5 s of
+ * Flat 302 kitchen, east wall". `cleared` once footage that covers the room arrives.
+ */
+export interface GapRequest {
+  id: string;
+  room_id: string;
+  text: string;
+  /** What to do, step by step, on the site supervisor's phone. */
+  steps: string[];
+  status: "open" | "sent" | "cleared";
+}
+
+/**
+ * A polite letter about a real shortfall: a claim that is Short in a fully covered
+ * room. Only letters whose every citation code has re-checked are ever sent; one that
+ * fails the check is not in the response at all.
+ *
+ * Every number in `body` was put there by code from the `Result`, never written by a
+ * model. Muse Spark writes only the wording around them.
+ */
+export interface QueryLetter {
+  id: string;
+  /** The demand letter or invoice line that is short. */
+  claim_id: string;
+  body: string;
+  citations: {
+    /** The billed line: a claim from the demand letter or invoice. */
+    invoice_claim_id: string;
+    /** The plan line: a claim from the BOQ, or null where the BOQ is silent. */
+    plan_claim_id: string | null;
+    /** The evidence frames, as in `Result.evidence`. */
+    evidence: string[];
+  };
+}
+
+/**
+ * One flat's report, the same for its buyer, its bank and its builder. It holds this
+ * flat and nothing of any other: its rooms, the documents that bill it plus the
+ * project's BOQ, the claims, results and detections for its rooms, and evidence frames
+ * rather than whole clips, which can show other flats, people and neighbours.
+ */
+export interface Report {
+  project: Pick<Project, "id" | "name" | "builder">;
+  flat: Flat;
+  rooms: Room[];
+  documents: Document[];
+  claims: Claim[];
+  /** A claim with a Result was judged; one in `not_checked` was not, and says why. */
+  results: Result[];
+  not_checked: NotChecked[];
+  detections: Detection[];
+  /** What was filmed in this flat's rooms: the coverage behind each Result. */
+  segments: Segment[];
+  gap_requests: GapRequest[];
+  query_letters: QueryLetter[];
+}
+
+/**
+ * The builder's view of a whole project, behind its builder link: every flat and
+ * room, every document and clip with its status, for setup, uploads and progress.
+ */
+export interface ProjectOverview {
+  project: Project;
+  rooms: Room[];
+  documents: Document[];
+  clips: Clip[];
+}
+
+/**
  * The API, as agreed. Import these instead of writing a path in a component or a
  * fetch call, so a change to the contract is a change in one place.
  */
@@ -219,7 +301,17 @@ export const api = {
   documentStatus: (documentId: string) => `/documents/${documentId}/status`,
   /** A project's builder link and its flats' report links. */
   projectLinks: (projectId: string) => `/projects/${projectId}/links`,
-  /** The report. No login needed for the buyer/bank view. */
+  /** The builder's view of a project: flats, rooms, documents and clips. Builder link. */
+  projectOverview: (projectId: string) => `/projects/${projectId}`,
+  /** One flat's report, for its builder. Builder link. */
+  flatReport: (flatId: string) => `/flats/${flatId}/report`,
+  /** One flat's report, for its buyer and bank. The report link is the token: no login. */
+  reportByLink: (token: string) => `/reports/${encodeURIComponent(token)}`,
+  /**
+   * Replaced by `projectOverview` and `flatReport`; kept only until the web app has
+   * moved to them, then removed.
+   * @deprecated
+   */
   projectReport: (projectId: string) => `/projects/${projectId}/report`,
   /** Create a gap request from the coverage map. */
   requestFootage: (roomId: string) => `/rooms/${roomId}/request-footage`,

@@ -25,6 +25,14 @@ ClipUploadRequest { project_id, content_type: "video/mp4"|"video/quicktime" } //
 ClipUpload        { upload_url, ticket, expires_at }                         // POST /clips reply
 CompleteClip      { ticket }                                                 // POST /clips/complete body → Clip
 ProjectLinks      { builder_token, report_tokens: [{ flat_id, token }] }     // GET /projects/:id/links
+
+NotChecked      { claim_id, reason: "not_countable"|"exceeds_plan" }
+GapRequest      { id, room_id, text, steps[], status: "open"|"sent"|"cleared" }
+QueryLetter     { id, claim_id, body,
+                  citations: { invoice_claim_id, plan_claim_id|null, evidence: [frame_url] } }
+Report          { project: { id, name, builder }, flat, rooms[], documents[], claims[],
+                  results[], not_checked[], detections[], segments[], gap_requests[], query_letters[] }
+ProjectOverview { project, rooms[], documents[], clips[] }                  // the builder's whole project
 ```
 
 ## API
@@ -38,8 +46,11 @@ ProjectLinks      { builder_token, report_tokens: [{ flat_id, token }] }     // 
 | `GET /clips/:id/status` | `uploaded` → `processing` → `done` / `failed`, for the upload UI to poll | William |
 | `GET /documents/:id/status` | The `Document`, with the same statuses, so the UI can tell "still reading" from "done" from "failed". Its claims arrive in the report | William |
 | `GET /projects/:id/links` | The project's builder link and each flat's report link. Answers only the team's setup key or the project's own builder link | Furqaan |
-| `GET /projects/:id/report` | The report: claims, counts, results, evidence frames. No login needed for the buyer/bank view | Apurva |
-| `POST /rooms/:id/request-footage` | Create a gap request from the coverage map | Apurva |
+| `GET /projects/:id` | The builder's `ProjectOverview`: every flat, room, document and clip with its status. Builder link | Furqaan |
+| `GET /flats/:id/report` | One flat's `Report`, for its builder. Builder link | Furqaan |
+| `GET /reports/:token` | One flat's `Report`, for its buyer and bank. The report link is the token: no login | Furqaan |
+| `GET /projects/:id/report` | Replaced by the three above; kept only until the web app has moved to them | — |
+| `POST /rooms/:id/request-footage` | Create a `GapRequest` from the coverage map. Builder link | Apurva |
 
 ## Who may call what
 
@@ -56,6 +67,11 @@ Every request carries its key as `Authorization: Bearer <token>` ([ADR](decision
 - **`Clip.captured_at` is null when the file carries no capture time** — WhatsApp may strip it. It is never filled in with the upload time; show it as "capture time unknown", never as a date.
 - **`Document.flat_id` is null for a document that covers the whole project**, such as a BOQ. A demand letter or invoice bills one flat. Where the file is stored stays server-side and is never in the contract.
 - **`Document.reason` is null unless the document failed.** Then it says why in plain words a builder can act on, chosen by code from a fixed list — never written by a model, never quoting the document.
+- **A `Report` holds one flat and nothing of any other.** Its rooms; the documents that bill it plus the project's BOQ; the claims, results, detections and segments for its rooms; evidence frames rather than whole clips, which can show other flats, people and neighbours. No list of the project's other flats. A buyer and a bank see exactly what the builder sees for that flat.
+- **Every claim in a `Report` is either judged or explained.** It has a `Result`, or a `NotChecked` saying why not. The UI never infers "not checked" from a missing `Result`, and never shows either reason as Not seen yet.
+- **A `QueryLetter` in a response has had every citation re-checked**: the invoice line and plan line exist, the frames resolve. One that fails is not sent at all, so there is no flag to read. Every number in its `body` was put there by code from the `Result`; Muse Spark writes only the wording around them.
+- **A `GapRequest` is exact and small**, and becomes `cleared` when footage covering the room arrives.
+- **No stage label** ("Stage 6") is in the report: a label read off a demand letter is a claim shown to a bank with no checked quote behind it. The demand letter's own claims, with their verified quotes, say what is billed.
 - **A clip is registered only once its video is in storage.** `POST /clips` saves nothing, so a clip and its ingest job are written together, never one without the other.
 - **`Segment.room_id` is null for an unplaced segment** — a part of a clip that passed no room tag. Unplaced segments are stored, but are never used for a per-room claim.
 - **`Segment.full_sweep`** is true only for one continuous stretch that starts at the room's QR tag and pans the whole room once in one direction, without panning back. It is what the coverage rule reads.
@@ -75,10 +91,10 @@ Flag these to Furqaan rather than deciding them in code:
 - ~~**`Flat`** is implied by `Project.flats[]` but never spelled out.~~ Settled 27 Oct: `{ id, name }`.
 - ~~**`Room.flat`** is a flat id in the type as written.~~ Settled 27 Oct: it is the flat's id.
 - `Claim.qty` / `Result.counted` units: whole objects for windows and doors in the MVP. Area items (tiles, plaster, paint) are post-hackathon and will need a unit on the count.
-- There is no shape yet for a **gap request** or a **query letter**, only the endpoints that produce them. Apurva and Furqaan to agree what comes back.
+- ~~There is no shape yet for a **gap request** or a **query letter**.~~ Settled 28 Oct: `GapRequest`, `QueryLetter`.
 - ~~**A claim that is not countable in v1 has no `Result` row.**~~ Confirmed 27 Oct by Furqaan. Apurva to add the third visual state in the report view.
 - ~~**`ItemKind`** is proposed but not yet in `contract/src/index.ts`.~~ Approved 27 Oct by Furqaan; in the contract.
-- **Where a claim that exceeds the BOQ says so.** It has no `Result`, so the report needs another home for "exceeds the plan, sent to a person". Settled when the comparison engine is built (Furqaan).
+- ~~**Where a claim that exceeds the BOQ says so.**~~ Settled 28 Oct: `Report.not_checked`, reason `exceeds_plan`.
 - The **tolerance** the comparison engine applies. ~~And whether the BOQ quantity or the demand-letter quantity wins when they disagree.~~ Settled 27 Oct: the demand letter is judged and the BOQ is a ceiling ([ADR](decisions/2026-10-27-the-demand-letter-is-judged-and-the-boq-is-a-ceiling.md)). The engine needs the plan quantity per item and room, which the document side supplies.
 
 ## Revision
@@ -90,4 +106,5 @@ Flag these to Furqaan rather than deciding them in code:
 | `ItemKind` added; `Claim.item` and `Detection.item` draw from it ([ADR](decisions/2026-10-27-claim-item-is-a-closed-vocabulary-not-the-boq-wording.md)). Approved William's ADRs on the closed vocabulary, the demand letter judged against the BOQ as a ceiling, and refusing unreadable input in the gap-request voice | 27 October 2026 | Furqaan |
 | `Claim.unit` may be null, where the document states no unit — found running real Muse Spark output on a demand letter | 27 October 2026 | Furqaan |
 | Builder routes need the project's builder link, `POST /projects` the setup key; `ProjectLinks` and `GET /projects/:id/links` added | 28 October 2026 | Furqaan |
+| The report becomes per flat and buyer-safe (`Report`, `GET /flats/:id/report`, `GET /reports/:token`), with `NotChecked`; `ProjectOverview` and `GET /projects/:id` for the builder; `GapRequest` and `QueryLetter` settled, from Apurva's proposal in `web/lib/types.ts` ([ADR](decisions/2026-10-28-the-report-is-per-flat-and-every-claim-is-judged-or-explained.md)) | 28 October 2026 | Furqaan |
 | `Document.reason` added. `CreateProject` and `CreatedProject` for `POST /projects` ([ADR](decisions/2026-10-27-creating-a-project-returns-its-rooms-and-their-qr-codes.md)). Clips upload in two steps: `POST /clips` returns a link and a ticket, `POST /clips/complete` registers the clip ([ADR](decisions/2026-10-27-clips-upload-in-two-steps-with-a-signed-ticket.md)) | 28 October 2026 | Furqaan |
