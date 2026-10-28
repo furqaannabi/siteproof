@@ -107,6 +107,7 @@ function ProjectCard({ report, summary }: Loaded) {
         <p className={s.cardMeta}>
           Flat {flat.name}
           {stage ? ` · ${stage}` : ""}
+          {` · ${report.rooms.length} ${report.rooms.length === 1 ? "room" : "rooms"}`}
           {demo ? " · demo data" : ""}
         </p>
       </div>

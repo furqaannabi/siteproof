@@ -43,8 +43,18 @@
 
 .addCard {
   border: 2px dashed var(--panel-border);
-  justify-content: center;
   align-items: flex-start;
+}
+
+.addCard .markAction {
+  margin-top: auto;
+}
+
+/* On a phone the set-up card shrinks to its content, so the first project rises. */
+@media (max-width: 639px) {
+  .addCard {
+    min-height: 0;
+  }
 }
 
 .addTitle {
@@ -148,11 +158,13 @@
 .empty {
   margin: 0;
   align-self: flex-start;
-  padding: 8px 12px;
-  border: 1.5px dashed var(--not-seen);
+  padding: 4px 8px;
+  border: 1.5px solid var(--muted);
   font-family: var(--font-mono);
-  font-size: var(--text-ref);
-  color: var(--ink-2);
+  font-size: var(--text-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
 }
 
 .next {
@@ -162,7 +174,7 @@
 }
 
 .checking {
-  color: var(--link);
+  color: var(--ink);
   font-weight: 600;
 }
 
@@ -236,10 +248,12 @@
 .reset {
   align-self: flex-start;
   min-height: 44px;
-  padding: 0 4px;
+  padding: 0;
   border: 0;
   background: transparent;
-  color: var(--short);
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
   font-weight: 600;
   font-size: var(--text-control);
 }

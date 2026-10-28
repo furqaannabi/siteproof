@@ -25,3 +25,7 @@ FIRST VIEWPORT: The header with the brand; "Your projects" as the page title; a 
 FORM: Project cards with tallies, fourth on my ordered list, third of the dealt structures. seed:bc305baaffce1686. Raised by the declined hand: type on rules inside each card, a strict outcome colour system, exact tally bars, and every card's full extent visible at once. No signature motion: a working index stays still.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+
+## Adaptations
+
+- A card with no demand letter offers **Room tags** beside Upload. Product truth: printing the room tags is the project page's own setup step (`app/projects/[projectId]/project-view.tsx`), and a project with no letter yet is usually still at that step.
