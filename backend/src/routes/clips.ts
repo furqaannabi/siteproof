@@ -11,12 +11,9 @@
  */
 import { Hono } from "hono";
 import { z } from "zod";
-import type { Clip, ClipStatus } from "@siteproof/contract";
+import type { Clip, ClipStatus, ClipUpload, ClipUploadRequest, CompleteClip } from "@siteproof/contract";
 import { api } from "@siteproof/contract";
 import { readTicket, signTicket } from "./upload-ticket";
-
-/** Proposed for the contract's `api`, alongside `createClip`. */
-export const COMPLETE_CLIP_PATH = "/clips/complete";
 
 /** A clip as the database holds it: the contract's fields, less the link, plus the key. */
 export interface ClipRecord {
@@ -70,8 +67,8 @@ const MAX_BYTES = 250 * 1024 * 1024;
 const UploadRequest = z.object({
   project_id: z.string().min(1),
   content_type: z.enum(Object.keys(VIDEO_TYPES) as [keyof typeof VIDEO_TYPES]),
-});
-const CompleteRequest = z.object({ ticket: z.string() });
+}) satisfies z.ZodType<ClipUploadRequest>;
+const CompleteRequest = z.object({ ticket: z.string() }) satisfies z.ZodType<CompleteClip>;
 
 // MP4 and MOV share one container format: boxes, each a 4-byte size then a 4-byte
 // type. A phone's file opens with "ftyp"; an older QuickTime file may open with one
@@ -102,14 +99,15 @@ export function clipRoutes({ store, files, ticketSecret, now }: ClipRouteDeps) {
 
     const object_key = `siteproof/clips/${crypto.randomUUID().replaceAll("-", "")}.${VIDEO_TYPES[content_type]}`;
     const issued = now();
-    return c.json({
+    const upload: ClipUpload = {
       upload_url: files.presignUpload(object_key, content_type, LINK_SECONDS),
       ticket: signTicket({ project_id, object_key, content_type, expires_at: issued + TICKET_MS }, ticketSecret()),
       expires_at: new Date(issued + LINK_SECONDS * 1000).toISOString(),
-    });
+    };
+    return c.json(upload);
   });
 
-  routes.post(COMPLETE_CLIP_PATH, async (c) => {
+  routes.post(api.completeClip(), async (c) => {
     const request = CompleteRequest.safeParse(await c.req.json().catch(() => null));
     const ticket = readTicket(request.success ? request.data.ticket : "", ticketSecret(), now());
     if (!ticket.ok) {

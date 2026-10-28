@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
-import type { CreatedProject, NewProject, ProjectStore } from "./projects";
+import type { CreatedProject } from "@siteproof/contract";
+import type { NewProject, ProjectStore } from "./projects";
 import { projectRoutes } from "./projects";
 
 /** A store that numbers what it is given and remembers every call. */

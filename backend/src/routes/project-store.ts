@@ -4,7 +4,8 @@
  * Imports the Prisma client on first use, for the same reason as the document store:
  * `db.ts` refuses to load without DATABASE_URL, and `app.ts` mounts this route.
  */
-import type { CreatedProject, ProjectStore } from "./projects";
+import type { CreatedProject } from "@siteproof/contract";
+import type { ProjectStore } from "./projects";
 
 export const prismaProjectStore: ProjectStore = {
   async create(input) {
