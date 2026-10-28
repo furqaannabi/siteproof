@@ -38,6 +38,27 @@
   --plan-label-verified: #9be7b0;
   --plan-label-short: #ffb37a;
   --plan-label-not-seen: #dce9f7;
+  --plan-amber: #f59e5b; /* the Short rule on the plan; blueprint eyebrows */
+  --plan-ink-soft: #c5d2e0; /* secondary text on the 3D stage */
+  --tag-paper: #ffffff; /* printed room tags and printed reports stay white */
+  --overlay-bg: rgba(0, 0, 0, 0.55); /* badges drawn over evidence frames */
+  --overlay-ink: #e9e5dc;
+
+  /* Type roles. Every font-size in the app is one of these. */
+  --text-label: 12px; /* mono or uppercase labels: the floor, nothing smaller */
+  --text-ref: 13px; /* mono references: quotes, clip times, tag codes */
+  --text-small: 14px; /* helper text, notes, captions, errors */
+  --text-control: 15px; /* buttons, toggles, chips, tile names */
+  --text-body: 16px; /* anything that is a sentence */
+  --text-minor-head: 20px;
+  --text-section: 24px;
+  --text-brand: 26px;
+  --text-subhead: 28px;
+  --text-numeral: 34px;
+  --text-headline: 36px;
+  --text-page: clamp(40px, 9vw, 64px);
+  --text-display: clamp(44px, 10vw, 72px);
+  --text-answer: clamp(64px, 16vw, 128px); /* the report's one verified count */
 
   --font-display: var(--font-barlow), "Arial Narrow", sans-serif;
   --font-body: var(--font-plex-sans), system-ui, sans-serif;
@@ -90,17 +111,48 @@ body {
   background-size: 24px 24px;
   color: var(--ink);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: var(--text-body);
   line-height: 1.5;
 }
 
 a {
   color: var(--link);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+/* The browser's own surfaces belong to the drawing set too: selecting text is a highlighter. */
+::selection {
+  background: var(--quote-mark);
+  color: #1e1d1a;
+}
+
+input,
+textarea {
+  caret-color: var(--mark);
 }
 
 button {
   font-family: inherit;
   cursor: pointer;
+}
+
+/* Placeholder text is a hint, in the muted ink: 6.9:1 on panels in both themes. */
+::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+/* Long names (an 80-character room, a project in two languages) wrap rather than spill. */
+h1,
+h2,
+h3 {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 :focus-visible {
