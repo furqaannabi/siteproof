@@ -7,7 +7,269 @@
 .page {
   --gutter: 16px;
   --seam: 2px dashed var(--plan-line);
+  position: relative;
+}
+
+/* Everything after the hero scrolls up over the building, on its own ground. */
+.page > section:not(.hero),
+.page > footer {
+  position: relative;
+  z-index: 1;
   background: var(--panel);
+}
+
+/* ---------- The hero: the building behind the whole page ---------- */
+
+.hero {
+  position: relative;
+  z-index: 1;
+  /* Three screens of scroll build the tower; the first screen stays pinned meanwhile. */
+  height: 300svh;
+  color: var(--plan-ink);
+  background: #0d2747;
+}
+
+.heroPin {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 16px var(--gutter) 28px;
+  /* Horizontal drags turn the building; vertical ones still scroll the page. */
+  touch-action: pan-y;
+}
+
+.towerStage {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-color: #0d2747;
+  background-image:
+    linear-gradient(rgba(220, 233, 247, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(220, 233, 247, 0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.towerStage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.towerStage[data-ready="true"] canvas {
+  opacity: 1;
+}
+
+.towerLabel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 4px 8px;
+  border: 1.5px solid var(--mark);
+  background: rgba(13, 39, 71, 0.85);
+  color: var(--plan-ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-ref);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+
+/* On a phone the building rises behind the text: a scrim under it keeps the words legible. */
+.heroPin::after {
+  content: "";
+  position: absolute;
+  inset: 40% 0 0;
+  z-index: 1;
+  background: linear-gradient(to bottom, rgba(13, 39, 71, 0), rgba(13, 39, 71, 0.92) 55%);
+  pointer-events: none;
+}
+
+.heroBar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 24px;
+}
+
+.heroText {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  max-width: 34rem;
+  padding: 24px 0 8px;
+}
+
+.heroTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  /* Kept legible wherever a line of the building crosses behind it. */
+  text-shadow: 0 2px 24px rgba(13, 39, 71, 0.9);
+}
+
+.heroLede {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--plan-ink);
+  max-width: 34ch;
+  text-shadow: 0 1px 12px rgba(13, 39, 71, 0.9);
+}
+
+
+
+/* The level gauge: fourteen floors, top to bottom; built in ink, the working floor in
+   Safety Orange, Flat 302 marked. */
+.gauge {
+  position: absolute;
+  z-index: 2;
+  right: var(--gutter);
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  pointer-events: none;
+}
+
+.gauge li {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  height: 18px;
+  color: rgba(220, 233, 247, 0.62);
+  transition: color 0.3s ease-out;
+}
+
+.gauge li::after {
+  content: "";
+  width: 22px;
+  border-top: 2px solid currentColor;
+  transition: width 0.3s ease-out;
+}
+
+.gauge li[data-state="built"] {
+  color: var(--plan-ink);
+}
+
+/* Safety Orange, lightened to stay legible at label size on the navy. */
+.gauge li[data-state="working"] {
+  color: #ff8f50;
+}
+
+.gauge li[data-state="working"]::after {
+  width: 40px;
+}
+
+.gauge li[data-flat] span {
+  padding: 0 4px;
+  outline: 1.5px solid currentColor;
+}
+
+.gauge li[data-flat][data-state="built"] {
+  color: var(--plan-label-short);
+}
+
+.readout {
+  position: absolute;
+  z-index: 2;
+  right: var(--gutter);
+  top: 112px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+  padding: 10px 12px;
+  border: 1px solid rgba(220, 233, 247, 0.25);
+  background: rgba(13, 39, 71, 0.82);
+  font-family: var(--font-mono);
+  font-size: var(--text-ref);
+  pointer-events: none;
+}
+
+.readoutRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--plan-ink-soft);
+}
+
+.readoutRow b {
+  color: var(--plan-ink);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.readoutFlat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* Folded away until the build reaches Flat 302, so the readout holds no empty space. */
+  max-height: 0;
+  margin-top: 0;
+  padding: 0 10px;
+  overflow: hidden;
+  border: 0 solid var(--mark);
+  opacity: 0;
+  transition:
+    max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    padding 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    margin 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.readoutFlat[data-lit="true"] {
+  max-height: 90px;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-width: 1.5px;
+  opacity: 1;
+}
+
+.readoutFlat span {
+  color: var(--plan-ink-soft);
+}
+
+.readoutFlat b {
+  font-family: var(--font-display);
+  font-size: var(--text-section);
+  font-weight: 700;
+  color: var(--plan-label-verified);
+}
+
+.buildHint {
+  position: absolute;
+  z-index: 2;
+  left: var(--gutter);
+  bottom: 12px;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-ref);
+  color: var(--plan-ink-soft);
+  transition: opacity 0.4s ease-out;
+  pointer-events: none;
 }
 
 /* ---------- The fold (first viewport) ---------- */
@@ -201,35 +463,6 @@
 }
 
 /* A drawing's title block cell, naming the side of the fold. */
-.block {
-  margin-top: auto;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  border-top: 2px solid var(--ink);
-  font-family: var(--font-mono);
-  font-size: var(--text-label);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-}
-
-.block > span {
-  padding: 10px 12px 2px 0;
-}
-
-.block > span + span {
-  padding-left: 12px;
-  border-left: 1px solid var(--rule);
-}
-
-.blockProof {
-  border-top-color: var(--plan-line);
-  color: var(--plan-ink-soft);
-}
-
-.blockProof > span + span {
-  border-left-color: rgba(220, 233, 247, 0.4);
-}
 
 /* The seam: the one place the page asks for something. */
 .seam {
@@ -266,16 +499,6 @@
   translate: 0 1px;
 }
 
-.setUp {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  min-height: 44px;
-  color: var(--ink);
-  font-weight: 600;
-  font-size: var(--text-control);
-}
-
 /* ---------- Line for line ---------- */
 
 .lines {
@@ -283,7 +506,7 @@
 }
 
 .linesHead {
-  padding: 56px var(--gutter) 32px;
+  padding: 96px var(--gutter) 56px;
   display: grid;
   gap: 16px;
   max-width: 1320px;
@@ -321,7 +544,7 @@
 
 .rowPaper,
 .rowProof {
-  padding: 28px var(--gutter);
+  padding: 40px var(--gutter);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -457,156 +680,14 @@
     transform 240ms cubic-bezier(0.2, 0.9, 0.25, 1);
 }
 
-/* ---------- Outcomes, as the drawing's legend ---------- */
-
-.outcomes {
-  padding: 56px var(--gutter);
-  max-width: 1320px;
-  margin: 0 auto;
-  display: grid;
-  gap: 32px;
-}
-
-.outcomesHead {
-  display: grid;
-  gap: 16px;
-}
-
-.tally {
-  display: flex;
-  gap: 5px;
-  max-width: 560px;
-}
-
-.tally > i {
-  flex: 1 1 0;
-  height: 28px;
-}
-
-.tV {
-  background: var(--verified);
-}
-
-.tS {
-  background: var(--short-fill);
-  box-shadow: inset 0 0 0 2px var(--short);
-}
-
-.tN {
-  background: repeating-linear-gradient(45deg, var(--hatch) 0 2px, var(--panel) 2px 6px);
-  box-shadow: inset 0 0 0 2px var(--not-seen);
-}
-
-.tallyNote {
-  margin: 0;
-  font-family: var(--font-mono);
-  font-size: var(--text-ref);
-  color: var(--muted);
-}
-
-.legend {
-  margin: 0;
-  border-top: 2px solid var(--ink);
-}
-
-.legendRow {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  padding: 22px 0;
-  border-bottom: 1px solid var(--rule);
-}
-
-.legendRow dt {
-  padding: 6px 0 6px 4px;
-}
-
-.legendRow dd {
-  margin: 0;
-  font-size: var(--text-body);
-  line-height: 1.55;
-}
-
-.when {
-  font-weight: 600;
-}
-
-.shows {
-  color: var(--ink-2);
-}
-
-.request {
-  display: block;
-  margin: 8px 0;
-  padding: 12px 16px;
-  background: var(--plan-bg);
-  color: var(--plan-ink);
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: var(--text-subhead);
-  line-height: 1.05;
-}
-
-/* ---------- Rules band ---------- */
-
-.rules {
-  background-color: var(--plan-bg);
-  background-image:
-    linear-gradient(rgba(220, 233, 247, 0.09) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(220, 233, 247, 0.09) 1px, transparent 1px);
-  background-size: 20px 20px;
-  color: var(--plan-ink);
-  padding: 56px var(--gutter);
-  display: grid;
-  gap: 28px;
-}
-
-.rules > * {
-  max-width: 1320px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.ruleList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  border-top: 1.5px solid var(--plan-line);
-}
-
-.ruleList li {
-  padding: 16px 0;
-  border-bottom: 1px solid rgba(220, 233, 247, 0.3);
-  font-size: var(--text-body);
-  line-height: 1.55;
-  color: var(--plan-ink-soft);
-}
-
-.ruleList b {
-  color: var(--plan-ink);
-}
-
-.ruleList li > span {
-  min-width: 0;
-}
-
 /* ---------- Who it's for ---------- */
 
 .who {
-  padding: 56px var(--gutter);
+  padding: 96px var(--gutter);
   max-width: 1320px;
   margin: 0 auto;
   display: grid;
   gap: 20px;
-}
-
-.whoLede {
-  margin: 0;
-  font-size: var(--text-body);
-  line-height: 1.55;
-  color: var(--ink-2);
-  max-width: 60ch;
 }
 
 .whoGrid {
@@ -647,7 +728,7 @@
 
 .closePaper,
 .closeProof {
-  padding: 56px var(--gutter);
+  padding: 72px var(--gutter);
   min-height: 180px;
   display: flex;
   align-items: center;
@@ -736,13 +817,12 @@
 
   .fold {
     grid-template-columns: 1fr 1fr;
-    min-height: min(100svh, 940px);
   }
 
   .fold > .paper,
   .fold > .proof {
     order: 0;
-    padding: 32px var(--gutter) 32px;
+    padding: 96px var(--gutter);
     border-top: 0;
   }
 
@@ -752,14 +832,37 @@
 
   /* Both halves share one row grid: a 44px header, a two-line title slot, then
      claim rows of one height, so each paper claim faces its stamped answer. */
-  .nav,
-  .brand {
-    height: 44px;
+  .heroPin {
+    padding: 28px var(--gutter) 40px;
+  }
+
+  .heroText {
+    margin: auto 0;
+  }
+
+  .heroPin::after {
+    display: none;
+  }
+
+  .gauge {
+    display: flex;
+  }
+
+  .readout {
+    top: auto;
+    bottom: 40px;
+    right: calc(var(--gutter) + 96px);
+    min-width: 240px;
+  }
+
+  .buildHint {
+    left: var(--gutter);
+    bottom: 40px;
   }
 
   .paper .foldTitle,
   .proof .foldTitle {
-    margin-top: 24px;
+    margin-top: 0;
     max-width: 16ch;
     min-height: calc(2em * 0.95);
   }
@@ -786,20 +889,17 @@
 
   /* The demo action sits on the fold in the title-block row; the proof side's
      cell steps clear of it. */
-  .blockProof > span:first-child {
-    padding-left: 150px;
-  }
 
   /* Sized so the whole fold, with the action, fits the first screen at 1440 x 900. */
   .heroFrame {
-    max-width: 400px;
+    max-width: 420px;
   }
 
   .fold > .seam {
     position: absolute;
     left: 50%;
     top: auto;
-    bottom: 20px;
+    bottom: 40px;
     margin: 0;
     transform: translateX(-50%);
   }
@@ -810,7 +910,7 @@
 
   .rowPaper,
   .rowProof {
-    padding: 40px var(--gutter);
+    padding: 72px var(--gutter);
   }
 
   .rowProof {
@@ -841,21 +941,12 @@
     max-width: 46ch;
   }
 
-  .outcomes {
-    grid-template-columns: 5fr 7fr;
-    align-items: start;
-    gap: 48px;
+  .linesHead {
+    padding: 160px var(--gutter) 88px;
   }
 
-  .legendRow {
-    grid-template-columns: 170px 1fr 1.3fr;
-    gap: 24px;
-    align-items: start;
-  }
-
-  .ruleList {
-    grid-template-columns: 1fr 1fr;
-    column-gap: 48px;
+  .who {
+    padding: 160px var(--gutter);
   }
 
   .whoGrid {
@@ -906,6 +997,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .readoutFlat,
+  .towerStage canvas {
+    transition: none;
+  }
+
   .rowProof .stamp {
     transition: none;
   }
