@@ -38,3 +38,6 @@ backend/src/generated/
 .turbo/
 coverage/
 *.log
+
+# SAM answers cached by the accuracy runner: local, never committed.
+backend/accuracy/.cache/
