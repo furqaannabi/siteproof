@@ -55,9 +55,12 @@ export async function readDocumentText(pdfPath: string): Promise<DocumentText> {
   const pageTexts = text.split("\f").slice(0, -1);
   if (pageTexts.length === 0) throw new DocumentError("unreadable", "This file could not be read as a PDF.");
 
-  const scanned = pageTexts.findIndex((page) => page.replace(/\s/g, "").length < MIN_TEXT_PER_PAGE);
+  const isScan = (page: string) => page.replace(/\s/g, "").length < MIN_TEXT_PER_PAGE;
+  const scanned = pageTexts.findIndex(isScan);
   if (scanned !== -1) {
-    const which = pageTexts.length === 1 ? "This" : `Page ${scanned + 1}`;
+    // Name the page only when some pages are fine: "Page 1 looks like a scan" of a
+    // document scanned throughout points at the wrong thing.
+    const which = pageTexts.every(isScan) ? "This" : `Page ${scanned + 1}`;
     throw new DocumentError("scan", `${which} looks like a scan. Send a PDF with selectable text.`);
   }
 
