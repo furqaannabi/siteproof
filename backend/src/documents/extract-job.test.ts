@@ -193,8 +193,8 @@ test("a whole-project document in a project of one flat is offered plain names",
 
 test("a whole-project document across several flats is offered names qualified by flat, so no two match", () => {
   expect(roomChoices({ ...doc(), flat_id: null }, TWO_FLATS)).toEqual([
-    { id: "r302b2", name: "302 / Bedroom 2" },
-    { id: "r302k", name: "302 / Kitchen" },
-    { id: "r303b2", name: "303 / Bedroom 2" },
+    { id: "r302b2", name: "302 / Bedroom 2", onLine: "Bedroom 2" },
+    { id: "r302k", name: "302 / Kitchen", onLine: "Kitchen" },
+    { id: "r303b2", name: "303 / Bedroom 2", onLine: "Bedroom 2" },
   ]);
 });

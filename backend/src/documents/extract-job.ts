@@ -13,7 +13,7 @@ import { z } from "zod";
 import type { ClipStatus } from "@siteproof/contract";
 import { buildExtractionRequest, type ExtractionRequest } from "./extraction";
 import { MuseSparkError, type MuseSparkAnswer } from "./muse-spark";
-import { ExtractionError, parseExtraction, type ParsedClaim } from "./parse-extraction";
+import { ExtractionError, parseExtraction, type ParsedClaim, type RoomChoice } from "./parse-extraction";
 import { DocumentError, readDocumentText, renderPageImages } from "./read-pdf";
 
 export interface ExtractDocumentRecord {
@@ -110,12 +110,14 @@ function fromMuseSpark(e: unknown): JobError {
  * unplaced. Qualified names are unique, so the parser needs no change; a line that
  * names no flat simply stays unplaced.
  */
-export function roomChoices(document: ExtractDocumentRecord, rooms: RoomRow[]): { id: string; name: string }[] {
+export function roomChoices(document: ExtractDocumentRecord, rooms: RoomRow[]): RoomChoice[] {
   if (document.flat_id !== null) {
     return rooms.filter((r) => r.flat_id === document.flat_id).map((r) => ({ id: r.id, name: r.name }));
   }
   const severalFlats = new Set(rooms.map((r) => r.flat_id)).size > 1;
-  return rooms.map((r) => ({ id: r.id, name: severalFlats ? `${r.flat_name} / ${r.name}` : r.name }));
+  // A qualified name is ours, not the document's: the line will say "Bedroom 2", so
+  // that is what has to be on it.
+  return rooms.map((r) => (severalFlats ? { id: r.id, name: `${r.flat_name} / ${r.name}`, onLine: r.name } : { id: r.id, name: r.name }));
 }
 
 export function extractDocumentJob({ store, files, ask }: ExtractDeps) {
