@@ -1,0 +1,229 @@
+{
+ "title": "Choose the one-screen landing \u00b7 blueprint throughout",
+ "question": "Re-rolled with your steer: the blueprint ground everywhere, little text, one dramatic moment.",
+ "options": [
+  {
+   "id": "elevation",
+   "kind": "assigned",
+   "kicker": "THE ROLL",
+   "label": "The building elevation",
+   "lineage": "an architect's elevation drawing",
+   "thesis": "Tower B drawn as a white-line elevation on the blueprint, six floors tall. One floor, Flat 302, glows: its twelve windows lit, nine green, two rust, one dashed, stamped 9 of 12. Headline, one sentence and the button on the left; one thin line for how it works and who it's for.",
+   "palette": [
+    "#163a6b",
+    "#f4f8fc",
+    "#fde68a",
+    "#e8590c",
+    "#7fd08d",
+    "#ffb38a",
+    "#dbe6f2"
+   ],
+   "materials": [
+    "blueprint grid",
+    "line-drawn tower",
+    "lit windows",
+    "stamp"
+   ],
+   "viewport": "Left: 'Proof of progress, flat by flat.' at 96px, one sentence, the demo button. Right, full height: the tower elevation; Flat 302's floor outlined in orange with its twelve windows lit; a 9 of 12 stamp beside it. Foot: READ \u2192 PLACE \u2192 COUNT \u2192 JUDGE \u00b7 for builders, buyers and banks. Signature: on load the windows of Flat 302 light one by one, then the stamp presses. Phone: headline, button, tower below.",
+   "risk": "The tower is illustrative: Flat 302's real windows are across five rooms, not one facade.",
+   "html": ".impeccable/mocks/decision/landing-v2/elevation.html",
+   "comp": ".impeccable/mocks/decision/landing-v2/elevation.webp",
+   "raised": [
+    {
+     "from": "challenger-scope",
+     "raise": "One signal on a quiet field: only Flat 302 lights; every other line stays a drawing."
+    },
+    {
+     "from": "challenger-map",
+     "raise": "A marked place: the orange leader and label put a finger on the one flat that matters."
+    }
+   ]
+  },
+  {
+   "id": "phone",
+   "kind": "dealt",
+   "label": "The builder's phone",
+   "lineage": "before and after, on the phone",
+   "thesis": "Two phones drawn in white line on the blueprint: the WhatsApp-style clips a builder already sends, an orange arrow, and the report a buyer pays against: the claim, 9 of 12, the tally, the stamps.",
+   "palette": [
+    "#163a6b",
+    "#f4f8fc",
+    "#fde68a",
+    "#e8590c",
+    "#7fd08d",
+    "#ffb38a",
+    "#dbe6f2"
+   ],
+   "materials": [
+    "line-drawn phones",
+    "arrow",
+    "report card"
+   ],
+   "viewport": "Left: 'Forward the clip. Get paid on proof.' and the button. Right: phone one with two clips and a 'Stage 6 done' message; dashed orange arrow; phone two with the claim, 9 of 12, tally, stamps and a frame. Captions under each. Foot line. Signature: the arrow draws and the report fills in. Phone: the two phones stack.",
+   "risk": "The left phone looks like WhatsApp; it must stay a generic drawing, not an imitation of the app.",
+   "html": ".impeccable/mocks/decision/landing-v2/phone.html",
+   "comp": ".impeccable/mocks/decision/landing-v2/phone.webp"
+  },
+  {
+   "id": "ledger",
+   "kind": "dealt",
+   "label": "The stamped ledger",
+   "lineage": "a drawing register, stamped",
+   "thesis": "The demand letter's three lines as three giant ledger rows across the full width, each with a big stamp pressed at its end: 9 of 12, 4 of 5, Not checked. Headline above, button top right.",
+   "palette": [
+    "#163a6b",
+    "#f4f8fc",
+    "#fde68a",
+    "#e8590c",
+    "#7fd08d",
+    "#ffb38a",
+    "#dbe6f2"
+   ],
+   "materials": [
+    "ledger rows",
+    "giant stamps"
+   ],
+   "viewport": "Top: 'Every claim, stamped with proof.' at 96px, the button to the right. Middle: three 140px rows, each quote in highlighter at 40px, each stamp at 56px. Foot line. Signature: the stamps press down one after another. Phone: rows stack quote over stamp.",
+   "risk": "Typographic only; no picture of the evidence itself.",
+   "html": ".impeccable/mocks/decision/landing-v2/ledger.html",
+   "comp": ".impeccable/mocks/decision/landing-v2/ledger.webp"
+  },
+  {
+   "id": "challenger-algorave",
+   "kind": "challenger",
+   "catalogId": "medium-native-algorave-source-floor",
+   "verdict": "declined",
+   "label": "Algorave source",
+   "lineage": "Algorave source",
+   "thesis": "Algorave source",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Algorave source"
+   ],
+   "viewport": "Algorave source",
+   "case": "Declined: live code, no evidence.",
+   "risk": "Off-world.",
+   "kept": "Nothing.",
+   "hero": "https://impeccable.style/worlds/cards/medium-native-algorave-source-floor-hero.webp"
+  },
+  {
+   "id": "challenger-scope",
+   "kind": "challenger",
+   "catalogId": "scientific-notation-oscilloscope-signal-bench",
+   "verdict": "declined",
+   "label": "Oscilloscope bench",
+   "lineage": "Oscilloscope bench",
+   "thesis": "Oscilloscope bench",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Oscilloscope bench"
+   ],
+   "viewport": "Oscilloscope bench",
+   "case": "Declined: an instrument costume.",
+   "risk": "Off-world.",
+   "kept": "One signal on a quiet field.",
+   "hero": "https://impeccable.style/worlds/cards/scientific-notation-oscilloscope-signal-bench-hero.webp"
+  },
+  {
+   "id": "challenger-acetate",
+   "kind": "challenger",
+   "catalogId": "rw-manual-acetate-tab-board",
+   "verdict": "declined",
+   "label": "Acetate tab board",
+   "lineage": "Acetate tab board",
+   "thesis": "Acetate tab board",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Acetate tab board"
+   ],
+   "viewport": "Acetate tab board",
+   "case": "Declined: acetate and shadows fight flat blueprint.",
+   "risk": "Off-world.",
+   "kept": "Nothing.",
+   "hero": "https://impeccable.style/worlds/cards/rw-manual-acetate-tab-board-hero.webp"
+  },
+  {
+   "id": "challenger-map",
+   "kind": "challenger",
+   "catalogId": "wayfinding-cartography-signage-salt-stiffened-treasure-map",
+   "verdict": "declined",
+   "label": "Treasure map",
+   "lineage": "Treasure map",
+   "thesis": "Treasure map",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Treasure map"
+   ],
+   "viewport": "Treasure map",
+   "case": "Declined: adventure tone, not payment support.",
+   "risk": "Off-world.",
+   "kept": "A marked place.",
+   "hero": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-salt-stiffened-treasure-map-hero.webp"
+  },
+  {
+   "id": "challenger-city",
+   "kind": "challenger",
+   "catalogId": "dream-surreal-impossible-worlds-sleeping-city-fold",
+   "verdict": "declined",
+   "label": "Sleeping city fold",
+   "lineage": "Sleeping city fold",
+   "thesis": "Sleeping city fold",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Sleeping city fold"
+   ],
+   "viewport": "Sleeping city fold",
+   "case": "Declined: dreamlike where proof belongs.",
+   "risk": "Off-world.",
+   "kept": "Nothing.",
+   "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-sleeping-city-fold-hero.webp"
+  },
+  {
+   "id": "challenger-shell",
+   "kind": "challenger",
+   "catalogId": "paper-folds-pleats-deployable-curved-crease-shell",
+   "verdict": "declined",
+   "label": "Curved crease shell",
+   "lineage": "Curved crease shell",
+   "thesis": "Curved crease shell",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Curved crease shell"
+   ],
+   "viewport": "Curved crease shell",
+   "case": "Declined: craft metaphor.",
+   "risk": "Off-world.",
+   "kept": "Nothing.",
+   "hero": "https://impeccable.style/worlds/cards/paper-folds-pleats-deployable-curved-crease-shell-hero.webp"
+  }
+ ],
+ "reroll": {
+  "registers": [
+   "safer",
+   "bolder"
+  ]
+ },
+ "buildPath": {
+  "value": "code"
+ },
+ "steer": true,
+ "followup": true
+}
