@@ -8,16 +8,7 @@
  */
 import type { DocumentKind } from "@siteproof/contract";
 
-/**
- * What registering a clip or document hands back in the mock. Clips now upload in two
- * steps (`ClipUpload`, `CompleteClip`); moving the upload screen to them is next.
- */
-export interface Registered<T> {
-  item: T;
-  /** Where the browser PUTs the file. Short-lived; never logged, never stored. */
-  upload_url: string;
-}
-
+/** The form fields sent with a document to `POST /documents`, beside the file itself. */
 export interface NewDocument {
   project_id: string;
   flat_id: string | null;

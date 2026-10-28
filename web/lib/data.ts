@@ -10,6 +10,8 @@ import {
   api,
   type Clip,
   type ClipStatus,
+  type ClipUpload,
+  type ClipUploadRequest,
   type CreatedProject,
   type CreateProject,
   type Document,
@@ -19,7 +21,7 @@ import {
   type Report,
 } from "@siteproof/contract";
 import { builderToken, knownProjects } from "./access";
-import type { NewDocument, Registered } from "./types";
+import type { NewDocument } from "./types";
 
 /**
  * Every builder call names its project: that picks the builder link it sends. There is no
@@ -37,10 +39,13 @@ export interface DataSource {
   getLinks(projectId: string, setupKey?: string): Promise<ProjectLinks>;
   /** Needs the team's setup key. */
   createProject(body: CreateProject, setupKey: string): Promise<CreatedProject>;
-  /** `roomHint` is used by the mock only. The real pipeline places a clip by its room tag. */
-  registerClip(projectId: string, file: File, roomHint?: string | null): Promise<Registered<Clip>>;
-  registerDocument(input: NewDocument, file: File): Promise<Registered<Document>>;
-  upload(url: string, file: File, onProgress: (fraction: number) => void): Promise<void>;
+  /**
+   * Sends one clip and registers it, reporting the transfer's progress. `roomHint` is used
+   * by the mock only; the real pipeline places a clip by its room tag.
+   */
+  uploadClip(projectId: string, file: File, onProgress: (fraction: number) => void, roomHint?: string | null): Promise<Clip>;
+  /** Sends one demand letter, invoice or BOQ, reporting the transfer's progress. */
+  uploadDocument(input: NewDocument, file: File, onProgress: (fraction: number) => void): Promise<Document>;
   clipStatus(projectId: string, clipId: string): Promise<ClipStatus>;
   documentStatus(projectId: string, documentId: string): Promise<Document>;
   requestFootage(projectId: string, roomId: string): Promise<void>;
@@ -78,17 +83,44 @@ async function call<T>(path: string, token: string | null, init?: RequestInit): 
   return (await res.json()) as T;
 }
 
-/** PUT a file to a presigned URL with progress. The URL is never logged. */
-function putWithProgress(url: string, file: File, onProgress: (fraction: number) => void): Promise<void> {
+/**
+ * Sends a file with progress, which fetch can't report. Answers the reply's JSON, or a
+ * DataError with the server's own plain message. URLs and tokens are never logged.
+ */
+function send(
+  method: "PUT" | "POST",
+  url: string,
+  body: File | FormData,
+  headers: Record<string, string>,
+  onProgress: (fraction: number) => void,
+): Promise<unknown> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open("PUT", url);
-    if (file.type) xhr.setRequestHeader("content-type", file.type);
+    xhr.open(method, url);
+    for (const [name, value] of Object.entries(headers)) xhr.setRequestHeader(name, value);
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded / e.total);
-    xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new DataError(xhr.status, "The upload didn't finish. Try again.")));
+    xhr.onload = () => {
+      let reply: { error?: string; message?: string } | null = null;
+      try {
+        reply = xhr.responseText ? JSON.parse(xhr.responseText) : null;
+      } catch {
+        // Storage answers a PUT with an empty body or XML, not JSON.
+      }
+      if (xhr.status < 300) resolve(reply);
+      else reject(new DataError(xhr.status, reply?.message ?? "The upload didn't finish. Try again."));
+    };
     xhr.onerror = () => reject(new DataError(0, "The upload didn't finish. Check your connection and try again."));
-    xhr.send(file);
+    xhr.send(body);
   });
+}
+
+/**
+ * The clip's type as the server signs it. The upload must declare the same type, so a
+ * file the phone left untyped is named by its extension.
+ */
+function clipType(file: File): ClipUploadRequest["content_type"] {
+  if (file.type === "video/quicktime" || file.name.toLowerCase().endsWith(".mov")) return "video/quicktime";
+  return "video/mp4";
 }
 
 /** A builder call for one project, with that project's link, or a plain refusal without one. */
@@ -110,14 +142,26 @@ const apiSource: DataSource = {
   getLinks: (projectId, setupKey) =>
     setupKey ? call<ProjectLinks>(api.projectLinks(projectId), setupKey) : asBuilder<ProjectLinks>(projectId, api.projectLinks(projectId)),
   createProject: (body, setupKey) => call<CreatedProject>(api.createProject(), setupKey, { method: "POST", body: JSON.stringify(body) }),
-  // The request and response of POST /clips and POST /documents aren't agreed yet (William).
-  registerClip: async () => {
-    throw new DataError(501, NOT_READY);
+  // Two steps, so a clip is saved only once its video is in storage: a link and a ticket,
+  // the video straight to storage, then the ticket back to register it.
+  uploadClip: async (projectId, file, onProgress) => {
+    const content_type = clipType(file);
+    const request: ClipUploadRequest = { project_id: projectId, content_type };
+    const { upload_url, ticket } = await asBuilder<ClipUpload>(projectId, api.createClip(), { method: "POST", body: JSON.stringify(request) });
+    // The upload link is signed on its own: it takes no builder link.
+    await send("PUT", upload_url, file, { "content-type": content_type }, onProgress);
+    return asBuilder<Clip>(projectId, api.completeClip(), { method: "POST", body: JSON.stringify({ ticket }) });
   },
-  registerDocument: async () => {
-    throw new DataError(501, NOT_READY);
+  uploadDocument: async (input, file, onProgress) => {
+    const token = builderToken(input.project_id);
+    if (!token) throw new DataError(401, "no_link");
+    const form = new FormData();
+    form.set("project_id", input.project_id);
+    form.set("kind", input.kind);
+    if (input.flat_id) form.set("flat_id", input.flat_id);
+    form.set("file", file);
+    return (await send("POST", base + api.createDocument(), form, { authorization: `Bearer ${token}` }, onProgress)) as Document;
   },
-  upload: putWithProgress,
   clipStatus: async (projectId, clipId) => {
     const body = await asBuilder<ClipStatus | { status: ClipStatus }>(projectId, api.clipStatus(clipId));
     return typeof body === "string" ? body : body.status;
@@ -156,9 +200,10 @@ function fromMock(): DataSource {
     getLinks: wrap((m, projectId: string) => m.getLinks(projectId)),
     // The mock needs no setup key.
     createProject: wrap((m, body: CreateProject) => m.createProject(body)),
-    registerClip: wrap((m, projectId: string, file: File, roomHint?: string | null) => m.registerClip(projectId, file, roomHint ?? null)),
-    registerDocument: wrap((m, input: NewDocument) => m.registerDocument(input)),
-    upload: wrap((m, url: string, file: File, onProgress: (fraction: number) => void) => m.upload(url, file, onProgress)),
+    uploadClip: wrap((m, projectId: string, file: File, onProgress: (fraction: number) => void, roomHint?: string | null) =>
+      m.uploadClip(projectId, file, onProgress, roomHint ?? null),
+    ),
+    uploadDocument: wrap((m, input: NewDocument, file: File, onProgress: (fraction: number) => void) => m.uploadDocument(input, file, onProgress)),
     clipStatus: wrap((m, _projectId: string, clipId: string) => m.clipStatus(clipId)),
     documentStatus: wrap((m, _projectId: string, documentId: string) => m.documentStatus(documentId)),
     requestFootage: wrap((m, _projectId: string, roomId: string) => m.requestFootage(roomId)),
