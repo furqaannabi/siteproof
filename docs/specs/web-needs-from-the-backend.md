@@ -5,7 +5,7 @@
 **For:** Furqaan
 **Status:** Open
 
-The web app is moved to the contract of 28 October: per-flat reports, the project overview, and secret links ([ADR](../decisions/2026-10-28-builder-access-by-secret-links-accepted.md)). It works end to end on mock data and against a stand-in server with the contract's shapes. Against `hack.furqaannabi.com` only creating a project and the share links work, because these are not there yet. Wednesday's plan is wiring the screens to the real API, so these block it.
+The web app is moved to the contract of 28 October: per-flat reports, the project overview, and secret links ([ADR](../decisions/2026-10-28-builder-access-by-secret-links-accepted.md)). It works end to end on mock data and against a stand-in server with the contract's shapes. Against `hack.furqaannabi.com` only creating a project and the share links can work, because these are not there yet. Uploads are wired to `POST /clips`, `POST /clips/complete` and `POST /documents`, but the upload page opens from the project overview, so it waits on `GET /projects/:id` too. Wednesday's plan is wiring the screens to the real API, so these block it.
 
 ## 1. Let the web app call the API (`WEB_ORIGINS`)
 
@@ -13,6 +13,8 @@ The server answers no browser until its origin is in `WEB_ORIGINS` (`backend/src
 
 - `http://localhost:3000`, for development;
 - the frontend's deployed address, once the hosting is decided.
+
+**Also the R2 bucket.** A clip's video goes from the phone straight to R2 through the `upload_url` that `POST /clips` hands back, a `PUT` with `content-type` set to the clip's type. A browser makes that request only if the bucket's CORS rules allow it, so the bucket needs a rule for the same origins: `PUT` allowed, the `content-type` header allowed. Without it every clip upload fails in the browser, while the same request from `curl` works.
 
 ## 2. The three routes the screens read
 
