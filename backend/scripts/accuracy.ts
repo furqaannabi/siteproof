@@ -58,6 +58,7 @@ const labels = parseLabels(await Bun.file(join(ROOT, "labels.json")).json());
 await mkdir(CACHE, { recursive: true });
 
 const results: CountResult[] = [];
+const failed: string[] = [];
 let toPay = 0;
 let framesToPay = 0;
 for (const label of labels) {
@@ -82,7 +83,18 @@ for (const label of labels) {
       console.log(`would count ${label.file} ${item}: ${billed} frames, $${(billed * USD_PER_FRAME).toFixed(3)}`);
       continue;
     }
-    const { objects } = await segmentClip(clip, PROMPTS[item], samConfigFromEnv());
+    // One failed count must not lose the rest of the run. It is reported and listed
+    // as not run; running again retries only the failures, since finished counts are
+    // cached. No automatic retry: every attempt is a fresh SAM charge.
+    let objects;
+    try {
+      ({ objects } = await segmentClip(clip, PROMPTS[item], samConfigFromEnv()));
+    } catch (e) {
+      const cause = (e as { cause?: { code?: string } }).cause?.code ?? (e as { code?: string }).code ?? "";
+      failed.push(`${label.file} ${item}`);
+      console.log(`FAILED      ${label.file} ${item}: ${(e as Error).name}${cause ? ` (${cause})` : ""}`);
+      continue;
+    }
     const answer: Cached = { counted: objects.length, prompt: PROMPTS[item], model: MODEL, frames };
     await Bun.write(cached, JSON.stringify(answer, null, 2));
     results.push({ file: label.file, item, counted: answer.counted });
@@ -94,4 +106,9 @@ if (dryRun) {
   console.log(`\n${toPay} count(s) to run: ${framesToPay} frames, about $${(framesToPay * USD_PER_FRAME).toFixed(2)}. Nothing was spent.`);
 } else {
   console.log(`\n${renderTable(score(labels, results))}`);
+  if (failed.length > 0) {
+    console.log(`\n${failed.length} count(s) failed and are listed as not run: ${failed.join(", ")}.`);
+    console.log("Run again to retry them; finished counts are cached and not paid for twice.");
+    process.exitCode = 1;
+  }
 }
