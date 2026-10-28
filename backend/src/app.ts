@@ -17,6 +17,8 @@ import {
   projectLinkVersions,
   projectOfDocument,
   setupKeyRequired,
+  ticketClipRegistered,
+  uploadAllowance,
 } from "./auth/guards";
 import { linkRoutes } from "./auth/links-route";
 import { checkReadablePdf } from "./documents/read-pdf";
@@ -48,6 +50,10 @@ app.get("/health", (c) => c.json({ ok: true }));
 app.on("POST", api.createProject(), setupKeyRequired);
 app.on("POST", api.createClip(), builderLinkRequired(projectInJson));
 app.on("POST", api.completeClip(), builderLinkRequired(projectInTicket));
+// At most 30 clips a project a day, checked when the link is asked for and again when
+// the clip is registered, which is what queues the paid SAM 3.1 run.
+app.on("POST", api.createClip(), uploadAllowance({ projectOf: projectInJson }));
+app.on("POST", api.completeClip(), uploadAllowance({ projectOf: projectInTicket, alreadyRegistered: ticketClipRegistered }));
 app.on("GET", api.clipStatus(":id"), builderLinkRequired(projectOfClip));
 app.on("POST", api.createDocument(), builderLinkRequired(projectInForm));
 app.on("GET", api.documentStatus(":id"), builderLinkRequired(projectOfDocument));

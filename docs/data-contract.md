@@ -47,6 +47,7 @@ Every request carries its key as `Authorization: Bearer <token>` ([ADR](decision
 
 - **`POST /projects`** needs the team's setup key. Nobody else can create a project.
 - **Every other builder route** — clips, documents, their statuses, a project's links — needs that project's builder link. No link, or a link that isn't valid, is `401`; a valid link for a different project is `404`, the same as a project that does not exist.
+- **At most 30 clips per project in any 24 hours.** `POST /clips` and `POST /clips/complete` answer `429` with `{ error: "daily_limit", message }` past that; completing a clip already registered still answers, since it costs nothing new.
 - **A report link** opens one flat's report and nothing else; it never opens a builder route.
 - Links never expire. Replacing one cuts off everyone who held it.
 

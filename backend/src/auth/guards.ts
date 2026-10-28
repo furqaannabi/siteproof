@@ -10,6 +10,7 @@ import type { Context } from "hono";
 import { readTicket } from "../routes/upload-ticket";
 import { requireBuilder } from "./builder";
 import { requireSetupKey } from "./setup";
+import { requireUploadAllowance } from "./upload-cap";
 
 /** Reads a required setting on use, so the app loads without it. */
 export const env = (name: string) => () => {
@@ -67,4 +68,22 @@ export const projectLinkVersions = async (id: string) => {
     where: { id },
     select: { link_version: true, flats: { select: { id: true, link_version: true }, orderBy: { name: "asc" } } },
   });
+};
+
+/** The cap on clips per project per day. */
+export const uploadAllowance = requireUploadAllowance({
+  clipsSince: async (projectId, since) => {
+    const { db } = await import("../db");
+    return db.clip.count({ where: { project_id: projectId, created_at: { gte: since } } });
+  },
+  now: () => new Date(),
+});
+
+/** Whether an upload ticket's clip is registered already: completing it again costs nothing. */
+export const ticketClipRegistered = async (c: Context) => {
+  const ticket = field(((await c.req.json()) as { ticket?: unknown }).ticket);
+  const read = ticket ? readTicket(ticket, env("UPLOAD_TICKET_SECRET")(), 0) : null;
+  if (!read?.ok) return false;
+  const { db } = await import("../db");
+  return (await db.clip.count({ where: { object_key: read.body.object_key } })) > 0;
 };
