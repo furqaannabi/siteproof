@@ -21,12 +21,16 @@ import {
   uploadAllowance,
 } from "./auth/guards";
 import { linkRoutes } from "./auth/links-route";
+import { museSparkConfigFromEnv } from "./documents/muse-spark";
 import { checkReadablePdf } from "./documents/read-pdf";
+import { writeSteps } from "./gap-requests/steps";
 import { r2Files } from "./r2";
 import { prismaClipStore } from "./routes/clip-store";
 import { clipRoutes } from "./routes/clips";
 import { prismaDocumentStore } from "./routes/document-store";
 import { documentRoutes } from "./routes/documents";
+import { prismaGapRequestStore, projectOfRoomId } from "./routes/gap-request-store";
+import { gapRequestRoutes } from "./routes/gap-requests";
 import { prismaProjectStore } from "./routes/project-store";
 import { projectRoutes } from "./routes/projects";
 
@@ -57,6 +61,7 @@ app.on("POST", api.completeClip(), uploadAllowance({ projectOf: projectInTicket,
 app.on("GET", api.clipStatus(":id"), builderLinkRequired(projectOfClip));
 app.on("POST", api.createDocument(), builderLinkRequired(projectInForm));
 app.on("GET", api.documentStatus(":id"), builderLinkRequired(projectOfDocument));
+app.on("POST", api.requestFootage(":id"), builderLinkRequired((c) => projectOfRoomId(c.req.param("id") ?? "")));
 
 app.route("/", projectRoutes(prismaProjectStore));
 app.route(
@@ -78,6 +83,22 @@ app.route(
   }),
 );
 app.route("/", documentRoutes({ store: prismaDocumentStore, files: r2Files, checkReadable: checkReadablePdf }));
+app.route(
+  "/",
+  gapRequestRoutes({
+    store: prismaGapRequestStore,
+    // Without Meta API settings every request gets the fixed steps, never an error.
+    writeSteps: (room) => {
+      let config = null;
+      try {
+        config = museSparkConfigFromEnv();
+      } catch {
+        // Not configured: fall through to the fixed steps.
+      }
+      return writeSteps(room, config);
+    },
+  }),
+);
 
 app.notFound((c) => c.json({ error: "not_found" }, 404));
 

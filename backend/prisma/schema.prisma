@@ -92,9 +92,10 @@ model Room {
   qr_code String @unique
 
   flat       Flat        @relation(fields: [flat_id], references: [id], onDelete: Cascade)
-  segments   Segment[]
-  claims     Claim[]
-  detections Detection[]
+  segments     Segment[]
+  claims       Claim[]
+  detections   Detection[]
+  gap_requests GapRequest[]
 
   @@index([flat_id])
 }
@@ -203,6 +204,30 @@ model Result {
   note          String?
 
   claim Claim @relation(fields: [claim_id], references: [id], onDelete: Cascade)
+}
+
+/// Stored as open or sent; "cleared" is worked out on read, from a full one-way sweep
+/// of the room in a clip uploaded after the request.
+enum GapRequestStatus {
+  open
+  sent
+}
+
+/// An exact, small ask for footage of a room that is Not seen yet.
+/// See docs/decisions/2026-10-28-gap-request-text-and-pdf-export.md.
+model GapRequest {
+  id         String           @id @default(uuid())
+  room_id    String
+  /// Written by code from the flat and room names, never by a model.
+  text       String
+  /// Muse Spark's filming steps, checked, or the fixed steps in code.
+  steps      String[]
+  status     GapRequestStatus @default(open)
+  created_at DateTime         @default(now())
+
+  room Room @relation(fields: [room_id], references: [id], onDelete: Cascade)
+
+  @@index([room_id])
 }
 
 /// Pipeline work. Internal to the backend, not part of the contract.
