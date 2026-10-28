@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Open items first</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+*{box-sizing:border-box}body{margin:0;width:390px;height:844px;overflow:hidden;background:#f4f1ea;color:#1e1d1a;font-family:'IBM Plex Sans',sans-serif;position:relative}
+.top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:2px solid #1e1d1a}
+.brand{display:flex;align-items:center;gap:8px;font-family:'Barlow Condensed';font-weight:700;font-size:22px;text-transform:uppercase}.mk{width:24px;height:24px;background:#e8590c}
+.tog{display:flex;border:2px solid #1e1d1a;font-size:13px;font-weight:600}.tog span{padding:8px 10px}.tog .on{background:#1e1d1a;color:#f4f1ea}
+.head{padding:16px 16px 0}.flat{font-weight:600;font-size:15px}
+.items{display:flex;border:2px solid #1e1d1a;width:max-content;margin-top:10px;font-size:14px;font-weight:600}.items span{padding:8px 14px}.items .on{background:#1e1d1a;color:#f4f1ea}
+h1{margin:14px 0 0;font-family:'Barlow Condensed';font-weight:700;font-size:44px;line-height:.95}h1 em{font-style:normal;color:#b4440a}
+.tally{display:flex;gap:4px;margin-top:12px}.tally i{flex:1;height:18px;background:#2f6b3a}.tally .s{background:#fbe3d2;box-shadow:inset 0 0 0 2px #b4440a}.tally .n{background:repeating-linear-gradient(45deg,#cfcac0 0 2px,#f4f1ea 2px 5px);box-shadow:inset 0 0 0 2px #4f4b44}
+.sec{margin:20px 16px 0;font-family:'Barlow Condensed';font-weight:600;font-size:22px;text-transform:uppercase;letter-spacing:.03em}
+.open{margin:8px 16px 0;border:2px solid #1e1d1a;background:#fffdf8}
+.it{padding:14px 14px;display:grid;grid-template-columns:1fr auto;gap:6px 10px;border-top:1px solid #cfcac0}.it:first-child{border-top:0}
+.it b{font-size:17px}.it p{grid-column:1/-1;margin:0;font-size:15px;color:#3e3b35;line-height:1.45}
+.st{font-family:'Barlow Condensed';font-weight:700;font-size:16px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border:3px solid currentColor;outline:1px solid currentColor;outline-offset:2px;transform:rotate(-5deg);align-self:start}
+.short{color:#b4440a}.ns{color:#4f4b44;border-style:dashed}.ver{color:#2f6b3a}
+.act{grid-column:1/-1;justify-self:start;margin-top:4px;padding:10px 14px;font-weight:600;font-size:15px;border:2px solid #1e1d1a}
+.act.k{background:#163a6b;color:#f4f8fc;border-color:#163a6b}
+.done{margin:12px 16px 0;padding:14px;border:2px solid #1e1d1a;display:grid;grid-template-columns:1fr auto;align-items:center;background:#fffdf8}
+.done b{font-size:17px}.done small{display:block;font-size:14px;color:#5c5850}
+.rail{position:absolute;right:0;top:200px;display:flex;flex-direction:column;gap:3px}.rail i{width:6px;height:28px;background:#2f6b3a}.rail .s{background:#b4440a}.rail .n{background:#4f4b44}.rail .here{width:12px}
+</style></head><body>
+<div class="top"><div class="brand"><span class="mk"></span>SiteProof</div><div class="tog"><span>Builder</span><span class="on">Buyer / bank</span></div></div>
+<div class="head">
+ <div class="flat">Flat 302 · Stage 6 · Northfield Residency</div>
+ <div class="items"><span class="on">Windows</span><span>Doors</span></div>
+ <h1>9 of 12 windows verified. <em>3 still open.</em></h1>
+ <div class="tally"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="n"></i></div>
+</div>
+<div class="sec">Still open</div>
+<div class="open">
+ <div class="it"><b>Bedroom 2 · 2 windows</b><span class="st short">Short</span>
+  <p>A full one-way sweep found 2 of the 4 windows in the plan.</p>
+  <span class="act">Read the query letter</span></div>
+ <div class="it"><b>Kitchen · 1 window</b><span class="st ns">Not seen yet</span>
+  <p>Not filmed from its room tag yet. Nothing is wrong: one clip clears it.</p>
+  <span class="act k">Need 5 s of the kitchen, east wall</span></div>
+</div>
+<div class="done"><span><b>9 windows verified</b><small>Living Room 3 · Bedroom 1 2 · Bedroom 2 2 · Bedroom 3 2, each with its frame</small></span><span class="st ver">Verified</span></div>
+<div class="sec">Rooms · plan or 3D</div>
+<div class="rail"><i></i><i class="here"></i><i class="n"></i><i class="s"></i><i></i></div>
+</body></html>

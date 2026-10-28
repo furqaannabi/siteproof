@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>The punch list</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+*{box-sizing:border-box}body{margin:0;width:1440px;height:900px;overflow:hidden;background:#fffdf8;color:#1e1d1a;font-family:'IBM Plex Sans',sans-serif}
+header{height:72px;border-bottom:2px solid #1e1d1a;display:flex;align-items:center;gap:28px;padding:0 40px;background:#f4f1ea}
+.brand{display:flex;align-items:center;gap:10px;font:700 26px 'Barlow Condensed';text-transform:uppercase}.mk{width:30px;height:30px;background:#e8590c}
+.sp{flex:1}.new{background:#e8590c;color:#1e1d1a;padding:12px 18px;font-weight:600;border:2px solid #1e1d1a}
+main{max-width:1100px;margin:0 auto;padding:36px 40px}
+h1{margin:0;font:700 72px/.9 'Barlow Condensed'}h1 em{font-style:normal;color:#b4440a}
+.list{margin-top:24px;border-top:2px solid #1e1d1a}
+.r{display:grid;grid-template-columns:200px 1fr auto auto;align-items:center;gap:20px;padding:18px 0;border-bottom:2px solid #1e1d1a}
+.where{font:13px 'IBM Plex Mono';color:#5c5850}.where b{display:block;font:600 16px 'IBM Plex Sans';color:#1e1d1a}
+.what{font-size:18px}
+.st{font:700 15px 'Barlow Condensed';letter-spacing:.1em;text-transform:uppercase;padding:1px 8px;border:2.5px solid currentColor;outline:1px solid currentColor;outline-offset:2px;transform:rotate(-4deg)}
+.short{color:#b4440a}.ns{color:#4f4b44;border-style:dashed}.doc{color:#163a6b}
+.btn{border:2px solid #1e1d1a;padding:10px 14px;font-weight:600}.btn.k{background:#163a6b;color:#f4f8fc;border-color:#163a6b}
+h2{margin:40px 0 0;font:600 24px 'Barlow Condensed';text-transform:uppercase;letter-spacing:.03em}
+.idx{margin-top:10px;border-top:1px solid #1e1d1a}
+.i{display:grid;grid-template-columns:1fr 260px 120px;gap:20px;align-items:center;padding:12px 0;border-bottom:1px solid #cfcac0;font-size:16px}
+.tally{display:flex;gap:3px}.tally i{flex:1;height:12px;background:#2f6b3a}.tally .s{background:#fbe3d2;box-shadow:inset 0 0 0 2px #b4440a}.tally .n{background:repeating-linear-gradient(45deg,#cfcac0 0 2px,#fffdf8 2px 5px);box-shadow:inset 0 0 0 2px #4f4b44}
+.m{font:13px 'IBM Plex Mono';color:#5c5850}
+</style></head><body>
+<header><div class="brand"><span class="mk"></span>SiteProof</div><div class="sp"></div><span class="new">Set up a project</span></header>
+<main>
+ <h1><em>3</em> things need you</h1>
+ <div class="list">
+  <div class="r"><span class="where"><b>Flat 302 · Kitchen</b>Northfield Residency</span><span class="what">Need 5 s of the kitchen, east wall</span><span class="st ns">Not seen yet</span><span class="btn k">Send to site</span></div>
+  <div class="r"><span class="where"><b>Flat 302 · Bedroom 2</b>Northfield Residency</span><span class="what">2 windows not found in a full one-way sweep</span><span class="st short">Short 2</span><span class="btn">Explain</span></div>
+  <div class="r"><span class="where"><b>Flat 101</b>Lakeview Heights</span><span class="what">Upload the demand letter and the bill of quantities</span><span class="st doc">To do</span><span class="btn">Upload</span></div>
+ </div>
+ <h2>All projects</h2>
+ <div class="idx">
+  <div class="i"><span><b>Northfield Residency, Tower B</b> · Flat 302</span><div class="tally"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="n"></i></div><span class="m">9 of 12</span></div>
+  <div class="i"><span><b>Lakeview Heights</b> · Flat 101</span><span class="m">No demand letter yet</span><span class="m">–</span></div>
+ </div>
+</main>
+</body></html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>The marked-up letter</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+*{box-sizing:border-box}body{margin:0;width:390px;height:844px;overflow:hidden;background:#e9e4d8;color:#1e1d1a;font-family:'IBM Plex Sans',sans-serif}
+.top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:2px solid #1e1d1a;background:#f4f1ea}
+.brand{display:flex;align-items:center;gap:8px;font-family:'Barlow Condensed';font-weight:700;font-size:22px;text-transform:uppercase}.mk{width:24px;height:24px;background:#e8590c}
+.tog{display:flex;border:2px solid #1e1d1a;font-size:13px;font-weight:600}.tog span{padding:8px 10px}.tog .on{background:#1e1d1a;color:#f4f1ea}
+.sheet{margin:14px 12px 0;background:#fffdf8;border:1px solid #cfcac0;padding:16px 14px 0;min-height:780px}
+.lh{font:12px 'IBM Plex Mono';color:#5c5850;line-height:1.6}.lh b{display:block;font:600 16px 'IBM Plex Sans';color:#1e1d1a}
+h1{margin:14px 0 4px;font-family:'Barlow Condensed';font-weight:700;font-size:34px;line-height:1}
+.line{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:12px 0;border-top:1px solid #cfcac0}
+.q{font:500 16px 'IBM Plex Mono'}.q mark{background:#ffe7a8;padding:1px 4px}
+.marg{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.st{font-family:'Barlow Condensed';font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;padding:1px 7px;border:2.5px solid currentColor;outline:1px solid currentColor;outline-offset:2px;transform:rotate(-5deg)}
+.ver{color:#2f6b3a}.short{color:#b4440a}.ns{color:#4f4b44;border-style:dashed}.nc{color:#5c5850;outline-color:transparent}
+.open{margin:0 0 12px;border-left:0;background:#f4f1ea;border:1px solid #cfcac0}
+.room{display:grid;grid-template-columns:1fr auto;padding:10px 12px;border-top:1px solid #cfcac0;font-size:15px}.room:first-child{border-top:0}.room b{font-weight:600}.room span{font:500 15px 'IBM Plex Mono'}
+.room.o{background:#fbe3d2}.room.n{background:repeating-linear-gradient(45deg,#e9e4d8 0 2px,#f4f1ea 2px 7px)}
+.foot{font:12px 'IBM Plex Mono';color:#5c5850;padding:10px 0}
+</style></head><body>
+<div class="top"><div class="brand"><span class="mk"></span>SiteProof</div><div class="tog"><span>Builder</span><span class="on">Buyer / bank</span></div></div>
+<div class="sheet">
+ <div class="lh"><b>Northfield Constructions Pvt. Ltd.</b>Ref NR/B/302/DL-06 · 27 October 2026<br>To the allottee, Flat 302</div>
+ <h1>Stage 6: what this letter claims, checked</h1>
+ <div class="line"><span class="q"><mark>"Windows complete: 12"</mark></span><span class="marg"><span class="st ver">Verified 9</span><span class="st short">Short 2</span><span class="st ns">Not seen 1</span></span></div>
+ <div class="open">
+  <div class="room"><b>Living Room</b><span>3 / 3</span></div>
+  <div class="room"><b>Bedroom 1</b><span>2 / 2</span></div>
+  <div class="room o"><b>Bedroom 2 · Short 2</b><span>2 / 4</span></div>
+  <div class="room"><b>Bedroom 3</b><span>2 / 2</span></div>
+  <div class="room n"><b>Kitchen · need 5 s</b><span>– / 1</span></div>
+ </div>
+ <div class="line"><span class="q"><mark>"Doors complete: 5"</mark></span><span class="marg"><span class="st ver">Verified 4</span><span class="st ns">Not seen 1</span></span></div>
+ <div class="line"><span class="q">"Internal plaster complete in all rooms"</span><span class="marg"><span class="st nc">Not checked</span></span></div>
+ <div class="foot">Each stamped line opens its rooms, frames and source. Plan · 3D</div>
+</div>
+</body></html>

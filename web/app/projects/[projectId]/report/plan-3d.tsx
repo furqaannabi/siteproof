@@ -30,7 +30,26 @@ export default function Plan3D({ rooms, selectedId, onSelect }: { rooms: Room3D[
   const labelsRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<SceneHandle | null>(null);
   const onSelectRef = useRef(onSelect);
+  const interactiveRef = useRef(true);
   const [failed, setFailed] = useState(false);
+  // On a touch screen the model starts parked, so a swipe across it scrolls the page
+  // like any other picture. "Turn the model" engages it; "Done" hands the swipe back.
+  const [touch, setTouch] = useState(false);
+  const [engaged, setEngaged] = useState(false);
+  const interactive = !touch || engaged;
+
+  useEffect(() => {
+    const query = window.matchMedia("(pointer: coarse)");
+    const sync = () => setTouch(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    interactiveRef.current = interactive;
+    sceneRef.current?.setInteractive(interactive);
+  }, [interactive]);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
@@ -51,6 +70,7 @@ export default function Plan3D({ rooms, selectedId, onSelect }: { rooms: Room3D[
       return;
     }
     sceneRef.current = handle;
+    handle.setInteractive(interactiveRef.current);
     return () => {
       handle.dispose();
       sceneRef.current = null;
@@ -91,7 +111,23 @@ export default function Plan3D({ rooms, selectedId, onSelect }: { rooms: Room3D[
           In the plan, not counted
         </span>
       </div>
-      <span className={styles.hint}>Drag to turn · pinch or scroll to zoom · tap a room</span>
+      {touch && !engaged && (
+        <button type="button" className={styles.engage} onClick={() => setEngaged(true)}>
+          <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 12a9 9 0 1 1-3-6.7" />
+            <path d="M21 4v5h-5" />
+          </svg>
+          Turn the model
+        </button>
+      )}
+      {touch && engaged && (
+        <button type="button" className={styles.release} onClick={() => setEngaged(false)}>
+          Done
+        </button>
+      )}
+      <span className={styles.hint}>
+        {!touch ? "Drag to turn · scroll to zoom · click a room" : engaged ? "One finger turns · pinch to zoom · tap a room" : "Swipe to scroll past"}
+      </span>
     </div>
   );
 }
@@ -168,6 +204,8 @@ function markerSpots(rect: Rect, n: number, bounds: Rect) {
 
 interface SceneHandle {
   apply(rooms: Room3D[], selectedId: string | undefined): void;
+  /** Off: the model ignores touch and mouse, so a swipe over it scrolls the page. */
+  setInteractive(on: boolean): void;
   dispose(): void;
 }
 
@@ -344,6 +382,16 @@ function buildScene(stage: HTMLDivElement, labelLayer: HTMLDivElement, rooms: Ro
     byId.set(room.id, { floors, outline, markers, centre: new THREE.Vector3(cx, 0, cz), label });
   });
 
+  /*
+   * Draw on demand. A still model costs nothing: a frame is scheduled only when
+   * something changes (a drag, the damping glide after it, a camera fly, a colour
+   * fade, a resize) and the loop stops as soon as everything has settled.
+   */
+  let raf = 0;
+  const invalidate = () => {
+    if (!raf) raf = requestAnimationFrame(tick);
+  };
+
   const fadeTo = (mat: THREE.Material, target: number) => {
     mat.userData.target = target;
     if (reduced) mat.opacity = target;
@@ -390,6 +438,7 @@ function buildScene(stage: HTMLDivElement, labelLayer: HTMLDivElement, rooms: Ro
     }
     if (selectedId && selectedId !== lastSelected && lastSelected !== undefined) flyTo(selectedId);
     lastSelected = selectedId ?? lastSelected ?? "";
+    invalidate();
   };
   apply(rooms, undefined);
   for (const mat of fading) mat.opacity = mat.userData.target;
@@ -407,40 +456,52 @@ function buildScene(stage: HTMLDivElement, labelLayer: HTMLDivElement, rooms: Ro
     const found = ray.intersectObjects(pickable)[0];
     if (found) onPick(found.object.userData.room as string);
   };
+  // A cancelled or captured-away touch is never a tap.
+  const onCancel = () => (downAt = null);
   renderer.domElement.addEventListener("pointerdown", onDown);
   renderer.domElement.addEventListener("pointerup", onUp);
+  renderer.domElement.addEventListener("pointercancel", onCancel);
+  renderer.domElement.addEventListener("lostpointercapture", onCancel);
+  window.addEventListener("blur", onCancel);
 
+  // The stage's size, read once per resize rather than every frame.
+  let w = 0;
+  let h = 0;
   const resize = () => {
-    const w = stage.clientWidth;
-    const h = stage.clientHeight;
+    w = stage.clientWidth;
+    h = stage.clientHeight;
     if (!w || !h) return;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    invalidate();
   };
   const observer = new ResizeObserver(resize);
   observer.observe(stage);
-  resize();
+  controls.addEventListener("start", invalidate);
+  controls.addEventListener("change", invalidate);
 
   const ease = (t: number) => 1 - Math.pow(1 - t, 3);
   const v = new THREE.Vector3();
-  let raf = 0;
-  const tick = (now: number) => {
+  function tick(now: number) {
+    raf = 0;
     if (fly) {
       const t = Math.min(1, (now - fly.start) / 700);
       controls.target.lerpVectors(fly.from.t, fly.to.t, ease(t));
       camera.position.lerpVectors(fly.from.p, fly.to.p, ease(t));
       if (t >= 1) fly = null;
     }
+    let fadingNow = false;
     for (const mat of fading) {
       const target = mat.userData.target as number;
+      if (mat.opacity === target) continue;
       mat.opacity += (target - mat.opacity) * 0.1;
       if (Math.abs(target - mat.opacity) < 0.005) mat.opacity = target;
+      else fadingNow = true;
     }
-    controls.update();
+    // true while the damping glide after a drag is still moving the camera.
+    const gliding = controls.update();
     renderer.render(scene, camera);
-    const w = stage.clientWidth;
-    const h = stage.clientHeight;
     for (const room of current) {
       const m = byId.get(room.id);
       if (!m) continue;
@@ -448,17 +509,26 @@ function buildScene(stage: HTMLDivElement, labelLayer: HTMLDivElement, rooms: Ro
       m.label.style.transform = `translate(${((v.x + 1) / 2) * w}px, ${((1 - v.y) / 2) * h}px) translate(-50%, -50%)`;
       m.label.hidden = v.z > 1;
     }
-    raf = requestAnimationFrame(tick);
-  };
-  raf = requestAnimationFrame(tick);
+    if (fly || fadingNow || gliding) invalidate();
+  }
+  resize();
 
   return {
     apply,
+    setInteractive(on) {
+      controls.enabled = on;
+      renderer.domElement.style.pointerEvents = on ? "auto" : "none";
+    },
     dispose() {
       cancelAnimationFrame(raf);
       observer.disconnect();
+      controls.removeEventListener("start", invalidate);
+      controls.removeEventListener("change", invalidate);
       renderer.domElement.removeEventListener("pointerdown", onDown);
       renderer.domElement.removeEventListener("pointerup", onUp);
+      renderer.domElement.removeEventListener("pointercancel", onCancel);
+      renderer.domElement.removeEventListener("lostpointercapture", onCancel);
+      window.removeEventListener("blur", onCancel);
       controls.dispose();
       disposables.forEach((d) => d.dispose());
       renderer.dispose();

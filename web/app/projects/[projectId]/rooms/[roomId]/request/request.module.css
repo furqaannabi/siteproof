@@ -23,7 +23,7 @@
   color: #f4f1ea;
   display: flex;
   flex-direction: column;
-  padding: 24px 16px;
+  padding: 24px 16px max(24px, env(safe-area-inset-bottom));
   gap: 20px;
 }
 
@@ -41,7 +41,7 @@
   text-decoration: none;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 20px;
+  font-size: var(--text-minor-head);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   min-height: 44px;
@@ -59,7 +59,7 @@
 
 .flat {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-label);
   color: #cfcac0;
 }
 
@@ -71,8 +71,8 @@
 
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 12px;
-  color: #f59e5b;
+  font-size: var(--text-label);
+  color: var(--plan-label-short);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -81,7 +81,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 44px;
+  font-size: var(--text-page);
   line-height: 0.98;
 }
 
@@ -152,7 +152,7 @@
 
 .tagLabel {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-label);
   background: #e8590c;
   color: #1e1d1a;
   padding: 2px 8px;
@@ -168,7 +168,7 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-label);
   color: #cfcac0;
 }
 
@@ -188,7 +188,7 @@
   right: 0;
   bottom: 22px;
   text-align: center;
-  font-size: 12px;
+  font-size: var(--text-small);
   color: #cfcac0;
 }
 
@@ -199,7 +199,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  font-size: 16px;
+  font-size: var(--text-body);
 }
 
 .steps li {
@@ -210,7 +210,7 @@
 
 .steps li > span {
   font-family: var(--font-mono);
-  color: #f59e5b;
+  color: var(--plan-label-short);
 }
 
 .actions {
@@ -230,7 +230,7 @@
   background: #e8590c;
   color: #1e1d1a;
   font-weight: 600;
-  font-size: 16px;
+  font-size: var(--text-body);
   text-decoration: none;
   cursor: pointer;
 }
@@ -249,7 +249,7 @@
 
 .small {
   text-align: center;
-  font-size: 12px;
+  font-size: var(--text-small);
   color: #cfcac0;
 }
 
@@ -262,6 +262,6 @@
 
 .done p {
   margin: 0;
-  font-size: 16px;
+  font-size: var(--text-body);
   color: #cfcac0;
 }

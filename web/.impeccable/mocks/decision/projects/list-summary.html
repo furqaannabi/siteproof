@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Projects beside a summary</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+*{box-sizing:border-box}body{margin:0;width:1440px;height:900px;overflow:hidden;background:#f4f1ea;color:#1e1d1a;font-family:'IBM Plex Sans',sans-serif;
+background-image:linear-gradient(rgba(22,58,107,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(22,58,107,.07) 1px,transparent 1px);background-size:24px 24px}
+header{height:72px;border-bottom:2px solid #1e1d1a;display:flex;align-items:center;gap:28px;padding:0 40px}
+.brand{display:flex;align-items:center;gap:10px;font:700 26px 'Barlow Condensed';text-transform:uppercase}.mk{width:30px;height:30px;background:#e8590c}
+.sp{flex:1}.new{background:#e8590c;color:#1e1d1a;padding:12px 18px;font-weight:600;border:2px solid #1e1d1a}
+main{display:grid;grid-template-columns:520px 1fr;gap:40px;padding:32px 40px}
+h1{margin:0 0 16px;font:700 56px/.95 'Barlow Condensed'}
+.list{border-top:2px solid #1e1d1a}
+.p{padding:16px 14px;border-bottom:2px solid #1e1d1a;display:grid;grid-template-columns:1fr auto;gap:6px 12px}
+.p.sel{background:#fffdf8;outline:2px solid #1e1d1a;outline-offset:-2px}
+.p b{font-size:18px}.p small{font-size:14px;color:#5c5850;grid-column:1/-1}
+.p .open{font:600 13px 'IBM Plex Sans';text-transform:uppercase;letter-spacing:.06em;color:#b4440a}
+.tally{grid-column:1/-1;display:flex;gap:3px}.tally i{flex:1;height:12px;background:#2f6b3a}.tally .s{background:#fbe3d2;box-shadow:inset 0 0 0 2px #b4440a}.tally .n{background:repeating-linear-gradient(45deg,#cfcac0 0 2px,#f4f1ea 2px 5px);box-shadow:inset 0 0 0 2px #4f4b44}
+.none{grid-column:1/-1;font:13px 'IBM Plex Mono';color:#5c5850;border:1.5px dashed #5c5850;padding:6px 10px}
+.panel{border:2px solid #1e1d1a;background:#fffdf8}
+.ph{padding:20px 24px;border-bottom:2px solid #1e1d1a;display:flex;justify-content:space-between;align-items:flex-end}
+.ph h2{margin:0;font:700 40px 'Barlow Condensed'}.ph span{font-size:15px;color:#3e3b35}
+.go{background:#1e1d1a;color:#f4f1ea;padding:12px 16px;font-weight:600}
+.sec{padding:16px 24px 4px;font:600 22px 'Barlow Condensed';text-transform:uppercase;letter-spacing:.03em}
+.act{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px;padding:14px 24px;border-top:1px solid #cfcac0;font-size:16px}
+.st{font:700 15px 'Barlow Condensed';letter-spacing:.1em;text-transform:uppercase;padding:1px 8px;border:2.5px solid currentColor;outline:1px solid currentColor;outline-offset:2px;transform:rotate(-4deg)}
+.short{color:#b4440a}.ns{color:#4f4b44;border-style:dashed}
+.btn{border:2px solid #1e1d1a;padding:8px 12px;font-weight:600;font-size:14px}.btn.k{background:#163a6b;color:#f4f8fc;border-color:#163a6b}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:16px 24px 22px}
+.facts div{border-top:3px solid #1e1d1a;padding-top:6px}.facts small{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#5c5850}.facts b{font:500 22px 'IBM Plex Mono'}
+</style></head><body>
+<header><div class="brand"><span class="mk"></span>SiteProof</div><div class="sp"></div><span class="new">Set up a project</span></header>
+<main>
+ <div><h1>Your projects</h1>
+  <div class="list">
+   <div class="p sel"><b>Northfield Residency, Tower B</b><span class="open">2 open</span><small>Flat 302 · Stage 6 · windows 9 of 12</small><div class="tally"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="n"></i></div></div>
+   <div class="p"><b>Lakeview Heights</b><span class="open">1 open</span><small>Flat 101 · 2 rooms</small><span class="none">No demand letter yet</span></div>
+  </div>
+ </div>
+ <div class="panel">
+  <div class="ph"><div><h2>Flat 302 · Stage 6</h2><span>Northfield Residency, Tower B · Northfield Constructions</span></div><span class="go">Open the report</span></div>
+  <div class="sec">Next for you</div>
+  <div class="act"><span><b>Kitchen</b> · Need 5 s of the kitchen, east wall</span><span class="st ns">Not seen yet</span><span class="btn k">Send to site</span></div>
+  <div class="act"><span><b>Bedroom 2</b> · 2 windows not found in a full sweep</span><span class="st short">Short 2</span><span class="btn">Explain</span></div>
+  <div class="sec">On file</div>
+  <div class="facts"><div><small>Documents</small><b>2 read</b></div><div><small>Clips</small><b>4 placed</b></div><div><small>Room tags</small><b>5 printed</b></div></div>
+ </div>
+</main>
+</body></html>

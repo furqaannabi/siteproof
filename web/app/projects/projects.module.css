@@ -1,0 +1,267 @@
+/* /projects: one square card per project, saying what's verified, what's open and what's next. */
+
+.main {
+  gap: 24px;
+}
+
+.grid {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+.card,
+.addCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 300px;
+  padding: 20px;
+  min-width: 0;
+}
+
+.card {
+  border: var(--panel-border-width) solid var(--panel-border);
+  background: var(--panel);
+}
+
+.addCard {
+  border: 2px dashed var(--panel-border);
+  align-items: flex-start;
+}
+
+.addCard .markAction {
+  margin-top: auto;
+}
+
+/* On a phone the set-up card shrinks to its content, so the first project rises. */
+@media (max-width: 639px) {
+  .addCard {
+    min-height: 0;
+  }
+}
+
+.addTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-headline);
+  line-height: 1;
+}
+
+.addCard p {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 34ch;
+}
+
+.cardHead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ink);
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-subhead);
+  line-height: 1.05;
+}
+
+.cardTitle a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cardTitle a:hover {
+  text-decoration: underline;
+}
+
+.cardMeta {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--muted);
+}
+
+.count {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.countLine {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.countNumber {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-page);
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.countOf {
+  font-size: var(--text-body);
+  color: var(--ink-2);
+}
+
+.tally {
+  display: flex;
+  gap: 3px;
+}
+
+.tally > span {
+  flex: 1 1 0;
+  height: 14px;
+}
+
+.tV {
+  background: var(--verified);
+}
+
+.tS {
+  background: var(--short-fill);
+  box-shadow: inset 0 0 0 2px var(--short);
+}
+
+.tN {
+  background: repeating-linear-gradient(45deg, var(--hatch) 0 2px, var(--panel) 2px 5px);
+  box-shadow: inset 0 0 0 2px var(--not-seen);
+}
+
+.empty {
+  margin: 0;
+  align-self: flex-start;
+  padding: 4px 8px;
+  border: 1.5px solid var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.next {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: 1.5;
+}
+
+.checking {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.actions {
+  margin-top: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.primaryAction,
+.secondaryAction,
+.markAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  font-weight: 600;
+  font-size: var(--text-control);
+  text-decoration: none;
+}
+
+.primaryAction {
+  background: var(--inverse-bg);
+  color: var(--inverse-ink);
+}
+
+.secondaryAction {
+  color: var(--ink);
+  border: 2px solid var(--panel-border);
+}
+
+.markAction {
+  background: var(--mark);
+  color: var(--mark-ink);
+  border: 2px solid var(--ink);
+}
+
+@media (hover: hover) {
+  .primaryAction:hover {
+    background: var(--ink-2);
+  }
+
+  .secondaryAction:hover {
+    background: var(--ground);
+  }
+
+  .markAction:hover {
+    filter: brightness(1.08);
+  }
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  border: 1px solid var(--rule);
+  font-family: var(--font-mono);
+  font-size: var(--text-ref);
+  color: var(--muted);
+}
+
+.note {
+  margin: 0;
+  font-size: var(--text-small);
+  color: var(--muted);
+}
+
+.reset {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  font-size: var(--text-control);
+}
+
+.footer {
+  margin: 8px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+  font-size: var(--text-small);
+  color: var(--muted);
+}

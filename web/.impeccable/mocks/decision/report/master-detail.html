@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Rooms and evidence, side by side</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+*{box-sizing:border-box}body{margin:0;width:1440px;height:900px;overflow:hidden;background:#f4f1ea;color:#1e1d1a;font-family:'IBM Plex Sans',sans-serif;
+background-image:linear-gradient(rgba(22,58,107,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(22,58,107,.07) 1px,transparent 1px);background-size:24px 24px}
+header{height:72px;border-bottom:2px solid #1e1d1a;display:flex;align-items:center;gap:28px;padding:0 40px;background:#f4f1ea}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed';font-weight:700;font-size:26px;text-transform:uppercase}.mk{width:30px;height:30px;background:#e8590c}
+.ht{flex:1;font-weight:600;font-size:17px}
+.tog{display:flex;border:2px solid #1e1d1a;font-weight:600;font-size:15px}.tog span{padding:10px 16px}.tog .on{background:#1e1d1a;color:#f4f1ea}
+.btn{background:#1e1d1a;color:#f4f1ea;padding:12px 16px;font-weight:600;font-size:15px}
+.answer{display:flex;align-items:flex-end;gap:40px;padding:22px 40px 18px}
+.big{font:700 96px/.85 'Barlow Condensed'}.big em{font-style:normal;font-weight:500;color:#5c5850;font-size:56px}
+.ans small{display:block;font-size:16px;color:#3e3b35;margin-bottom:6px}
+.tally{display:flex;gap:4px;width:420px;margin-top:10px}.tally i{flex:1;height:18px;background:#2f6b3a}.tally .s{background:#fbe3d2;box-shadow:inset 0 0 0 2px #b4440a}.tally .n{background:repeating-linear-gradient(45deg,#cfcac0 0 2px,#f4f1ea 2px 5px);box-shadow:inset 0 0 0 2px #4f4b44}
+.items{margin-left:auto;display:flex;border:2px solid #1e1d1a;font-weight:600;font-size:15px;align-self:center}.items span{padding:10px 16px}.items .on{background:#1e1d1a;color:#f4f1ea}
+main{display:grid;grid-template-columns:460px 1fr;gap:28px;padding:0 40px}
+.plan{background:#163a6b;padding:12px;background-image:linear-gradient(rgba(220,233,247,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(220,233,247,.09) 1px,transparent 1px);background-size:20px 20px}
+.g{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:60px;gap:3px}.g i{box-shadow:0 0 0 1.5px #dce9f7}.g .v{background:#1d5550}.g .s{background:#5b3524;outline:3px solid #e8590c;outline-offset:-6px}.g .n{background:repeating-linear-gradient(45deg,rgba(220,233,247,.3) 0 1.5px,#163a6b 1.5px 8px)}.g .w{grid-column:span 2;grid-row:span 2}
+.mt{display:flex;justify-content:space-between;color:#dce9f7;font:13px 'IBM Plex Mono';margin-top:8px}.mt b{color:#f4f8fc}
+.list{margin-top:14px;border-top:2px solid #1e1d1a}
+.row{display:grid;grid-template-columns:40px 1fr 70px 120px;align-items:center;padding:12px 0;border-bottom:1px solid #cfcac0;font-size:16px}
+.row code{font:13px 'IBM Plex Mono';color:#5c5850}.row .c{font:500 16px 'IBM Plex Mono'}.row .o{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.row.sel{background:#fffdf8;box-shadow:inset 4px 0 0 #e8590c}.row.open b{font-weight:700}
+.ov{color:#2f6b3a}.os{color:#b4440a}.on2{color:#4f4b44}
+.ev{border:2px solid #1e1d1a;background:#fffdf8;position:relative;display:grid;grid-template-columns:1fr 280px}
+.ev h2{margin:0;font:700 40px 'Barlow Condensed'}
+.l{padding:20px 24px}.facts{display:flex;gap:28px;margin-top:10px}.facts div{border-top:3px solid #1e1d1a;padding-top:4px;min-width:110px}.facts small{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#5c5850}.facts b{font:500 26px 'IBM Plex Mono'}
+.plate{position:relative;margin-top:16px;height:270px;background:#0f2a4f}
+.plate .w{position:absolute;top:60px;width:110px;height:140px;background:#2b4e7e;outline:3px solid #e8590c;outline-offset:3px}.plate .x{position:absolute;top:60px;width:110px;height:140px;border:2px dashed #4a6182}
+.tick{position:absolute;width:14px;height:14px;border:0 solid #1e1d1a}.tl{left:-8px;top:-8px;border-left-width:2px;border-top-width:2px}.br{right:-8px;bottom:-8px;border-right-width:2px;border-bottom-width:2px}
+.stamp{position:absolute;right:-26px;bottom:-22px;font:700 30px 'Barlow Condensed';letter-spacing:.1em;text-transform:uppercase;color:#b4440a;background:#fffdf8;padding:4px 14px;border:3px solid currentColor;outline:1px solid currentColor;outline-offset:3px;transform:rotate(-5deg)}
+.margin{border-left:1px solid #cfcac0;padding:20px;display:flex;flex-direction:column;gap:14px;background:#f4f1ea}
+.margin small{font-size:12px;color:#5c5850}.margin q{display:block;font:13px 'IBM Plex Mono';background:#ffe7a8;padding:2px 6px;margin-top:4px;quotes:none}
+</style></head><body>
+<header><div class="brand"><span class="mk"></span>SiteProof</div><div class="ht">Flat 302 · Stage 6 · Northfield Residency, Tower B</div><div class="tog"><span>Builder</span><span class="on">Buyer / bank</span></div><span class="btn">Print or save PDF</span></header>
+<div class="answer"><div class="big">9 <em>of</em> 12</div><div class="ans"><small>windows verified with their frames · 2 Short · 1 Not seen yet</small><div class="tally"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="s"></i><i class="s"></i><i class="n"></i></div></div><div class="items"><span class="on">Windows</span><span>Doors</span></div></div>
+<main>
+ <div>
+  <div class="plan"><div class="g"><i class="v w"></i><i class="n"></i><i class="v"></i><i class="s"></i><i class="v"></i></div><div class="mt"><span><b>Plan</b> · 3D</span><span>R1 to R5</span></div></div>
+  <div class="list">
+   <div class="row sel open"><code>R4</code><b>Bedroom 2</b><span class="c">2 / 4</span><span class="o os">Short by 2</span></div>
+   <div class="row open"><code>R2</code><b>Kitchen</b><span class="c">– / 1</span><span class="o on2">Not seen yet</span></div>
+   <div class="row"><code>R1</code><span>Living Room</span><span class="c">3 / 3</span><span class="o ov">Verified</span></div>
+   <div class="row"><code>R3</code><span>Bedroom 1</span><span class="c">2 / 2</span><span class="o ov">Verified</span></div>
+   <div class="row"><code>R5</code><span>Bedroom 3</span><span class="c">2 / 2</span><span class="o ov">Verified</span></div>
+  </div>
+ </div>
+ <div class="ev">
+  <div class="l"><h2>R4 · Bedroom 2</h2>
+   <div class="facts"><div><small>In the plan</small><b>4</b></div><div><small>Counted</small><b>2</b></div><div><small>Coverage</small><b style="font-size:16px">One-way sweep</b></div></div>
+   <div class="plate"><span class="tick tl"></span><span class="tick br"></span><span class="w" style="left:40px"></span><span class="w" style="left:180px"></span><span class="x" style="left:320px"></span><span class="x" style="left:460px"></span><span class="stamp">Short 2</span></div>
+  </div>
+  <div class="margin"><div><small>Demand letter</small><q>"Windows complete: 12"</q></div><div><small>Bill of quantities · W-4</small><q>"UPVC openable window, 1200 x 1500 mm Bedroom 2 nos 4"</q></div><div><small>Query letter</small><span style="font-size:15px">Ready, 3 citations checked</span></div></div>
+ </div>
+</main>
+</body></html>

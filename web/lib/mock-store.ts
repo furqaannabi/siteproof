@@ -27,7 +27,18 @@ interface Upload {
 interface State {
   reports: Record<string, Report>;
   uploads: Record<string, Upload>;
+  /** Which version of the demo seed the saved demo project was copied from. */
+  seed?: string;
 }
+
+// A fingerprint of the demo seed. When mocks/flat-302.ts changes, a browser that saved
+// the old demo gets the new one; projects the user created are kept.
+const SEED = (() => {
+  const text = JSON.stringify(flat302);
+  let h = 0;
+  for (let i = 0; i < text.length; i++) h = (Math.imul(31, h) + text.charCodeAt(i)) | 0;
+  return String(h);
+})();
 
 let state: State | null = null;
 
@@ -40,7 +51,10 @@ function load(): State {
     // Private window or blocked storage: start fresh, in memory only.
   }
   state ??= { reports: {}, uploads: {} };
-  state.reports[flat302.project.id] ??= structuredClone(flat302);
+  if (state.seed !== SEED || !state.reports[flat302.project.id]) {
+    state.reports[flat302.project.id] = structuredClone(flat302);
+    state.seed = SEED;
+  }
   return state;
 }
 
@@ -54,7 +68,7 @@ function save() {
 
 /** Forget everything created in mock mode and restore the demo project. */
 export function resetMock() {
-  state = { reports: {}, uploads: {} };
+  state = { reports: {}, uploads: {}, seed: SEED };
   state.reports[flat302.project.id] = structuredClone(flat302);
   save();
 }

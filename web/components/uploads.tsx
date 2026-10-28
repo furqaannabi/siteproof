@@ -12,18 +12,58 @@ const CLIP_EXTENSIONS = [".mp4", ".mov", ".m4v"];
 export const CLIP_ACCEPT = [...CLIP_TYPES, ...CLIP_EXTENSIONS].join(",");
 export const DOCUMENT_ACCEPT = "application/pdf,.pdf";
 
+// The server's limits (ADRs of 27 October), checked here first so a builder on slow
+// site data never waits for an upload that will be refused at the end.
+const MAX_CLIP_BYTES = 250 * 1024 * 1024;
+const MAX_CLIP_SECONDS = 60;
+const MAX_DOCUMENT_BYTES = 20 * 1024 * 1024;
+
 const POLL_MS = 2000;
 
 export function clipProblem(file: File): string | null {
   const name = file.name.toLowerCase();
-  if (CLIP_TYPES.includes(file.type) || CLIP_EXTENSIONS.some((e) => name.endsWith(e))) return null;
-  if (file.type === "video/webm" || name.endsWith(".webm")) return "This video format can't be checked. Send it as MP4: WhatsApp and most phone cameras do this already.";
-  return "This isn't a video SiteProof can read. Upload an MP4 or MOV clip.";
+  const isClip = CLIP_TYPES.includes(file.type) || CLIP_EXTENSIONS.some((e) => name.endsWith(e));
+  if (!isClip) {
+    if (file.type === "video/webm" || name.endsWith(".webm")) return "This video format can't be checked. Send it as MP4: WhatsApp and most phone cameras do this already.";
+    return "This isn't a video SiteProof can read. Upload an MP4 or MOV clip.";
+  }
+  if (file.size === 0) return "This file is empty. Choose the clip again.";
+  if (file.size > MAX_CLIP_BYTES) return "This clip is over 250 MB. Film at 1080p rather than 4K, or send it through WhatsApp, which makes it smaller.";
+  return null;
 }
 
 export function documentProblem(file: File): string | null {
-  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) return null;
-  return "Upload the document as a PDF. A PDF made from the original reads best; a photo or scan may not be readable.";
+  if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf"))
+    return "Upload the document as a PDF. A PDF made from the original reads best; a photo or scan may not be readable.";
+  if (file.size === 0) return "This file is empty. Choose the PDF again.";
+  if (file.size > MAX_DOCUMENT_BYTES) return "This PDF is over 20 MB. Send the PDF the document was made from, not a scan.";
+  return null;
+}
+
+/**
+ * The clip's length, read from its own metadata in the browser. null when the browser
+ * can't tell (some phones' HEVC files): the server's ingest step still enforces the limit.
+ */
+function clipSeconds(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
+    const video = document.createElement("video");
+    const url = URL.createObjectURL(file);
+    const done = (value: number | null) => {
+      clearTimeout(timeout);
+      URL.revokeObjectURL(url);
+      video.removeAttribute("src");
+      resolve(value);
+    };
+    const timeout = setTimeout(() => done(null), 5000);
+    video.preload = "metadata";
+    video.onloadedmetadata = () => done(Number.isFinite(video.duration) ? video.duration : null);
+    video.onerror = () => done(null);
+    video.src = url;
+  });
+}
+
+function megabytes(bytes: number) {
+  return bytes < 1024 * 1024 ? "under 1 MB" : `${Math.round(bytes / (1024 * 1024))} MB`;
 }
 
 export interface UploadItem {
@@ -35,17 +75,29 @@ export interface UploadItem {
   progress: number;
   status: ClipStatus | "uploading";
   error: string | null;
+  /** The transfer failed, not the file: the same file can be sent again. */
+  retryable: boolean;
 }
 
-/** A queue of uploads: register, PUT with progress, then poll the status until it settles. */
+/** A queue of uploads: check, register, PUT with progress, then poll the status until it settles. */
 export function useUploads(onSettled?: () => void) {
   const [items, setItems] = useState<UploadItem[]>([]);
   const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
+  const retries = useRef(new Map<string, () => void>());
 
   useEffect(() => {
     const live = timers.current;
     return () => live.forEach(clearTimeout);
   }, []);
+
+  // Closing the tab mid-transfer loses the file; ask first. Once it's sent, leaving is fine.
+  const sending = items.some((x) => x.status === "uploading");
+  useEffect(() => {
+    if (!sending) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [sending]);
 
   const patch = useCallback((key: string, change: Partial<UploadItem>) => {
     setItems((xs) => xs.map((x) => (x.key === key ? { ...x, ...change } : x)));
@@ -73,55 +125,95 @@ export function useUploads(onSettled?: () => void) {
   );
 
   const run = useCallback(
-    async (item: UploadItem, file: File, register: () => Promise<{ id: string; upload_url: string }>) => {
-      setItems((xs) => [item, ...xs]);
+    async (key: string, kind: UploadItem["kind"], file: File, register: () => Promise<{ id: string; upload_url: string }>) => {
       try {
         const { id, upload_url } = await register();
-        patch(item.key, { id });
-        await data.upload(upload_url, file, (p) => patch(item.key, { progress: p }));
-        patch(item.key, { progress: 1, status: "uploaded" });
+        patch(key, { id });
+        await data.upload(upload_url, file, (p) => patch(key, { progress: p }));
+        retries.current.delete(key);
+        patch(key, { progress: 1, status: "uploaded" });
         onSettled?.();
-        poll(item.key, item.kind, id);
+        poll(key, kind, id);
       } catch (e) {
-        patch(item.key, { status: "failed", error: e instanceof Error ? e.message : "The upload didn't finish. Try again." });
+        const message = e instanceof Error ? e.message : "The upload didn't finish.";
+        patch(key, { status: "failed", error: message, retryable: retries.current.has(key) });
       }
     },
     [onSettled, patch, poll],
   );
 
+  const start = useCallback(
+    (item: UploadItem, file: File, register: () => Promise<{ id: string; upload_url: string }>) => {
+      const go = () => {
+        patch(item.key, { status: "uploading", progress: 0, error: null, retryable: false });
+        void run(item.key, item.kind, file, register);
+      };
+      retries.current.set(item.key, go);
+      void run(item.key, item.kind, file, register);
+    },
+    [patch, run],
+  );
+
   const addClip = useCallback(
     (projectId: string, file: File, roomHint: string | null = null) => {
-      const item: UploadItem = { key: crypto.randomUUID(), label: file.name, kind: "clip", id: null, progress: 0, status: "uploading", error: null };
+      const item: UploadItem = {
+        key: crypto.randomUUID(),
+        label: file.name,
+        detail: megabytes(file.size),
+        kind: "clip",
+        id: null,
+        progress: 0,
+        status: "uploading",
+        error: null,
+        retryable: false,
+      };
       const problem = clipProblem(file);
-      if (problem) {
-        setItems((xs) => [{ ...item, status: "failed", error: problem }, ...xs]);
-        return;
-      }
-      void run(item, file, async () => {
-        const r = await data.registerClip(projectId, file, roomHint);
-        return { id: r.item.id, upload_url: r.upload_url };
+      setItems((xs) => [problem ? { ...item, status: "failed", error: problem } : item, ...xs]);
+      if (problem) return;
+      void clipSeconds(file).then((seconds) => {
+        if (seconds !== null && seconds > MAX_CLIP_SECONDS + 0.5) {
+          patch(item.key, {
+            status: "failed",
+            error: `This clip is ${Math.round(seconds)} seconds long. SiteProof checks clips up to 60 seconds: trim it, or film each room separately.`,
+          });
+          return;
+        }
+        start(item, file, async () => {
+          const r = await data.registerClip(projectId, file, roomHint);
+          return { id: r.item.id, upload_url: r.upload_url };
+        });
       });
     },
-    [run],
+    [patch, start],
   );
 
   const addDocument = useCallback(
     (input: NewDocument, file: File, detail: string) => {
-      const item: UploadItem = { key: crypto.randomUUID(), label: file.name, detail, kind: "document", id: null, progress: 0, status: "uploading", error: null };
+      const item: UploadItem = {
+        key: crypto.randomUUID(),
+        label: file.name,
+        detail,
+        kind: "document",
+        id: null,
+        progress: 0,
+        status: "uploading",
+        error: null,
+        retryable: false,
+      };
       const problem = documentProblem(file);
-      if (problem) {
-        setItems((xs) => [{ ...item, status: "failed", error: problem }, ...xs]);
-        return;
-      }
-      void run(item, file, async () => {
+      setItems((xs) => [problem ? { ...item, status: "failed", error: problem } : item, ...xs]);
+      if (problem) return;
+      start(item, file, async () => {
         const r = await data.registerDocument(input, file);
         return { id: r.item.id, upload_url: r.upload_url };
       });
     },
-    [run],
+    [start],
   );
 
-  return { items, addClip, addDocument };
+  const retry = useCallback((key: string) => retries.current.get(key)?.(), []);
+
+  return { items, addClip, addDocument, retry };
 }
 
 const STATUS_NOTE: Partial<Record<UploadItem["status"], string>> = {
@@ -130,7 +222,7 @@ const STATUS_NOTE: Partial<Record<UploadItem["status"], string>> = {
   done: "Done. The report is updated.",
 };
 
-export function UploadList({ items }: { items: UploadItem[] }) {
+export function UploadList({ items, onRetry }: { items: UploadItem[]; onRetry?: (key: string) => void }) {
   if (items.length === 0) return null;
   return (
     <ul className={ui.list} aria-live="polite">
@@ -140,7 +232,14 @@ export function UploadList({ items }: { items: UploadItem[] }) {
             <span className={ui.mono}>{x.label}</span>
             {x.detail && <span className={ui.muted}> · {x.detail}</span>}
             {x.status === "uploading" && (
-              <span className={ui.progress} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(x.progress * 100)}>
+              <span
+                className={ui.progress}
+                role="progressbar"
+                aria-label={`Sending ${x.label}`}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(x.progress * 100)}
+              >
                 <span style={{ width: `${Math.round(x.progress * 100)}%` }} />
               </span>
             )}
@@ -156,7 +255,13 @@ export function UploadList({ items }: { items: UploadItem[] }) {
               )
             )}
           </span>
-          <StatusBadge status={x.status} />
+          {x.retryable && onRetry ? (
+            <button type="button" className={ui.secondaryButton} onClick={() => onRetry(x.key)}>
+              Try again
+            </button>
+          ) : (
+            <StatusBadge status={x.status} />
+          )}
         </li>
       ))}
     </ul>

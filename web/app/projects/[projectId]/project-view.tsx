@@ -3,7 +3,7 @@
 import type { DocumentKind } from "@siteproof/contract";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { AppHeader, captureTime, ErrorPanel, Loading, ProjectNav, StatusBadge, ui, useReport } from "@/components/ui";
+import { AppHeader, captureTime, ErrorPanel, Loading, ProjectNav, StaleNotice, StatusBadge, ui, useReport } from "@/components/ui";
 import type { Report } from "@/lib/types";
 import styles from "./project.module.css";
 
@@ -14,7 +14,7 @@ export const DOCUMENT_LABEL: Record<DocumentKind, string> = {
 };
 
 export function ProjectPage({ projectId }: { projectId: string }) {
-  const { report, error, reload } = useReport(projectId);
+  const { report, error, stale, reload } = useReport(projectId);
   const created = useSearchParams().get("created") === "1";
 
   if (error) {
@@ -35,7 +35,12 @@ export function ProjectPage({ projectId }: { projectId: string }) {
       </>
     );
   }
-  return <ProjectView report={report} created={created} />;
+  return (
+    <>
+      <StaleNotice stale={stale} onRetry={reload} />
+      <ProjectView report={report} created={created} />
+    </>
+  );
 }
 
 function ProjectView({ report, created }: { report: Report; created: boolean }) {

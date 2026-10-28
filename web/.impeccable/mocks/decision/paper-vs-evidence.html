@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Paper vs evidence · first viewport</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 1440px; height: 900px; overflow: hidden; color: #1e1d1a; font-family: 'IBM Plex Sans', sans-serif; display: grid; grid-template-columns: 1fr 1fr; }
+  .paper { background: #fffdf8; padding: 40px 56px; position: relative; }
+  .proof { background: #163a6b; color: #f4f8fc; padding: 40px 56px; position: relative;
+    background-image: linear-gradient(rgba(220,233,247,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(220,233,247,.09) 1px, transparent 1px); background-size: 20px 20px; }
+  .brand { display: flex; align-items: center; gap: 10px; font: 700 26px 'Barlow Condensed'; text-transform: uppercase; }
+  .mark { width: 30px; height: 30px; background: #e8590c; }
+  .side { margin-top: 40px; font: 13px 'IBM Plex Mono'; letter-spacing: .08em; text-transform: uppercase; color: #5c5850; }
+  .proof .side { color: #9db0c6; }
+  h1 { margin: 10px 0 0; font: 700 76px/0.92 'Barlow Condensed'; }
+  .lines { margin-top: 36px; display: flex; flex-direction: column; gap: 22px; }
+  .line { font: 500 24px 'IBM Plex Mono'; }
+  .paper .line { color: #3e3b35; }
+  .ask { font-size: 18px; color: #5c5850; margin-top: 4px; }
+  .ev { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; border-top: 1px solid rgba(220,233,247,.3); padding-top: 14px; }
+  .ev small { display: block; font: 15px 'IBM Plex Sans'; color: #c5d2e0; margin-top: 4px; }
+  .stamp { font: 700 22px 'Barlow Condensed'; letter-spacing: .1em; text-transform: uppercase; padding: 4px 12px; border: 3px solid currentColor; outline: 1px solid currentColor; outline-offset: 3px; transform: rotate(-5deg); }
+  .g { color: #6fd08c; } .r { color: #ff9a5c; } .n { color: #b8c7d8; border-style: dashed; }
+  .frame { margin-top: 26px; height: 210px; background: #0f2a4f; position: relative; border: 1px solid rgba(220,233,247,.4); }
+  .w { position: absolute; top: 40px; width: 110px; height: 130px; background: #2b4e7e; border: 4px solid #9db0c6; }
+  .w.c { outline: 4px solid #e8590c; outline-offset: 4px; }
+  .w.e { background: #081a31; border: 3px dashed #4a6182; }
+  .badge { position: absolute; right: 10px; top: 10px; font: 12px 'IBM Plex Mono'; background: rgba(0,0,0,.55); color: #e9e5dc; padding: 3px 8px; }
+  .fold { position: absolute; left: 720px; top: 0; bottom: 0; width: 0; border-left: 2px dashed #1e1d1a; }
+  .cta { position: absolute; left: 720px; bottom: 56px; transform: translateX(-50%); background: #e8590c; color: #1e1d1a; font: 600 18px 'IBM Plex Sans'; padding: 18px 30px; z-index: 2; }
+</style>
+</head>
+<body>
+<section class="paper">
+  <div class="brand"><span class="mark"></span>SiteProof</div>
+  <div class="side">Today · what a buyer pays against</div>
+  <h1>A demand letter says it's done.</h1>
+  <div class="lines">
+    <div class="line">Windows complete: 12</div>
+    <div class="line">Doors complete: 5</div>
+    <div class="line">Stage 6 instalment: 10%</div>
+  </div>
+  <p class="ask">The buyer pays, or argues in the WhatsApp group. By the next stage it's plastered over.</p>
+</section>
+<section class="proof">
+  <div class="side">With SiteProof · what the buyer sees</div>
+  <h1>The builder's own clips show it.</h1>
+  <div class="lines">
+    <div class="ev"><div class="line">9 of 12 windows<small>Each counted window outlined in its best frame</small></div><span class="stamp g">Verified 9</span></div>
+    <div class="ev"><div class="line">Bedroom 2: 2 of 4<small>A full one-way sweep, so the gap counts</small></div><span class="stamp r">Short 2</span></div>
+    <div class="ev"><div class="line">Kitchen<small>Need 5 s of the kitchen, east wall</small></div><span class="stamp n">Not seen yet</span></div>
+  </div>
+  <div class="frame"><span class="badge">Tracked · 2 outlined</span><span class="w c" style="left:40px"></span><span class="w c" style="left:190px"></span><span class="w e" style="left:340px"></span><span class="w e" style="left:490px"></span></div>
+</section>
+<div class="fold"></div>
+<a class="cta">Open the Flat 302 demo</a>
+</body>
+</html>

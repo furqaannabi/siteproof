@@ -45,7 +45,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--text-ref);
   border: 2px solid var(--panel-border);
 }
 
@@ -76,7 +76,7 @@
 .flatHeading {
   margin: 8px 0;
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: var(--text-minor-head);
 }
 
 .tags {
@@ -90,7 +90,7 @@
 
 .tag {
   border: 2px solid var(--panel-border);
-  background: #fff;
+  background: var(--tag-paper);
   color: #1e1d1a;
   padding: 14px;
   display: flex;
@@ -109,18 +109,19 @@
   justify-content: center;
   border: 2px dashed #5c5850;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--text-ref);
   color: #5c5850;
 }
 
 .tagLabel {
+  text-wrap: balance;
   font-weight: 600;
-  font-size: 15px;
+  font-size: var(--text-control);
 }
 
 .tagCode {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-label);
   letter-spacing: 0.08em;
   color: #5c5850;
 }
@@ -139,7 +140,7 @@
 
 .placed {
   display: block;
-  font-size: 13px;
+  font-size: var(--text-small);
   color: var(--muted);
 }
 

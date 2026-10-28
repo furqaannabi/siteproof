@@ -15,7 +15,7 @@
 
 .legend {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-label);
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -45,12 +45,18 @@
 }
 
 .chip {
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 12px;
   border: 1.5px solid var(--rule);
   background: var(--panel);
   color: var(--ink);
-  font-size: 14px;
+  font-size: var(--text-control);
+}
+
+@media (hover: hover) {
+  .chip:hover:not(:disabled) {
+    border-color: var(--ink);
+  }
 }
 
 .chip:disabled {
@@ -61,7 +67,7 @@
 .submitBar {
   position: sticky;
   bottom: 0;
-  padding: 12px 0;
+  padding: 12px 0 max(12px, env(safe-area-inset-bottom));
   background: var(--ground);
   border-top: 1px solid var(--rule);
 }

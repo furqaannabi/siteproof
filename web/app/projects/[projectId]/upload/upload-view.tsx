@@ -3,14 +3,14 @@
 import type { DocumentKind } from "@siteproof/contract";
 import Link from "next/link";
 import { useState } from "react";
-import { AppHeader, ErrorPanel, Loading, ProjectNav, ui, useReport } from "@/components/ui";
+import { AppHeader, ErrorPanel, Loading, ProjectNav, StaleNotice, ui, useReport } from "@/components/ui";
 import { CLIP_ACCEPT, DOCUMENT_ACCEPT, DropZone, UploadList, useUploads } from "@/components/uploads";
 import type { Report } from "@/lib/types";
 import { DOCUMENT_LABEL } from "../project-view";
 import styles from "./upload.module.css";
 
 export function UploadPage({ projectId }: { projectId: string }) {
-  const { report, error, reload } = useReport(projectId);
+  const { report, error, stale, reload } = useReport(projectId);
   if (error) {
     return (
       <>
@@ -29,7 +29,12 @@ export function UploadPage({ projectId }: { projectId: string }) {
       </>
     );
   }
-  return <UploadView report={report} onSettled={reload} />;
+  return (
+    <>
+      <StaleNotice stale={stale} onRetry={reload} />
+      <UploadView report={report} onSettled={reload} />
+    </>
+  );
 }
 
 function UploadView({ report, onSettled }: { report: Report; onSettled: () => void }) {
@@ -75,7 +80,7 @@ function UploadView({ report, onSettled }: { report: Report; onSettled: () => vo
             </ol>
             <p className={ui.muted}>A clip that doesn&apos;t do this still counts, but the room may show as Not seen yet until one does.</p>
           </details>
-          <UploadList items={clips.items} />
+          <UploadList items={clips.items} onRetry={clips.retry} />
         </section>
 
         <section className={ui.panel}>
@@ -95,7 +100,7 @@ function UploadView({ report, onSettled }: { report: Report; onSettled: () => vo
               </select>
             </label>
             <label className={ui.field}>
-              <span>For</span>
+              <span>Which flat</span>
               {wholeProject ? (
                 <select className={ui.select} disabled value="">
                   <option value="">Whole project</option>
@@ -125,7 +130,7 @@ function UploadView({ report, onSettled }: { report: Report; onSettled: () => vo
               )
             }
           />
-          <UploadList items={docs.items} />
+          <UploadList items={docs.items} onRetry={docs.retry} />
         </section>
 
         <div className={ui.row}>

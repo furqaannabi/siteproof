@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useId, useRef, useState } from "react";
 import { ui } from "@/components/ui";
 import { data } from "@/lib/data";
 import type { CreateProject } from "@/lib/types";
@@ -65,6 +65,7 @@ export function SetupForm() {
   const [tried, setTried] = useState(false);
   const [saving, setSaving] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const errors = tried ? validate(name, builder, flats) : {};
 
@@ -74,7 +75,11 @@ export function SetupForm() {
     e.preventDefault();
     setTried(true);
     setServerError(null);
-    if (Object.keys(validate(name, builder, flats)).length > 0) return;
+    if (Object.keys(validate(name, builder, flats)).length > 0) {
+      // Take the builder straight to the first thing to fix, once the errors have rendered.
+      requestAnimationFrame(() => formRef.current?.querySelector<HTMLInputElement>('[aria-invalid="true"]')?.focus());
+      return;
+    }
     const body: CreateProject = {
       name: name.trim(),
       builder: builder.trim(),
@@ -91,12 +96,12 @@ export function SetupForm() {
   }
 
   return (
-    <form className={styles.form} onSubmit={submit} noValidate>
+    <form className={styles.form} onSubmit={submit} noValidate ref={formRef}>
       <section className={ui.panel}>
         <h2 className={ui.h2}>Project</h2>
         <div className={ui.row}>
-          <Field label="Project name" value={name} onChange={setName} error={errors.name} placeholder="Northfield Residency, Tower B" />
-          <Field label="Builder" value={builder} onChange={setBuilder} error={errors.builder} placeholder="Northfield Constructions Pvt. Ltd." />
+          <Field label="Project name" value={name} onChange={setName} error={errors.name} placeholder="e.g. Green Park, Tower B" />
+          <Field label="Builder" value={builder} onChange={setBuilder} error={errors.builder} placeholder="e.g. your company's name" />
         </div>
       </section>
 
@@ -113,7 +118,7 @@ export function SetupForm() {
                 </button>
               )}
             </div>
-            <Field label="Flat number" value={f.name} onChange={(v) => updateFlat(f.key, (x) => ({ ...x, name: v }))} error={errors[f.key]} placeholder="302" />
+            <Field label="Flat number" value={f.name} onChange={(v) => updateFlat(f.key, (x) => ({ ...x, name: v }))} error={errors[f.key]} placeholder="e.g. 302" />
 
             <fieldset className={styles.rooms}>
               <legend className={styles.legend}>Rooms</legend>
@@ -125,7 +130,7 @@ export function SetupForm() {
                     value={r.name}
                     onChange={(v) => updateFlat(f.key, (x) => ({ ...x, rooms: x.rooms.map((y) => (y.key === r.key ? { ...y, name: v } : y)) }))}
                     error={errors[r.key]}
-                    placeholder="Bedroom 2"
+                    placeholder="e.g. Bedroom 2"
                   />
                   {f.rooms.length > 1 && (
                     <button
@@ -190,7 +195,7 @@ export function SetupForm() {
       )}
       {tried && Object.keys(errors).length > 0 && (
         <p className={ui.fieldError} role="alert">
-          Fix the highlighted names, then create the project.
+          Some names need attention. Each one has a note under it.
         </p>
       )}
 
@@ -216,6 +221,7 @@ function Field({
   error?: string;
   placeholder?: string;
 }) {
+  const errorId = useId();
   return (
     <label className={ui.field}>
       <span>{label}</span>
@@ -225,9 +231,15 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         maxLength={MAX_NAME + 20}
+        aria-required="true"
         aria-invalid={error ? true : undefined}
+        aria-describedby={error ? errorId : undefined}
       />
-      {error && <span className={ui.fieldError}>{error}</span>}
+      {error && (
+        <span id={errorId} className={ui.fieldError}>
+          {error}
+        </span>
+      )}
     </label>
   );
 }

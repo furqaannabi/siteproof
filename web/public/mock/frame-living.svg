@@ -5,5 +5,5 @@
 <rect x="120" y="200" width="300" height="380" fill="#2B4E7E" stroke="#9DB0C6" stroke-width="6"/><line x1="270" y1="200" x2="270" y2="580" stroke="#9DB0C6" stroke-width="4"/><rect x="560" y="190" width="300" height="390" fill="#2B4E7E" stroke="#9DB0C6" stroke-width="6"/><line x1="710" y1="190" x2="710" y2="580" stroke="#9DB0C6" stroke-width="4"/><rect x="1000" y="210" width="300" height="370" fill="#2B4E7E" stroke="#9DB0C6" stroke-width="6"/><line x1="1150" y1="210" x2="1150" y2="580" stroke="#9DB0C6" stroke-width="4"/>
 
 <rect x="1360" y="260" width="200" height="520" fill="#3A4F6B" stroke="#9DB0C6" stroke-width="6"/><circle cx="1536" cy="520" r="8" fill="#9DB0C6"/>
-<text x="24" y="876" font-family="monospace" font-size="22" fill="#9DB0C6">MOCK FRAME · NOT SITE FOOTAGE</text>
+<text x="28" y="872" font-family="monospace" font-size="40" font-weight="bold" fill="#C5D2E0">MOCK FRAME · NOT SITE FOOTAGE</text>
 </svg>

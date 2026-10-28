@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stamp chain · first viewport</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 1440px; height: 900px; overflow: hidden; background: #f4f1ea;
+    background-image: linear-gradient(rgba(22,58,107,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(22,58,107,.07) 1px, transparent 1px);
+    background-size: 24px 24px; color: #1e1d1a; font-family: 'IBM Plex Sans', sans-serif; }
+  .sheet { position: absolute; inset: 24px; border: 2px solid #1e1d1a; display: grid; grid-template-columns: 640px 1fr; }
+  .left { padding: 48px 48px 0; border-right: 2px solid #1e1d1a; display: flex; flex-direction: column; gap: 28px; }
+  .brand { display: flex; align-items: center; gap: 10px; font: 700 26px 'Barlow Condensed'; text-transform: uppercase; }
+  .mark { width: 30px; height: 30px; background: #e8590c; }
+  h1 { margin: 0; font: 700 84px/0.92 'Barlow Condensed'; letter-spacing: -0.01em; }
+  .lede { margin: 0; font-size: 19px; line-height: 1.5; max-width: 520px; color: #3e3b35; }
+  .letter { background: #fffdf8; border: 1px solid #cfcac0; padding: 18px 20px; display: flex; flex-direction: column; gap: 6px; width: 460px; }
+  .letter small { font: 12px 'IBM Plex Mono'; text-transform: uppercase; letter-spacing: .08em; color: #5c5850; }
+  .quote { font: 500 20px 'IBM Plex Mono'; background: #ffe7a8; align-self: flex-start; padding: 2px 6px; }
+  .chain { position: relative; padding: 40px 56px 0 88px; }
+  .spine { position: absolute; left: 112px; top: 56px; bottom: 140px; width: 3px; background: #1e1d1a; }
+  .station { position: relative; display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 20px; height: 112px; }
+  .num { width: 50px; height: 50px; border: 2px solid #1e1d1a; background: #f4f1ea; display: grid; place-items: center; font: 500 14px 'IBM Plex Mono'; z-index: 1; }
+  .station.on .num { background: #e8590c; border-color: #e8590c; }
+  .what { font: 600 30px/1.05 'Barlow Condensed'; }
+  .what span { display: block; font: 400 15px 'IBM Plex Sans'; color: #5c5850; margin-top: 4px; }
+  .stamp { font: 700 22px 'Barlow Condensed'; letter-spacing: .1em; text-transform: uppercase; padding: 4px 12px; border: 3px solid currentColor; outline: 1px solid currentColor; outline-offset: 3px; transform: rotate(-5deg); color: #2f6b3a; }
+  .pending { font: 12px 'IBM Plex Mono'; text-transform: uppercase; letter-spacing: .08em; color: #5c5850; border: 1.5px dashed #5c5850; padding: 4px 10px; }
+  .final .what { font-size: 44px; }
+  .final .stamp { font-size: 34px; color: #b4440a; }
+  .titleblock { position: absolute; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(3, 140px) 260px; border-top: 2px solid #1e1d1a; border-left: 2px solid #1e1d1a; background: #f4f1ea; }
+  .cell { padding: 10px 14px; border-right: 1px solid #cfcac0; font: 12px 'IBM Plex Mono'; text-transform: uppercase; letter-spacing: .06em; color: #5c5850; }
+  .cell b { display: block; font: 500 15px 'IBM Plex Mono'; color: #1e1d1a; text-transform: none; letter-spacing: 0; margin-top: 2px; }
+  .cta { background: #e8590c; color: #1e1d1a; display: flex; align-items: center; justify-content: center; font: 600 18px 'IBM Plex Sans'; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="left">
+    <div class="brand"><span class="mark"></span>SiteProof</div>
+    <h1>One claim. Five checks. One stamp you can trust.</h1>
+    <p class="lede">Builders already film progress for buyers' WhatsApp groups. SiteProof places those clips by room, reads the demand letter, counts what's installed, and stamps each claim with the frames to prove it.</p>
+    <div class="letter">
+      <small>Demand letter · Flat 302 · Stage 6</small>
+      <span class="quote">"Windows complete: 12"</span>
+    </div>
+  </div>
+  <div class="chain">
+    <div class="spine"></div>
+    <div class="station on"><span class="num">A1</span><div class="what">Quote matched word for word<span>The line exists in the letter, exactly as claimed.</span></div><span class="stamp">Matched</span></div>
+    <div class="station"><span class="num">A2</span><div class="what">Clips placed by room tag<span>Four WhatsApp clips, each placed from the QR tag at a doorway.</span></div><span class="pending">Next</span></div>
+    <div class="station"><span class="num">A3</span><div class="what">Windows counted, not appearances<span>Each window tracked once, however often the camera passes it.</span></div><span class="pending">Waiting</span></div>
+    <div class="station"><span class="num">A4</span><div class="what">Coverage checked<span>Only a one-way sweep from the tag can make a room Short.</span></div><span class="pending">Waiting</span></div>
+    <div class="station final"><span class="num">A5</span><div class="what">9 of 12 verified</div><span class="stamp">Short 2</span></div>
+  </div>
+  <div class="titleblock">
+    <div class="cell">Flat<b>302</b></div>
+    <div class="cell">Claim<b>Windows</b></div>
+    <div class="cell">Sheet<b>A1 to A5</b></div>
+    <a class="cta">Open the Flat 302 demo</a>
+  </div>
+</div>
+</body>
+</html>

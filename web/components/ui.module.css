@@ -19,7 +19,7 @@
   background: var(--inverse-bg);
   color: var(--inverse-ink);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--text-label);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   text-align: center;
@@ -49,7 +49,7 @@
 .brandName {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 26px;
+  font-size: var(--text-brand);
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
@@ -62,13 +62,14 @@
 }
 
 .headerMain {
+  text-wrap: balance;
   font-weight: 600;
-  font-size: 17px;
+  font-size: var(--text-body);
 }
 
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-label);
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -89,7 +90,7 @@
   background: transparent;
   color: var(--ink);
   font-weight: 500;
-  font-size: 14px;
+  font-size: var(--text-control);
   text-decoration: none;
 }
 
@@ -98,6 +99,92 @@
   background: var(--inverse-bg);
   color: var(--inverse-ink);
   font-weight: 600;
+}
+
+/*
+ * Project / Upload / Report. On a phone it is a bar along the bottom edge, in thumb
+ * reach, so the header stays short and the page's answer is on the first screen.
+ */
+.projectNav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  background: var(--ground);
+  border-top: 2px solid var(--panel-border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.projectNav > a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  color: var(--ink);
+  font-weight: 500;
+  font-size: var(--text-control);
+  text-decoration: none;
+}
+
+.projectNav > a + a {
+  border-left: 1px solid var(--rule);
+}
+
+.projectNav > [aria-current="page"] {
+  background: var(--inverse-bg);
+  color: var(--inverse-ink);
+  font-weight: 600;
+}
+
+/* Keep the last of the page clear of the bar. */
+:global(body):has(.projectNav) {
+  padding-bottom: calc(58px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .projectNav {
+    position: static;
+    display: flex;
+    border: 2px solid var(--panel-border);
+    padding-bottom: 0;
+  }
+
+  .projectNav > a {
+    min-height: 44px;
+    padding: 0 16px;
+    font-size: var(--text-control);
+  }
+
+  .projectNav > a + a {
+    border-left: 0;
+  }
+
+  :global(body):has(.projectNav) {
+    padding-bottom: 0;
+  }
+}
+
+/* A button's words, hidden on a phone where the icon carries it; still read aloud. */
+.phoneHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .phoneHidden {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
 }
 
 .primaryButton,
@@ -111,7 +198,7 @@
   min-height: 44px;
   padding: 0 16px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--text-control);
   border: 0;
   text-decoration: none;
 }
@@ -136,6 +223,42 @@
   background: transparent;
   color: var(--short);
   padding: 0 8px;
+}
+
+/* Hover only where there's a pointer that hovers; a press nudges down a pixel. */
+@media (hover: hover) {
+  .primaryButton:hover:not(:disabled) {
+    background: var(--ink-2);
+  }
+
+  .secondaryButton:hover:not(:disabled) {
+    background: var(--panel);
+  }
+
+  .markButton:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+
+  .dangerLink:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .toggle > a:not([aria-current="page"]):hover,
+  .toggle > button:not([aria-pressed="true"]):hover,
+  .projectNav > a:not([aria-current="page"]):hover {
+    background: var(--panel);
+  }
+
+  .drop:hover {
+    border-color: var(--mark);
+  }
+}
+
+.primaryButton:active:not(:disabled),
+.secondaryButton:active:not(:disabled),
+.markButton:active:not(:disabled) {
+  translate: 0 1px;
 }
 
 .primaryButton:disabled,
@@ -171,7 +294,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(40px, 9vw, 64px);
+  font-size: var(--text-page);
   line-height: 0.95;
 }
 
@@ -179,7 +302,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 24px;
+  font-size: var(--text-section);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -187,14 +310,14 @@
 .lede {
   margin: 0;
   margin-top: 12px;
-  font-size: 16px;
+  font-size: var(--text-body);
   color: var(--ink-2);
   max-width: 640px;
 }
 
 .muted {
   color: var(--muted);
-  font-size: 13px;
+  font-size: var(--text-small);
 }
 
 .mono {
@@ -249,7 +372,7 @@
 
 .badge {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--text-label);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -305,7 +428,7 @@
 }
 
 .field > span {
-  font-size: 13px;
+  font-size: var(--text-small);
   font-weight: 600;
 }
 
@@ -314,7 +437,7 @@
   min-height: 48px;
   padding: 0 12px;
   font: inherit;
-  font-size: 16px;
+  font-size: var(--text-body);
   color: var(--ink);
   background: var(--panel);
   border: 2px solid var(--panel-border);
@@ -326,8 +449,36 @@
   border-color: var(--short);
 }
 
+.stale {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 6px 16px;
+  background: var(--short-panel);
+  border-bottom: 2px solid var(--short);
+  color: var(--ink);
+  font-size: var(--text-small);
+}
+
+.stale button {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--link);
+  font-weight: 600;
+  font-size: var(--text-control);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .fieldError {
-  font-size: 13px;
+  font-size: var(--text-small);
   color: var(--short);
 }
 
@@ -366,14 +517,14 @@
 .dropTitle {
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 24px;
+  font-size: var(--text-section);
 }
 
 /* States */
 
 .loading {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--text-ref);
   color: var(--muted);
   padding: 48px 0;
   text-align: center;
@@ -429,9 +580,9 @@
   right: 10px;
   top: 10px;
   font-family: var(--font-mono);
-  font-size: 11px;
-  color: #e9e5dc;
-  background: rgba(0, 0, 0, 0.55);
+  font-size: var(--text-label);
+  color: var(--overlay-ink);
+  background: var(--overlay-bg);
   padding: 3px 8px;
 }
 
@@ -444,7 +595,7 @@
   text-align: center;
   border: 2px dashed var(--rule);
   color: var(--muted);
-  font-size: 14px;
+  font-size: var(--text-small);
 }
 
 @media (min-width: 640px) {
@@ -458,6 +609,7 @@
 }
 
 @media print {
+  .projectNav,
   .header nav,
   .header button,
   .mockBar {
