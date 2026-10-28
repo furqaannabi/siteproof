@@ -38,3 +38,7 @@ backend/src/generated/
 .turbo/
 coverage/
 *.log
+
+# Impeccable design tool: review screenshots and per-person settings stay local
+web/.impeccable/review/
+/.impeccable/
