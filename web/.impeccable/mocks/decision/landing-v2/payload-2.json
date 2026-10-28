@@ -1,0 +1,242 @@
+{
+ "title": "Choose the one-screen landing \u00b7 dark",
+ "question": "Re-rolled with your steer: dark. Same drawing-set world on its dark blueprint ground. One screen: paper vs evidence, how it works, who it's for, the demo button.",
+ "options": [
+  {
+   "id": "pipeline",
+   "kind": "assigned",
+   "kicker": "THE ROLL",
+   "label": "The pipeline",
+   "lineage": "a process drawing, read left to right",
+   "thesis": "How it works is the hero: four connected stops on one dashed line, Read, Place, Count, Judge, each showing its own evidence, ending in 9 of 12 with its stamps. Headline and demo button above, who it's for along the foot.",
+   "palette": [
+    "#0d1726",
+    "#13233a",
+    "#eef3f9",
+    "#fde68a",
+    "#e8590c",
+    "#2f6b3a",
+    "#b4440a"
+   ],
+   "materials": [
+    "dark blueprint grid",
+    "connected stops",
+    "room tag",
+    "outlined windows",
+    "stamps"
+   ],
+   "viewport": "Top: brand. Then a short headline and one sentence, the demo button at the right. Middle: four stops on a dashed orange line: the quoted claim, a room tag, four openings with two outlined, then 9 of 12 with Verified, Short and Not seen yet stamps. Foot: Builders, Buyers, Banks. Phone: headline, button, the four stops stacked on a vertical line.",
+   "risk": "Four stops plus a headline is a lot for one screen; each stop has to stay to one picture and one line.",
+   "raised": [
+    {
+     "from": "challenger-drum",
+     "raise": "A chase light runs the line once on load, lighting each stop in turn, then rests on Judge."
+    },
+    {
+     "from": "challenger-dubois",
+     "raise": "Bold graphic argument: each stop is a picture first, words second."
+    },
+    {
+     "from": "challenger-manifesto",
+     "raise": "Hierarchy by scale alone: the headline and the final number outrank everything."
+    }
+   ],
+   "html": ".impeccable/mocks/decision/landing-v2/pipeline.html",
+   "comp": ".impeccable/mocks/decision/landing-v2/pipeline.webp"
+  },
+  {
+   "id": "fold-dark",
+   "kind": "dealt",
+   "label": "The fold, condensed",
+   "lineage": "today's paper-vs-evidence fold, dark",
+   "thesis": "Today's fold in the dark world and on one screen: dark paper with the letter's three bare lines on the left, the same lines stamped with the evidence frame on the right, the demo button on the seam, how it works and who it's for as one strip along the foot.",
+   "palette": [
+    "#1a1d22",
+    "#e9e4d8",
+    "#0d1726",
+    "#eef3f9",
+    "#fde68a",
+    "#e8590c",
+    "#ffb38a"
+   ],
+   "materials": [
+    "dark paper",
+    "blueprint",
+    "dashed fold",
+    "stamps",
+    "foot strip"
+   ],
+   "viewport": "Left: brand, 'A demand letter says it's done.', three highlighted lines, one sentence. Right: 'The builder's own clips show it.', the same three lines stamped 9 of 12, 4 of 5, Not checked, and an evidence frame. The demo button on the dashed seam. Foot: Read, Place, Count, Judge, then who it's for. Phone: halves stack, button on the seam.",
+   "risk": "Closest to the current page; it reads as the same idea, tightened.",
+   "html": ".impeccable/mocks/decision/landing-v2/fold-dark.html",
+   "comp": ".impeccable/mocks/decision/landing-v2/fold-dark.webp"
+  },
+  {
+   "id": "callouts",
+   "kind": "dealt",
+   "label": "The sheet with callouts",
+   "lineage": "an engineering drawing with leader-line notes",
+   "thesis": "One evidence frame at the centre of the sheet, Bedroom 2 with two windows outlined and two empty, stamped Short 2. How it works is four callouts with leader lines to what each step produced. Who it's for and the positioning line form the title block.",
+   "palette": [
+    "#0d1726",
+    "#13233a",
+    "#eef3f9",
+    "#fde68a",
+    "#e8590c",
+    "#ffb38a"
+   ],
+   "materials": [
+    "dark sheet",
+    "evidence frame",
+    "leader-line callouts",
+    "title block"
+   ],
+   "viewport": "Left: brand, 'Every claim gets the frame that proves it.', one sentence, the demo button. Right: the quoted BOQ line over a large frame, stamp half off its corner; Read and Judge callouts to its right, Place and Count below. Foot: Builders, Buyers, Banks, and the positioning line. Phone: headline, button, frame, callouts as a list.",
+   "risk": "Shows one room's evidence closely; the whole-flat answer (9 of 12) waits for the demo.",
+   "html": ".impeccable/mocks/decision/landing-v2/callouts.html",
+   "comp": ".impeccable/mocks/decision/landing-v2/callouts.webp"
+  },
+  {
+   "id": "challenger-bazaar",
+   "kind": "challenger",
+   "catalogId": "dream-surreal-impossible-worlds-moon-shadow-bazaar",
+   "verdict": "declined",
+   "label": "Moon-shadow bazaar",
+   "lineage": "surreal worlds",
+   "thesis": "Trading shadows.",
+   "palette": [
+    "#0b0d2a",
+    "#c9b8ff"
+   ],
+   "materials": [
+    "shadows"
+   ],
+   "viewport": "A dream market.",
+   "case": "Declined: dreamlike is the opposite of evidence.",
+   "risk": "Vague.",
+   "kept": "Nothing.",
+   "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-moon-shadow-bazaar-hero.webp"
+  },
+  {
+   "id": "challenger-tensegrity",
+   "kind": "challenger",
+   "catalogId": "kinetic-sculpture-automata-tensegrity-breathing-column",
+   "verdict": "declined",
+   "label": "Tensegrity column",
+   "lineage": "kinetic sculpture",
+   "thesis": "Forces held in balance.",
+   "palette": [
+    "#111111",
+    "#c0202a"
+   ],
+   "materials": [
+    "rods",
+    "cord"
+   ],
+   "viewport": "A breathing column.",
+   "case": "Declined: a metaphor where a real frame belongs.",
+   "risk": "Abstract.",
+   "kept": "Nothing.",
+   "hero": "https://impeccable.style/worlds/cards/kinetic-sculpture-automata-tensegrity-breathing-column-hero.webp"
+  },
+  {
+   "id": "challenger-dubois",
+   "kind": "challenger",
+   "catalogId": "dubois-data-portraits",
+   "verdict": "declined",
+   "label": "Du Bois data portraits",
+   "lineage": "1900 data graphics",
+   "thesis": "Bold inked bars.",
+   "palette": [
+    "#e8dcc6",
+    "#c8102e",
+    "#1f3a93",
+    "#f2b705"
+   ],
+   "materials": [
+    "inked bars"
+   ],
+   "viewport": "Counts as bold bars.",
+   "case": "Declined: its palette replaces the drawing set.",
+   "risk": "Costume.",
+   "kept": "Bold graphic argument.",
+   "hero": "https://impeccable.style/worlds/cards/dubois-data-portraits-hero.webp"
+  },
+  {
+   "id": "challenger-manifesto",
+   "kind": "challenger",
+   "catalogId": "design-canon-blast-manifesto-page",
+   "verdict": "declined",
+   "label": "Blast manifesto",
+   "lineage": "1914 wood type",
+   "thesis": "Slabs of type at right angles.",
+   "palette": [
+    "#f0e8d8",
+    "#111111",
+    "#c8102e"
+   ],
+   "materials": [
+    "wood type"
+   ],
+   "viewport": "Diagonal slabs.",
+   "case": "Declined: shouting fights 'payment support, not policing'.",
+   "risk": "Aggressive.",
+   "kept": "Hierarchy by scale.",
+   "hero": "https://impeccable.style/worlds/cards/design-canon-blast-manifesto-page-hero.webp"
+  },
+  {
+   "id": "challenger-hypercard",
+   "kind": "challenger",
+   "catalogId": "medium-native-hypercard-stack-shoebox",
+   "verdict": "declined",
+   "label": "HyperCard stack",
+   "lineage": "1987 software",
+   "thesis": "Linked black-and-white cards.",
+   "palette": [
+    "#ffffff",
+    "#000000"
+   ],
+   "materials": [
+    "cards"
+   ],
+   "viewport": "A card stack.",
+   "case": "Declined: monochrome drops the outcome colours.",
+   "risk": "Loses meaning.",
+   "kept": "Nothing.",
+   "hero": "https://impeccable.style/worlds/cards/medium-native-hypercard-stack-shoebox-hero.webp"
+  },
+  {
+   "id": "challenger-drum",
+   "kind": "challenger",
+   "catalogId": "signals-instruments-drum-machine-step-row",
+   "verdict": "declined",
+   "label": "Drum machine steps",
+   "lineage": "80s rhythm machines",
+   "thesis": "Step keys under a chase light.",
+   "palette": [
+    "#1a1a1a",
+    "#ff5a36",
+    "#ffd23f"
+   ],
+   "materials": [
+    "step keys"
+   ],
+   "viewport": "Sixteen lit keys.",
+   "case": "Declined: candy colours fight the outcome system.",
+   "risk": "Toy.",
+   "kept": "A chase light runs the steps.",
+   "hero": "https://impeccable.style/worlds/cards/signals-instruments-drum-machine-step-row-hero.webp"
+  }
+ ],
+ "reroll": {
+  "registers": [
+   "safer",
+   "bolder"
+  ]
+ },
+ "buildPath": {
+  "value": "code"
+ },
+ "steer": true,
+ "followup": true
+}

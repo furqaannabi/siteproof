@@ -1,0 +1,57 @@
+{
+  "title": "Choose the one-screen landing",
+  "question": "Same drawing-set world. One screen: paper vs evidence, how it works, who it's for, and the demo button. Desktop sketches; each card says how it folds onto a phone.",
+  "options": [
+    {
+      "id": "big-answer", "kind": "assigned", "kicker": "THE ROLL",
+      "label": "The big answer",
+      "lineage": "the scoreboard and the drawing's title block",
+      "thesis": "The letter's claim in highlighter, and under it the answer at monumental scale: 9 of 12, with its twelve-cell tally. How it works runs as four cells along the foot, who it's for closes the title block, and the demo button sits beside the answer.",
+      "palette": ["#163a6b", "#f4f8fc", "#fde68a", "#2f6b3a", "#ffb38a", "#c9d3df", "#e8590c"],
+      "materials": ["blueprint grid", "monumental numerals", "twelve-cell tally", "title block strip"],
+      "viewport": "Top: brand. Left: \"Windows complete: 12\" in highlighter, then 9 of 12 at 300px with the tally and a three-part legend. Right: a short headline, one sentence, Open the Flat 302 demo. Foot: Read · Place · Count · Judge, then 'For builders, buyers, banks'. Phone: claim, number, tally, button, then the four steps as a short list.",
+      "risk": "One number carries the page; a judge who doesn't read the legend may take 9 of 12 as a failure rather than proof.",
+      "raised": [
+        { "from": "challenger-poster", "raise": "Size is billing: the answer outranks every other thing on the sheet." },
+        { "from": "challenger-segments", "raise": "Absence is drawn on purpose: the Not seen yet cell is a dashed ghost, not a gap." },
+        { "from": "challenger-ribbon", "raise": "One line from claim to answer: the quote sits directly over the number it is checked against." },
+        { "from": "challenger-cyc", "raise": "Named states, never colour alone: every tally state has its words in the legend." }
+      ],
+      "html": ".impeccable/mocks/decision/landing-v2/big-answer.html",
+      "comp": ".impeccable/mocks/decision/landing-v2/big-answer.webp"
+    },
+    {
+      "id": "flip", "kind": "dealt",
+      "label": "Paper flips to evidence",
+      "lineage": "today's fold, made into one switchable sheet",
+      "thesis": "One sheet with two tabs: The paper shows the letter's three lines bare; The evidence stamps each one and shows the frame. It flips by itself once, then on tap. Four numbered steps and the demo button sit on the paper column beside it.",
+      "palette": ["#f4f1ea", "#1e1d1a", "#163a6b", "#fde68a", "#2f6b3a", "#ffb38a", "#e8590c"],
+      "materials": ["paper column", "tabbed blueprint sheet", "stamps", "evidence frame"],
+      "viewport": "Left paper column: brand, headline, one sentence, four numbered steps, the demo button, who it's for. Right: the sheet with The paper / The evidence tabs, three quoted lines each with its stamp, and an evidence frame with two windows outlined and two empty openings. Phone: headline, the sheet, steps, button.",
+      "risk": "The flip is the payoff; a judge who never taps sees one state and may miss the contrast.",
+      "html": ".impeccable/mocks/decision/landing-v2/flip.html",
+      "comp": ".impeccable/mocks/decision/landing-v2/flip.webp"
+    },
+    {
+      "id": "plan", "kind": "dealt",
+      "label": "The plan sheet",
+      "lineage": "an architect's floor plan, stamped",
+      "thesis": "Flat 302 as a blueprint floor plan filling the right of the screen, every room stamped Verified, Short or Not seen yet. How it works is four margin notes with leader lines to the plan; who it's for is the paper column's foot.",
+      "palette": ["#163a6b", "#f4f8fc", "#f4f1ea", "#2f6b3a", "#b4440a", "#c9d3df", "#e8590c"],
+      "materials": ["floor plan", "room stamps", "leader-line notes", "title block"],
+      "viewport": "Left paper column: brand, headline, one sentence, demo button, and three who-it's-for cells at the foot. Right blueprint: the plan of five rooms with stamps, Read and Judge notes to its right, Place and Count notes below, a mono title block in the corner. Phone: headline, button, the plan, notes as a list.",
+      "risk": "The plan echoes the report page closely, so the landing previews the app more than it explains it.",
+      "html": ".impeccable/mocks/decision/landing-v2/plan.html",
+      "comp": ".impeccable/mocks/decision/landing-v2/plan.webp"
+    },
+    { "id": "challenger-cyc", "kind": "challenger", "catalogId": "stagecraft-theater-lighting-cyclorama-dawn", "verdict": "declined", "label": "Cyclorama dawn", "lineage": "theatre lighting", "thesis": "Bands of light from night to day.", "palette": ["#000000", "#1f3a93", "#e8a0b4", "#ffffff"], "materials": ["horizon bands"], "viewport": "Light rises across the screen.", "case": "Declined: a new palette; the world is settled.", "risk": "Mood over meaning.", "kept": "Named states, never colour alone.", "hero": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn-hero.webp" },
+    { "id": "challenger-ribbon", "kind": "challenger", "catalogId": "exhibition-museum-curation-provenance-ribbon", "verdict": "declined", "label": "Provenance ribbon", "lineage": "museum provenance", "thesis": "One ribbon through an object's life.", "palette": ["#e8dcc0", "#b0201c", "#888888"], "materials": ["ribbon"], "viewport": "A ribbon from letter to frame.", "case": "Declined: buff and red silk fight the drawing set.", "risk": "Costume.", "kept": "One line from claim to answer.", "hero": "https://impeccable.style/worlds/cards/exhibition-museum-curation-provenance-ribbon-hero.webp" },
+    { "id": "challenger-ascii", "kind": "challenger", "catalogId": "medium-native-ascii-live-scene-render", "verdict": "declined", "label": "ASCII render", "lineage": "glyph art", "thesis": "The site as typewriter glyphs.", "palette": ["#000000", "#33ff66"], "materials": ["glyph grid"], "viewport": "A room drawn in characters.", "case": "Declined: hides the evidence frames that are the product.", "risk": "Unreadable proof.", "kept": "Nothing: evidence must stay a real frame.", "hero": "https://impeccable.style/worlds/cards/medium-native-ascii-live-scene-render-hero.webp" },
+    { "id": "challenger-segments", "kind": "challenger", "catalogId": "signals-instruments-seven-segment-alarm-clock", "verdict": "declined", "label": "Seven-segment", "lineage": "LED displays", "thesis": "Counts as lit segments.", "palette": ["#111111", "#ff2a2a"], "materials": ["segment mask"], "viewport": "9 OF 12 in red LEDs.", "case": "Declined: red reads as alarm, the opposite of payment support.", "risk": "Accusing tone.", "kept": "Absence drawn on purpose.", "hero": "https://impeccable.style/worlds/cards/signals-instruments-seven-segment-alarm-clock-hero.webp" },
+    { "id": "challenger-poster", "kind": "challenger", "catalogId": "pop-culture-shelf-bollywood-painted-poster", "verdict": "declined", "label": "Painted film poster", "lineage": "Bombay hoardings", "thesis": "The flat as a painted hero.", "palette": ["#b0102a", "#f2c200", "#2b2a6b"], "materials": ["airbrush", "outlined lettering"], "viewport": "A painted montage.", "case": "Declined: a painting of a building is not evidence.", "risk": "Spectacle over proof.", "kept": "Size is billing.", "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-bollywood-painted-poster-hero.webp" },
+    { "id": "challenger-timetable", "kind": "challenger", "catalogId": "rw-timetable-slide-rack", "verdict": "declined", "label": "Timetable slides", "lineage": "airline timetables", "thesis": "One type size, raked slides.", "palette": ["#d9a400", "#1e1d1a", "#fff8e8"], "materials": ["raked glass"], "viewport": "Slides on a light bed.", "case": "Declined: one type size can't carry a one-screen hook.", "risk": "Flat hierarchy.", "kept": "Rank by weight and rule, not boxes.", "hero": "https://impeccable.style/worlds/cards/rw-timetable-slide-rack-hero.webp" }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "code" },
+  "steer": true
+}

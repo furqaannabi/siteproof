@@ -1,0 +1,230 @@
+{
+ "title": "Choose the one-screen landing \u00b7 dark, dramatic",
+ "question": "Re-rolled again: dark, much less text, one dramatic moment. Headline, one visual, the demo button, and a single line for how it works and who it's for.",
+ "options": [
+  {
+   "id": "wipe",
+   "kind": "assigned",
+   "kicker": "THE ROLL",
+   "label": "The wipe",
+   "lineage": "paper vs evidence, as one moment",
+   "thesis": "One line, two worlds. The letter's claim set huge in highlighter on dark paper; a glowing orange edge has wiped across, and on the blueprint side the same claim carries a giant 9 of 12 stamp. A five-word headline, the button, and one thin line for how it works and who it's for.",
+   "materials": [
+    "dark paper",
+    "blueprint",
+    "glowing wipe edge",
+    "giant stamp"
+   ],
+   "viewport": "Headline 'Paper says done. Proof shows it.' at 92px top left. Across the middle: \"Windows complete: 12\" at 64px in highlighter on the paper side; the orange edge; a 120px 9 of 12 stamp on the blueprint side. Button below. Foot: READ \u2192 PLACE \u2192 COUNT \u2192 JUDGE \u00b7 for builders, buyers and banks. Signature: on load the edge sweeps left to right and the stamp presses as it passes. Phone: claim, edge sweeping down, stamp, button.",
+   "risk": "One claim carries the story; the evidence frame itself waits for the demo.",
+   "html": ".impeccable/mocks/decision/landing-v2/wipe.html",
+   "comp": ".impeccable/mocks/decision/landing-v2/wipe.webp",
+   "raised": [
+    {
+     "from": "challenger-fluid",
+     "raise": "The wipe moves like ink across the sheet, once, then holds."
+    },
+    {
+     "from": "challenger-gameboy",
+     "raise": "Few tones, total commitment: two grounds, one highlighter, one signal orange."
+    }
+   ],
+   "palette": [
+    "#0d1726",
+    "#15171b",
+    "#eef3f9",
+    "#fde68a",
+    "#e8590c",
+    "#2f6b3a",
+    "#ffb38a"
+   ]
+  },
+  {
+   "id": "tally",
+   "kind": "dealt",
+   "label": "The tally wall",
+   "lineage": "the report's tally, at wall scale",
+   "thesis": "The answer as architecture: 9 of 12 at 170px, and under it the twelve-cell tally as a wall filling the screen: nine lit green, two rust, one dashed ghost for Not seen yet.",
+   "materials": [
+    "giant numerals",
+    "twelve-cell wall",
+    "highlighted claim"
+   ],
+   "viewport": "9 of 12 at 170px top left; the claim, one line and the button top right; twelve full-height cells across the width with three short labels under them. Foot line as the others. Signature: cells light one by one on load. Phone: the number, a 4\u00d73 grid of cells, button.",
+   "risk": "Abstract: a judge sees a result before they see what produced it.",
+   "html": ".impeccable/mocks/decision/landing-v2/tally.html",
+   "comp": ".impeccable/mocks/decision/landing-v2/tally.webp",
+   "palette": [
+    "#0d1726",
+    "#15171b",
+    "#eef3f9",
+    "#fde68a",
+    "#e8590c",
+    "#2f6b3a",
+    "#ffb38a"
+   ]
+  },
+  {
+   "id": "window",
+   "kind": "dealt",
+   "label": "One window, huge",
+   "lineage": "the evidence frame, close up",
+   "thesis": "One window filling the right of a dark frame, outlined in glowing orange, stamped Counted once. The proof at the scale of the thing proved: a headline, the BOQ line and the button on the left.",
+   "materials": [
+    "dark evidence frame",
+    "glowing outline",
+    "stamp"
+   ],
+   "viewport": "Left: 'Every window, seen and counted.' at 104px, the quoted BOQ line, the button. Right: a dark room with one huge window outlined in orange and a Counted once stamp; a mono mock-frame caption. Foot line. Signature: the outline draws itself round the window on load. Phone: frame first, headline, button.",
+   "risk": "The frame is a drawn mock until real footage exists; it must say so on the page.",
+   "html": ".impeccable/mocks/decision/landing-v2/window.html",
+   "comp": ".impeccable/mocks/decision/landing-v2/window.webp",
+   "palette": [
+    "#0d1726",
+    "#15171b",
+    "#eef3f9",
+    "#fde68a",
+    "#e8590c",
+    "#2f6b3a",
+    "#ffb38a"
+   ]
+  },
+  {
+   "id": "challenger-understory",
+   "kind": "challenger",
+   "catalogId": "dream-surreal-impossible-worlds-luminescent-alien-understory",
+   "verdict": "declined",
+   "label": "Luminescent understory",
+   "lineage": "Luminescent understory",
+   "thesis": "Luminescent understory",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Luminescent understory"
+   ],
+   "viewport": "Luminescent understory",
+   "case": "Declined: glowing fantasy, not evidence.",
+   "risk": "Off-world.",
+   "kept": "Nothing.",
+   "hero": "https://impeccable.style/worlds/cards/dream-surreal-impossible-worlds-luminescent-alien-understory-hero.webp"
+  },
+  {
+   "id": "challenger-crane",
+   "kind": "challenger",
+   "catalogId": "paper-folds-pleats-deployable-orizuru-crane-sequence",
+   "verdict": "declined",
+   "label": "Folding crane",
+   "lineage": "Folding crane",
+   "thesis": "Folding crane",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Folding crane"
+   ],
+   "viewport": "Folding crane",
+   "case": "Declined: a craft metaphor where proof belongs.",
+   "risk": "Off-world.",
+   "kept": "Nothing.",
+   "hero": "https://impeccable.style/worlds/cards/paper-folds-pleats-deployable-orizuru-crane-sequence-hero.webp"
+  },
+  {
+   "id": "challenger-gyaru",
+   "kind": "challenger",
+   "catalogId": "pop-culture-shelf-gyaru-magazine-density",
+   "verdict": "declined",
+   "label": "Gyaru magazine",
+   "lineage": "Gyaru magazine",
+   "thesis": "Gyaru magazine",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Gyaru magazine"
+   ],
+   "viewport": "Gyaru magazine",
+   "case": "Declined: maximum density, the opposite of the steer.",
+   "risk": "Off-world.",
+   "kept": "Nothing.",
+   "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-gyaru-magazine-density-hero.webp"
+  },
+  {
+   "id": "challenger-gameboy",
+   "kind": "challenger",
+   "catalogId": "digital-design-canon-gameboy-four-shade-field",
+   "verdict": "declined",
+   "label": "Four-shade field",
+   "lineage": "Four-shade field",
+   "thesis": "Four-shade field",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Four-shade field"
+   ],
+   "viewport": "Four-shade field",
+   "case": "Declined: four greens replace the outcome colours.",
+   "risk": "Off-world.",
+   "kept": "Few tones, total commitment.",
+   "hero": "https://impeccable.style/worlds/cards/digital-design-canon-gameboy-four-shade-field-hero.webp"
+  },
+  {
+   "id": "challenger-teletext",
+   "kind": "challenger",
+   "catalogId": "broadcast-programming-teletext-service",
+   "verdict": "declined",
+   "label": "Teletext",
+   "lineage": "Teletext",
+   "thesis": "Teletext",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Teletext"
+   ],
+   "viewport": "Teletext",
+   "case": "Declined: block type can't carry quotes word for word.",
+   "risk": "Off-world.",
+   "kept": "Nothing.",
+   "hero": "https://impeccable.style/worlds/cards/broadcast-programming-teletext-service-hero.webp"
+  },
+  {
+   "id": "challenger-fluid",
+   "kind": "challenger",
+   "catalogId": "medium-native-fluid-ink-basin",
+   "verdict": "declined",
+   "label": "Fluid ink basin",
+   "lineage": "Fluid ink basin",
+   "thesis": "Fluid ink basin",
+   "palette": [
+    "#111111",
+    "#ffffff"
+   ],
+   "materials": [
+    "Fluid ink basin"
+   ],
+   "viewport": "Fluid ink basin",
+   "case": "Declined: liquid, where the product is precise.",
+   "risk": "Off-world.",
+   "kept": "One motion, moving like ink, then holding.",
+   "hero": "https://impeccable.style/worlds/cards/medium-native-fluid-ink-basin-hero.webp"
+  }
+ ],
+ "reroll": {
+  "registers": [
+   "safer",
+   "bolder"
+  ]
+ },
+ "buildPath": {
+  "value": "code"
+ },
+ "steer": true,
+ "followup": true
+}
