@@ -59,7 +59,7 @@ The table will report over-counts and under-counts separately, by kind of clip, 
 
 ## Run it locally
 
-You need [Bun](https://bun.sh) 1.4+, [pnpm](https://pnpm.io) 11, Docker, and on the `PATH` `ffmpeg`, `ffprobe` and poppler's `pdftotext` (`brew install ffmpeg poppler`). Chrome is needed only to re-render the sample documents.
+You need [Bun](https://bun.sh) 1.4+, [pnpm](https://pnpm.io) 11, Docker, and on the `PATH` `ffmpeg`, `ffprobe`, poppler's `pdftotext` and zbar's `zbarimg` (`brew install ffmpeg poppler zbar`; on Ubuntu `apt install ffmpeg poppler-utils zbar-tools`). Chrome is needed only to re-render the sample documents.
 
 ```bash
 pnpm install
