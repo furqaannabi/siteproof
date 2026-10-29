@@ -2,8 +2,9 @@
 
 import type { Clip, DocumentKind, ItemKind, Outcome, ProjectLinks, ProjectOverview, Report, Room, Segment } from "@siteproof/contract";
 import Link from "next/link";
+import qrcode from "qrcode-generator";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EvidenceFrame } from "@/components/evidence-frame";
 import { AppHeader, captureTime, CopyButton, ErrorPanel, Loading, StaleNotice, StatusBadge, ui, useFlatReport, useOverview } from "@/components/ui";
 import { builderLink, reportLink } from "@/lib/access";
@@ -831,16 +832,42 @@ function TagSheet({ project, rooms, only, onPrint }: { project: ProjectOverview[
   );
 }
 
+/** The QR's quiet zone, in modules: scanners need clear paper round the code. */
+const QUIET = 4;
+
 /**
- * Where the QR code for a room tag is drawn. Drawing a real QR needs a small
- * encoder library; until one is agreed, this shows the code as text in a tag-sized
- * box so the layout and printing are right. The decoder only reads `SP`-prefixed codes.
+ * One room tag's QR code, as SVG so it prints sharp at any size. It encodes the room's
+ * tag code as text, which is exactly what the pipeline's decoder matches against
+ * `Room.qr_code`. The codes are capital letters and digits, so alphanumeric mode fits
+ * the server's ten characters in the smallest grid, 21 × 21, even at error correction
+ * H (about 30% of the code can be lost): tags on a site get dusty, scuffed and filmed
+ * at an angle. Printed at 100 mm, so each square is a few pixels in a 1080p frame from
+ * 1 to 2 m.
  */
 function TagCode({ code }: { code: string }) {
+  const { size, d } = useMemo(() => {
+    const qr = qrcode(0, "H");
+    qr.addData(code, "Alphanumeric");
+    qr.make();
+    const n = qr.getModuleCount();
+    // One path for every dark module, each horizontal run drawn as one rectangle.
+    let path = "";
+    for (let row = 0; row < n; row++) {
+      for (let col = 0; col < n; col++) {
+        if (!qr.isDark(row, col)) continue;
+        let run = 1;
+        while (col + run < n && qr.isDark(row, col + run)) run++;
+        path += `M${col + QUIET} ${row + QUIET}h${run}v1h-${run}z`;
+        col += run - 1;
+      }
+    }
+    return { size: n + QUIET * 2, d: path };
+  }, [code]);
   return (
-    <span className={styles.qr} role="img" aria-label={`QR code ${code}`}>
-      <span>QR</span>
-    </span>
+    <svg className={styles.qr} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`QR code for room tag ${code}`} shapeRendering="crispEdges">
+      <rect width={size} height={size} fill="#fff" />
+      <path d={d} fill="#000" />
+    </svg>
   );
 }
 
