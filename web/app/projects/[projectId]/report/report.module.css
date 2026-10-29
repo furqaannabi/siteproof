@@ -666,8 +666,8 @@ td.num {
     gap: 8px;
   }
 
-  .bandLabel,
-  .bandCount {
+  /* The count stays: without it, Next gives no hint there are more items. */
+  .bandLabel {
     display: none;
   }
 

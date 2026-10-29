@@ -655,8 +655,14 @@ export function NextStep({ steps }: { steps: Step[] }) {
             <span className={styles.bandCount}>
               {(i % steps.length) + 1} of {steps.length}
             </span>
-            <button type="button" className={styles.bandGhost} onClick={() => setI((n) => n + 1)}>
-              Next step
+            {/* Shows the next item that needs you; the item's own button does the work. */}
+            <button
+              type="button"
+              className={styles.bandGhost}
+              aria-label={`Show the next item, ${((i + 1) % steps.length) + 1} of ${steps.length}`}
+              onClick={() => setI((n) => n + 1)}
+            >
+              Next
             </button>
           </>
         )}
