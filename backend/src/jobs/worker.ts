@@ -3,11 +3,12 @@
  * sleep whenever the queue has nothing ready.
  */
 import { extractDocument } from "../documents/extract-store";
+import { ingestClip } from "../pipeline/ingest-store";
 import { postgresJobQueue } from "./queue-store";
 import { runOnce, type JobHandler, type JobQueue } from "./runner";
 
 /** Every job kind the worker runs. A kind not listed here waits in the queue. */
-export const handlers: readonly JobHandler[] = [extractDocument];
+export const handlers: readonly JobHandler[] = [extractDocument, ingestClip];
 
 const IDLE_MS = 2000;
 

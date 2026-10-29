@@ -33,6 +33,8 @@ test("samples a clip at the given rate and reads its capture time", async () => 
 
   expect(result.captured_at).toBe("2026-10-27T09:15:00.000000Z");
   expect(result.frames.map((f) => f.t)).toEqual([0, 1, 2, 3, 4]);
+  // SAM numbers frames at the video's own rate, so counting needs it.
+  expect(result.source_fps).toBe(30);
 });
 
 test("a clip with no capture time in its metadata has captured_at null, not the upload time", async () => {

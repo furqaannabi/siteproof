@@ -37,6 +37,8 @@ export interface IngestedClip {
   /** null when the file carries no capture time. Never filled in with the upload time. */
   captured_at: string | null;
   duration_s: number;
+  /** The video's own frame rate. SAM numbers frames at this rate, not the sampling rate. */
+  source_fps: number;
   frames: SampledFrame[];
 }
 
@@ -106,9 +108,12 @@ export async function ingestClip(clip: string, { fps, outDir }: IngestOptions): 
     throw new IngestError("incomplete", "This clip didn't finish uploading — send it again.");
   }
 
+  const [num = 0, den = 1] = String(video.avg_frame_rate ?? "0/1").split("/").map(Number);
+
   return {
     captured_at,
     duration_s,
+    source_fps: den ? num / den : 0,
     frames: names.map((name, i) => ({ path: join(outDir, name), t: i / fps })),
   };
 }
