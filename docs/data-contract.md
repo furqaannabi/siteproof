@@ -81,7 +81,8 @@ Every request carries its key as `Authorization: Bearer <token>` ([ADR](decision
 - **`Claim.unit` is null where the document states no unit**, as a demand letter's "Windows complete: 12" does. It is never filled in (a "nos" the document never printed could not be told apart from one it did); show no unit, never the text "null". The engine compares counts and never reads it.
 - **`Claim.quote_verified`** is set by code, not by a model: it is true only when `source_quote` appears in the source document word for word. A claim with `quote_verified: false` is an unverified claim and is never shown as a number.
 - **`Detection.track_id`** is SAM's identity for one object within one clip. Objects are counted, not appearances.
-- **`Result.counted`** is the highest count from any single clip for that room and item. Merging the same object across clips is a stretch goal.
+- **`Result.counted`** is the highest count from any single clip for that room and item. Within a full one-way sweep each run of consecutive frames is one object; elsewhere, SAM's distinct track ids. Merging the same object across clips is a stretch goal ([ADR](decisions/2026-10-29-how-a-count-is-made-and-judged.md)).
+- **`Result.outcome` is `"verified"` only when counted ≥ claimed**, exactly. `"short"` also needs the Muse Spark cross-check to agree with the count.
 - **`Result.outcome`** comes only from deterministic comparison. `"short"` is allowed only when `room_covered` is true; everything else is `"not_seen"`.
 - **`Result.evidence`** is never empty for a counted object. No evidence, no number.
 
@@ -96,7 +97,7 @@ Flag these to Furqaan rather than deciding them in code:
 - ~~**A claim that is not countable in v1 has no `Result` row.**~~ Confirmed 27 Oct by Furqaan. Apurva to add the third visual state in the report view.
 - ~~**`ItemKind`** is proposed but not yet in `contract/src/index.ts`.~~ Approved 27 Oct by Furqaan; in the contract.
 - ~~**Where a claim that exceeds the BOQ says so.**~~ Settled 28 Oct: `Report.not_checked`, reason `exceeds_plan`.
-- The **tolerance** the comparison engine applies. ~~And whether the BOQ quantity or the demand-letter quantity wins when they disagree.~~ Settled 27 Oct: the demand letter is judged and the BOQ is a ceiling ([ADR](decisions/2026-10-27-the-demand-letter-is-judged-and-the-boq-is-a-ceiling.md)). The engine needs the plan quantity per item and room, which the document side supplies.
+- ~~The **tolerance** the comparison engine applies.~~ Settled 29 Oct: exact ([ADR](decisions/2026-10-29-how-a-count-is-made-and-judged.md)). ~~And whether the BOQ quantity or the demand-letter quantity wins when they disagree.~~ Settled 27 Oct: the demand letter is judged and the BOQ is a ceiling ([ADR](decisions/2026-10-27-the-demand-letter-is-judged-and-the-boq-is-a-ceiling.md)). The engine needs the plan quantity per item and room, which the document side supplies.
 
 ## Revision
 

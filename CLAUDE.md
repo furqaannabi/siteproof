@@ -75,7 +75,7 @@ These are the product. Do not re-open them, and do not write code that bends the
 | Rule | Detail |
 | --- | --- |
 | **Models find, code decides** | SAM 3.1 counts. Muse Spark reads. The outcome comes only from deterministic comparison in TypeScript. No model call ever produces an outcome, a number shown to a buyer, or a bank-facing claim |
-| **Count objects, not appearances** | SAM keeps each object's identity within a clip. Across clips, a room's count is the **highest count from any single clip**. Merging objects across clips is a stretch goal, not an assumption |
+| **Count objects, not appearances** | SAM's track ids are not trusted alone: it can give two look-alike objects one id across a gap. **Within a full one-way sweep, every run of consecutive frames is one object**, since the camera never pans back. Elsewhere, SAM's distinct ids. Across clips, a room's count is the **highest count from any single clip**. Merging objects across clips is a stretch goal, not an assumption ([ADR](docs/decisions/2026-10-29-how-a-count-is-made-and-judged.md)) |
 | **Coverage rule** | A room is fully covered only when one continuous clip starts at the room's QR tag and sweeps the whole room once in one direction, without panning back. Re-entries are merged by an edge-and-size heuristic. If the SAM count and the Muse Spark cross-check disagree, the room stays **Not seen yet** |
 | **Short is only for fully covered rooms** | Everything else is **Not seen yet**, with a precise request for footage. Never an accusation |
 | **No evidence, no number** | Every count links to its frames and masks. Model output that fails the schema counts as unverified. Every quote must match the document word for word |
@@ -108,6 +108,7 @@ These are the product. Do not re-open them, and do not write code that bends the
 | Clips, frames, masks | Cloudflare R2, a private bucket, access only through short-lived presigned URLs ([ADR](docs/decisions/2026-10-27-cloudflare-r2-for-clips-frames-and-masks.md)) |
 | Schema validation | Zod, on every API request body and every model response |
 | Who gets in | Secret links, no accounts: a builder link per project, a read-only report link per flat. Only a hash of each token is stored ([ADR](docs/decisions/2026-10-28-builder-access-by-secret-links-accepted.md)) |
+| Backend hosting | One EC2 instance: Caddy for HTTPS, pm2 for the API and job worker, Postgres in Docker on `127.0.0.1:5544` ([ADR](docs/decisions/2026-10-29-the-backend-runs-on-ec2.md)) |
 | Package manager and layout | pnpm workspace: `web/`, `backend/`, `contract/` |
 
 **Checked on 27 October 2026** against [Meta's Model API docs](https://dev.meta.ai/docs/pricing-rate-limits) and our own account. Base URL `https://api.meta.ai/v1`, bearer-token auth. Prices change: recheck the docs before relying on a number for anything larger than a test.
@@ -120,11 +121,7 @@ These are the product. Do not re-open them, and do not write code that bends the
 
 **Never use a `-contributor` model** (such as `muse-spark-1.3-contributor`). It is cheaper because Meta may train on what it is sent, and we send real site footage and buyers' documents.
 
-**Not yet decided.** Present 2–3 options, the human chooses, it gets an ADR, then it is filled in here:
-
-| Decision | Owner |
-| --- | --- |
-| Backend hosting | Furqaan |
+**Not yet decided:** nothing, as of 29 October. A new open question gets 2–3 options, the human chooses, it gets an ADR, then it is filled in above.
 
 ---
 
@@ -172,7 +169,7 @@ Its planning phase — confirm the interface, confirm which behaviours to test, 
 | --- | --- | --- |
 | Comparison engine | Claimed vs counted vs plan, with tolerance. Verified / Short / Not seen yet for every combination. **Short never appears for a room that is not fully covered** | Furqaan |
 | Coverage rule | A one-way sweep from the tag counts as covered. A back-and-forth pan does not. No tag means unplaced, which is never a claim | Furqaan |
-| Counting | The highest count from any single clip per room. A window passed three times in one clip counts once. SAM count vs Muse Spark cross-check disagreeing leaves the room Not seen yet | Furqaan |
+| Counting | The highest count from any single clip per room. In a one-way sweep, one id seen in two runs counts two; a back-and-forth pan is never used for Short. SAM count vs Muse Spark cross-check disagreeing leaves the room Not seen yet. Verified is exact: counted ≥ claimed; one below in a covered room is Short by one | Furqaan |
 | Quote checker | A quote that is not in the document word for word fails. Whitespace and case handling is deliberate and tested. Schema-invalid extraction becomes an unverified claim, never a silent default | William |
 | Citation re-check | A query letter whose invoice line, plan clause or frame ID does not resolve is not shown | Furqaan + William |
 | Accuracy evaluation | SAM counts vs hand counts on 15–20 labelled clips, published in the README | William + Furqaan |
