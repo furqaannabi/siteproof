@@ -17,6 +17,7 @@ import {
   NextStep,
   nextSteps,
   type RoomRow,
+  rowKey,
   seconds,
   SendGapRequest,
   STAMP,
@@ -249,8 +250,8 @@ function Summary({ rooms, rows, outcomeOf, loading }: { rooms: Room[]; rows: Roo
   const counts = ITEMS.flatMap((item) => {
     const mine = rows.filter((r) => r.claim.item === item);
     if (mine.length === 0) return [];
-    const seen = mine.filter((r) => r.result.outcome !== "not_seen").reduce((n, r) => n + Math.min(r.result.counted, r.claim.qty), 0);
-    const planned = mine.reduce((n, r) => n + r.claim.qty, 0);
+    const seen = mine.filter((r) => r.result.outcome !== "not_seen").reduce((n, r) => n + Math.min(r.result.counted, r.result.expected), 0);
+    const planned = mine.reduce((n, r) => n + r.result.expected, 0);
     return [`${seen} of ${planned} ${ITEM_PLURAL[item]}`];
   });
   return (
@@ -446,7 +447,7 @@ function FlatPlan({
       {order.map(({ q, room }, i) => {
         const outcome = outcomeOf(room.id);
         const row = rows.find((r) => r.room.id === room.id && r.claim.item === item);
-        const planned = row?.claim.qty ?? 0;
+        const planned = row?.result.expected ?? 0;
         const counted = row && row.result.outcome !== "not_seen" ? Math.min(row.result.counted, planned) : 0;
         const sides = sidesOf(q, layout, bounds);
         const markers = markersFor(sides, planned);
@@ -559,10 +560,10 @@ function RoomPanel({
       {rows.length > 0 && (
         <dl className={styles.counts}>
           {rows.map((r) => (
-            <div key={r.claim.id}>
+            <div key={rowKey(r)}>
               <dt>{ITEM_PLURAL[r.claim.item as ItemKind].charAt(0).toUpperCase() + ITEM_PLURAL[r.claim.item as ItemKind].slice(1)}</dt>
               <dd>
-                {r.result.outcome === "not_seen" ? "–" : r.result.counted} <span>of {r.claim.qty}</span>
+                {r.result.outcome === "not_seen" ? "–" : r.result.counted} <span>of {r.result.expected}</span>
               </dd>
             </div>
           ))}

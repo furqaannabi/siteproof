@@ -128,7 +128,7 @@ function cutReport(p: MockProject, flatId: string): Report {
     rooms,
     documents,
     claims,
-    results: p.results.filter((r) => claimIds.has(r.claim_id)),
+    results: p.results.filter((r) => claimIds.has(r.claim_id) && (r.room_id === null || roomIds.has(r.room_id))),
     not_checked: p.not_checked.filter((n) => claimIds.has(n.claim_id)),
     detections: p.detections.filter((d) => roomIds.has(d.room_id)),
     segments: p.segments.filter((s) => s.room_id !== null && roomIds.has(s.room_id)),
@@ -162,14 +162,14 @@ function settle(report: MockProject) {
 function fillGap(report: MockProject, clip: Clip, roomId: string) {
   if (report.project.id !== flat302.project.id) return;
   report.segments.push({ clip_id: clip.id, room_id: roomId, t_start: 0, t_end: 5, full_sweep: true, captured_at: clip.captured_at });
-  for (const claim of report.claims.filter((c) => c.room_id === roomId)) {
-    if (claim.item === "not_countable") continue;
-    const result = report.results.find((r) => r.claim_id === claim.id);
-    if (!result || result.outcome !== "not_seen") continue;
-    const found = detections(roomId, claim.item, claim.qty, clip.id);
+  // Every result for this room that wasn't judged is now covered by the clip.
+  for (const result of report.results.filter((r) => r.room_id === roomId && r.outcome === "not_seen")) {
+    const claim = report.claims.find((c) => c.id === result.claim_id);
+    if (!claim || claim.item === "not_countable") continue;
+    const found = detections(roomId, claim.item, result.expected, clip.id);
     report.detections.push(...found);
     Object.assign(result, {
-      counted: claim.qty,
+      counted: result.expected,
       outcome: "verified",
       room_covered: true,
       evidence: [...new Set(found.map((d) => d.best_frame_url))],
@@ -309,7 +309,7 @@ export const mockSource = {
       return structuredClone(live);
     }
     const swept = p.segments.some((s) => s.room_id === roomId && s.full_sweep);
-    const notSeen = p.claims.some((c) => c.room_id === roomId && p.results.some((r) => r.claim_id === c.id && r.outcome === "not_seen"));
+    const notSeen = p.results.some((r) => r.room_id === roomId && r.outcome === "not_seen");
     if (swept && !notSeen) throw new MockError(409, "This room already has a one-way sweep from its room tag, so there's nothing to film.");
     const flat = p.project.flats.find((f) => f.id === room.flat);
     const lower = room.name.toLowerCase();
