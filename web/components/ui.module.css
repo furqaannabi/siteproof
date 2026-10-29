@@ -45,15 +45,6 @@
   min-height: 44px;
 }
 
-.brandMark {
-  width: 26px;
-  height: 26px;
-  border: 2px solid currentColor;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .brandName {
   font-family: var(--font-display);
   font-weight: 700;

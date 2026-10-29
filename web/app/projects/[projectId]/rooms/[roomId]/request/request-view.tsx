@@ -4,7 +4,7 @@ import type { Report, Room } from "@siteproof/contract";
 import { Camera, Check, MapPin, RotateCw, Video } from "lucide-react";
 import Link from "next/link";
 import { useCallback } from "react";
-import { ErrorPanel, Loading, StaleNotice, useFlatReport, useOverview } from "@/components/ui";
+import { ErrorPanel, Loading, LogoMark, StaleNotice, useFlatReport, useOverview } from "@/components/ui";
 import { CLIP_ACCEPT, useUploads } from "@/components/uploads";
 import { usingMock } from "@/lib/data";
 import { autoLayout } from "@/lib/room-layout";
@@ -73,9 +73,7 @@ function RequestView({
       <header className={styles.bar}>
         <div className={styles.barIn}>
           <Link href={reportHref} className={styles.brand}>
-            <span className={styles.brandMark}>
-              <Check size={15} strokeWidth={3} aria-hidden="true" />
-            </span>
+            <LogoMark />
             SiteProof
           </Link>
           <span className={styles.where}>

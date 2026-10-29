@@ -9,15 +9,37 @@ import { takeBuilderLink } from "@/lib/access";
 import { data, DataError, usingMock } from "@/lib/data";
 import styles from "./ui.module.css";
 
+/**
+ * SiteProof's mark: a doorway with its room tag, ticked. Every clip starts at the tag on a
+ * room's door, and that's how footage finds its room. Drawn in the colour of the text round
+ * it: white on the binding, green on the page.
+ */
+export function LogoMark({ size = 28, className }: { size?: number; className?: string }) {
+  return (
+    <svg
+      className={className}
+      aria-hidden="true"
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 28V7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v21" strokeWidth="2.6" />
+      <path d="M4 28h24" strokeWidth="2.6" />
+      <rect x="11.5" y="10" width="9" height="9" rx="1.5" strokeWidth="2.2" />
+      <path d="M14 14.6l1.6 1.6 2.8-3.1" strokeWidth="1.9" />
+    </svg>
+  );
+}
+
 /** `href` is where the mark leads: the projects list for a builder, the start page for a buyer. */
 export function Brand({ href = "/projects" }: { href?: string }) {
   return (
     <Link href={href} className={styles.brand}>
-      <span className={styles.brandMark}>
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 12l5 5L20 6" />
-        </svg>
-      </span>
+      <LogoMark />
       <span className={styles.brandName}>SiteProof</span>
     </Link>
   );

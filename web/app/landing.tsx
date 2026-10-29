@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { LogoMark } from "@/components/ui";
 import { DEMO_PROJECT_ID } from "@/lib/data";
 import { BEATS, type SceneFrame } from "./landing-scene";
 import s from "./landing.module.css";
@@ -182,11 +183,7 @@ export function Landing() {
       <header className={s.bar}>
         <div className={s.barIn}>
           <Link href="/" className={s.brand}>
-            <i>
-              <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <path d="M4 12l5 5L20 6" />
-              </svg>
-            </i>
+            <LogoMark />
             SiteProof
           </Link>
           <nav className={s.nav} aria-label="Site">

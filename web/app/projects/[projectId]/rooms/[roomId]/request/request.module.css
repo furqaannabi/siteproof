@@ -35,15 +35,6 @@
   font-size: 22px;
 }
 
-.brandMark {
-  width: 26px;
-  height: 26px;
-  border: 2px solid currentColor;
-  border-radius: 4px;
-  display: grid;
-  place-items: center;
-}
-
 /* Where this is: the project name gives way first, so the flat always shows whole. */
 .where {
   display: flex;

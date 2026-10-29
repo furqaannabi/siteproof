@@ -75,15 +75,6 @@
   font-stretch: 80%;
 }
 
-.brand i {
-  width: 26px;
-  height: 26px;
-  border: 2px solid currentColor;
-  border-radius: 4px;
-  display: grid;
-  place-items: center;
-}
-
 .nav {
   margin-left: auto;
   display: flex;
