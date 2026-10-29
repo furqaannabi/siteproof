@@ -828,16 +828,14 @@
   height: 84px;
 }
 
+/* The QR itself: pure black on white with its quiet zone, the contrast a phone camera
+   needs to read it from a doorway. */
 .qr {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px dashed #5c5850;
-  border-radius: 4px;
-  background: var(--tag-paper);
-  font-family: var(--font-mono);
-  font-size: var(--text-ref);
-  color: #5c5850;
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  background: #fff;
 }
 
 .tagLabel {
@@ -891,13 +889,21 @@
     display: none;
   }
 
+  /* Each QR prints 100 mm wide, so a phone filming from 1 to 2 m sees every square
+     as several pixels: one tag across an A4 page, two down it. */
   .tags {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fill, 112mm);
+    justify-content: center;
+    gap: 8mm;
   }
 
   .tags .qr {
-    width: 45mm;
-    height: 45mm;
+    width: 100mm;
+    height: 100mm;
+  }
+
+  .tags .tag {
+    padding: 6mm;
   }
 
   .tag {
