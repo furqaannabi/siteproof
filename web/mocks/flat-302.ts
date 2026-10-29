@@ -116,13 +116,19 @@ const claims: Claim[] = [
   { id: "cl-dl-plaster", doc_id: DL, item: "not_countable", qty: 0, unit: null, room_id: null, source_quote: "Internal plaster complete in all rooms", quote_verified: true },
 ];
 
+// As the comparison engine works (ADR of 29 October): the demand letter's whole-flat
+// line is judged once per room, against that room's line in the BOQ; the BOQ's lines
+// are the plan, listed as not checked with reason "plan", never judged themselves.
 const results: Result[] = [];
 const allDetections: Detection[] = [];
+const planIds: string[] = [];
 
 for (const p of plan) {
   for (const item of ["window", "door"] as const) {
     const [planned, counted] = item === "window" ? p.windows : p.doors;
     const claimId = `cl-boq-${roomKey[p.room]}-${item}`;
+    const judged = item === "window" ? "cl-dl-windows" : "cl-dl-doors";
+    planIds.push(claimId);
     claims.push({
       id: claimId,
       doc_id: BOQ,
@@ -134,13 +140,13 @@ for (const p of plan) {
       quote_verified: true,
     });
     if (counted === null) {
-      results.push({ claim_id: claimId, room_id: p.room, expected: planned, counted: 0, outcome: "not_seen", room_covered: false, evidence: [] });
+      results.push({ claim_id: judged, room_id: p.room, expected: planned, counted: 0, outcome: "not_seen", room_covered: false, evidence: [] });
       continue;
     }
     const found = detections(p.room, item, counted);
     allDetections.push(...found);
     results.push({
-      claim_id: claimId,
+      claim_id: judged,
       room_id: p.room,
       expected: planned,
       counted,
@@ -167,7 +173,7 @@ export const flat302: MockProject = {
   segments,
   claims,
   results,
-  not_checked: [{ claim_id: "cl-dl-plaster", reason: "not_countable" }],
+  not_checked: [{ claim_id: "cl-dl-plaster", reason: "not_countable" }, ...planIds.map((claim_id) => ({ claim_id, reason: "plan" as const }))],
   detections: allDetections,
   gap_requests: [
     {
@@ -185,7 +191,7 @@ export const flat302: MockProject = {
   query_letters: [
     {
       id: "q-bed2-window",
-      claim_id: "cl-boq-bed2-window",
+      claim_id: "cl-dl-windows",
       body:
         "Re: your demand letter, \"Windows complete: 12\". The bill of quantities lists 4 windows in Bedroom 2 (item W-4). " +
         "A one-way sweep from the Bedroom 2 room tag shows 2 installed. " +

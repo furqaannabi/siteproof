@@ -44,21 +44,42 @@ export function itemWord(item: ItemKind, n: number) {
 
 export interface RoomRow {
   room: Room;
+  /**
+   * The line shown for this room: its plan line from the BOQ when the BOQ splits the
+   * claim by room, otherwise the claim itself. What it was judged against is
+   * `result.expected`, a number code produced.
+   */
   claim: Claim;
+  /** The claim the result is for: usually the demand letter's whole-flat line. */
+  judged: Claim;
   result: Result;
   segments: Segment[];
 }
 
-/** The room's claims for one item, each with its result. A claim with no result is never shown as an outcome. */
+/** A row's own key: one claim has a result per room. */
+export const rowKey = (r: RoomRow) => `${r.judged.id}-${r.room.id}`;
+
+/**
+ * Each room's result for one item, with the line it was judged against. One Result per
+ * claim and room (ADR of 29 October): a whole-flat claim the BOQ splits has one per room.
+ * A claim with no result is never shown as an outcome.
+ */
 function roomRows(report: Report, item: ItemKind): RoomRow[] {
+  const byId = new Map(report.claims.map((c) => [c.id, c]));
+  const planIds = new Set(report.not_checked.filter((n) => n.reason === "plan").map((n) => n.claim_id));
   const rows: RoomRow[] = [];
   for (const room of report.rooms) {
-    const claim = report.claims.find((c) => c.room_id === room.id && c.item === item && c.quote_verified);
-    const result = claim && report.results.find((r) => r.claim_id === claim.id);
-    if (!claim || !result) continue;
+    const result = report.results.find((r) => {
+      const c = byId.get(r.claim_id);
+      return r.room_id === room.id && c?.item === item && c.quote_verified;
+    });
+    const judged = result && byId.get(result.claim_id);
+    if (!result || !judged) continue;
+    const plan = report.claims.find((c) => planIds.has(c.id) && c.room_id === room.id && c.item === item && c.quote_verified);
     rows.push({
       room,
-      claim,
+      claim: plan ?? judged,
+      judged,
       result,
       segments: report.segments.filter((s) => s.room_id === room.id),
     });
@@ -79,7 +100,7 @@ export function seconds(t: number) {
 
 /** What the builder can do about a Short room, with the count's grammar right for one. */
 function shortNote(row: RoomRow, item: ItemKind) {
-  const missing = row.claim.qty - row.result.counted;
+  const missing = row.result.expected - row.result.counted;
   const one = missing === 1;
   return `${missing} ${itemWord(item, missing)} ${one ? "wasn't" : "weren't"} found in a one-way sweep. If ${one ? "it's" : "they're"} installed somewhere the sweep missed, film one slow sweep from the ${row.room.name} room tag. If ${one ? "it's" : "they're"} still to come, correct the demand letter before buyers pay.`;
 }
@@ -90,8 +111,11 @@ function shortNote(row: RoomRow, item: ItemKind) {
  * The server sends only letters that passed its re-check; this is the same check again,
  * because a citation that fails it is never shown.
  */
-export function checkedLetter(report: Report, claimId: string): QueryLetter | null {
-  const letter = report.query_letters.find((q) => q.claim_id === claimId);
+export function checkedLetter(report: Report, row: RoomRow): QueryLetter | null {
+  // A whole-flat claim has a letter per Short room, told apart by the room's plan line.
+  const letter = report.query_letters.find(
+    (q) => q.claim_id === row.judged.id && (q.citations.plan_claim_id === row.claim.id || row.judged.room_id === row.room.id),
+  );
   if (!letter) return null;
   const { invoice_claim_id, plan_claim_id, evidence } = letter.citations;
   const claim = (id: string) => report.claims.some((c) => c.id === id && c.quote_verified);
@@ -240,7 +264,7 @@ export function allRows(report: Report): RoomRow[] {
   return [...byRoom.values()].flat();
 }
 
-const missingOf = (r: RoomRow) => r.claim.qty - r.result.counted;
+const missingOf = (r: RoomRow) => r.result.expected - r.result.counted;
 
 interface Bill {
   item: ItemKind;
@@ -257,7 +281,7 @@ function billFor(report: Report, rows: RoomRow[], item: ItemKind, letterId: stri
     item,
     claim: report.claims.find((c) => c.doc_id === letterId && c.item === item && c.room_id === null),
     // Objects counted with frames, in rooms that were judged, never more than the plan holds.
-    seen: mine.filter((r) => r.result.outcome !== "not_seen").reduce((n, r) => n + Math.min(r.result.counted, r.claim.qty), 0),
+    seen: mine.filter((r) => r.result.outcome !== "not_seen").reduce((n, r) => n + Math.min(r.result.counted, r.result.expected), 0),
     short: mine.filter((r) => r.result.outcome === "short"),
     notSeen: mine.filter((r) => r.result.outcome === "not_seen"),
   };
@@ -325,7 +349,9 @@ function ReportView({
   const unseenRooms = report.rooms.filter((room) => rows.some((r) => r.room.id === room.id && r.result.outcome === "not_seen"));
 
   // Claims in this report that weren't judged, each with why; never shown as Not seen yet.
+  // The BOQ's plan lines are shown beside their rooms, never in this list.
   const notChecked = report.not_checked.flatMap((n) => {
+    if (n.reason === "plan") return [];
     const claim = report.claims.find((c) => c.id === n.claim_id && c.quote_verified);
     if (!claim) return [];
     // For a claim over the plan, the plan line goes beside it.
@@ -415,7 +441,7 @@ function ReportView({
                   <GapPanel key={room.id} report={report} room={room} view={view} onChange={onChange} />
                 ))}
                 {shortRows.map((r) => (
-                  <ShortPanel key={r.claim.id} report={report} row={r} view={view} />
+                  <ShortPanel key={rowKey(r)} report={report} row={r} view={view} />
                 ))}
                 <NotChecked items={notChecked} />
               </aside>
@@ -440,7 +466,7 @@ function BillPanel({ bill }: { bill: Bill }) {
     },
     bill.notSeen.length > 0 && {
       short: false,
-      text: `${sum(bill.notSeen, (r) => r.claim.qty)} not seen yet in ${bill.notSeen.map((r) => r.room.name).join(", ")}`,
+      text: `${sum(bill.notSeen, (r) => r.result.expected)} not seen yet in ${bill.notSeen.map((r) => r.room.name).join(", ")}`,
     },
   ].filter((x): x is { short: boolean; text: string } => Boolean(x));
 
@@ -514,7 +540,7 @@ function RoomEntry({ report, room, rows }: { report: Report; room: Room; rows: R
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <Entry key={r.claim.id} report={report} row={r} order={i} />
+            <Entry key={rowKey(r)} report={report} row={r} order={i} />
           ))}
         </tbody>
       </table>
@@ -530,11 +556,11 @@ function Entry({ report, row, order }: { report: Report; row: RoomRow; order: nu
   return (
     <tr>
       <td>
-        <span className={styles.item}>{sentence(itemWord(item, claim.qty))}</span>
+        <span className={styles.item}>{sentence(itemWord(item, result.expected))}</span>
         <q className={styles.quote}>{claim.source_quote}</q>
       </td>
       <td className={styles.num} data-label="Billed">
-        {claim.qty}
+        {result.expected}
       </td>
       <td className={styles.num} data-label="Counted">
         {/* Not seen yet is never a number: the room wasn't judged, so a count would read as a zero. */}
@@ -617,14 +643,14 @@ export function nextSteps(report: Report, view: View, shortRows: RoomRow[], unse
   }
   for (const r of shortRows) {
     const n = missingOf(r);
-    const letter = checkedLetter(report, r.claim.id);
+    const letter = checkedLetter(report, r);
     const toLetter = view === "bank" && letter;
     steps.push({
-      key: `short-${r.claim.id}`,
+      key: `short-${rowKey(r)}`,
       label: view === "builder" ? "Answer before buyers pay" : letter ? "Query letter ready" : "Hold this amount",
       text: `${r.room.name}: ${n} ${itemWord(r.claim.item as ItemKind, n)} fewer than billed`,
       action: (
-        <a className={styles.bandBtn} href={toLetter ? `#letter-${r.claim.id}` : `#room-${r.room.id}`}>
+        <a className={styles.bandBtn} href={toLetter ? `#letter-${rowKey(r)}` : `#room-${r.room.id}`}>
           {toLetter ? "Read the letter" : "See the room"}
         </a>
       ),
@@ -702,7 +728,7 @@ function GapPanel({ report, room, view, onChange }: { report: Report; room: Room
 }
 
 function ShortPanel({ report, row, view }: { report: Report; row: RoomRow; view: View }) {
-  const letter = checkedLetter(report, row.claim.id);
+  const letter = checkedLetter(report, row);
   if (view === "builder") {
     return (
       <section className={styles.panel}>
@@ -714,7 +740,7 @@ function ShortPanel({ report, row, view }: { report: Report; row: RoomRow; view:
   // A letter whose citations don't all resolve is never shown.
   if (!letter) return null;
   return (
-    <section className={styles.panel} id={`letter-${row.claim.id}`}>
+    <section className={styles.panel} id={`letter-${rowKey(row)}`}>
       <h3 className={styles.panelTitle}>Draft query letter · {row.room.name}</h3>
       <p className={styles.letter}>{letter.body}</p>
       <span className={styles.cites}>
@@ -761,7 +787,7 @@ function Flat3D({ rows }: { rows: RoomRow[] }) {
     .map((r) => ({
       id: r.room.id,
       name: r.room.name,
-      qty: r.claim.qty,
+      qty: r.result.expected,
       counted: r.result.counted,
       outcome: r.result.outcome,
     }));

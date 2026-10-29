@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { data, DEMO_PROJECT_ID, resetMockData, usingMock } from "@/lib/data";
 import { autoLayout } from "@/lib/room-layout";
-import { allRows, checkedLetter, itemWord, type RoomRow } from "./[projectId]/report/report-view";
+import { allRows, checkedLetter, itemWord, rowKey, type RoomRow } from "./[projectId]/report/report-view";
 import s from "./projects.module.css";
 
 const PENDING: ClipStatus[] = ["uploaded", "processing"];
@@ -19,9 +19,9 @@ function summarise(report: Report, overview: ProjectOverview) {
   const claim = report.claims.find((c) => c.doc_id === letter?.id && c.item === "window" && c.room_id === null && c.quote_verified);
   const rows = allRows(report);
   const windows = rows.filter((r) => r.claim.item === "window");
-  const seen = windows.filter((r) => r.result.outcome !== "not_seen").reduce((n, r) => n + Math.min(r.result.counted, r.claim.qty), 0);
-  const short = windows.filter((r) => r.result.outcome === "short").reduce((n, r) => n + (r.claim.qty - r.result.counted), 0);
-  const notSeen = windows.filter((r) => r.result.outcome === "not_seen").reduce((n, r) => n + r.claim.qty, 0);
+  const seen = windows.filter((r) => r.result.outcome !== "not_seen").reduce((n, r) => n + Math.min(r.result.counted, r.result.expected), 0);
+  const short = windows.filter((r) => r.result.outcome === "short").reduce((n, r) => n + (r.result.expected - r.result.counted), 0);
+  const notSeen = windows.filter((r) => r.result.outcome === "not_seen").reduce((n, r) => n + r.result.expected, 0);
   // Clips belong to the project, not a flat, so every flat counts the project's.
   const checking = [...overview.clips, ...report.documents].filter((x) => PENDING.includes(x.status)).length;
   return { letter, claimed: claim?.qty ?? null, seen, short, notSeen, checking, rows };
@@ -81,12 +81,12 @@ function todosFor({ report, summary, oneOfMany }: Loaded): Todo[] {
   }
   for (const r of summary.rows.filter((x: RoomRow) => x.result.outcome === "short")) {
     const item = r.claim.item as ItemKind;
-    const letter = checkedLetter(report, r.claim.id);
+    const letter = checkedLetter(report, r);
     todos.push({
-      key: `short-${r.claim.id}`,
+      key: `short-${rowKey(r)}`,
       kind: "short",
       where: `${flat} · ${r.room.name} · Short`,
-      title: `${r.result.counted} of ${r.claim.qty} ${itemWord(item, r.claim.qty)} seen`,
+      title: `${r.result.counted} of ${r.result.expected} ${itemWord(item, r.result.expected)} seen`,
       detail: letter ? "Fully covered. A query letter is drafted, citing the bill line and the frames." : "Fully covered, and fewer seen than billed.",
       href: reportAt(r.room.id),
       action: "See the room",
