@@ -5,6 +5,8 @@
  */
 import { r2Files } from "../r2";
 import { ingestClipJob, type IngestStore } from "./ingest-job";
+import { askMuseSpark, MuseSparkError, museSparkConfigFromEnv } from "../documents/muse-spark";
+import { crossCheckRequest, readCount } from "./cross-check";
 import { samConfigFromEnv, segmentClip } from "./sam";
 
 /**
@@ -34,15 +36,17 @@ export const prismaIngestStore: IngestStore = {
     await db.clip.update({ where: { id }, data: { status: "processing" } });
   },
 
-  async save(id, { captured_at, segments, detections }) {
+  async save(id, { captured_at, segments, detections, crossChecks }) {
     const { db } = await import("../db");
     // One transaction: a re-run replaces what an earlier attempt saved, and a crash
     // part-way leaves the clip as it was.
     await db.$transaction([
       db.segment.deleteMany({ where: { clip_id: id } }),
       db.detection.deleteMany({ where: { clip_id: id } }),
+      db.crossCheck.deleteMany({ where: { clip_id: id } }),
       db.segment.createMany({ data: segments.map((s) => ({ clip_id: id, ...s })) }),
       db.detection.createMany({ data: detections.map((d) => ({ clip_id: id, ...d })) }),
+      db.crossCheck.createMany({ data: crossChecks.map((c) => ({ clip_id: id, ...c })) }),
       db.clip.update({ where: { id }, data: { status: "done", captured_at: captureTime(captured_at) } }),
     ]);
   },
@@ -58,4 +62,15 @@ export const ingestClip = ingestClipJob({
   store: prismaIngestStore,
   files: r2Files,
   segment: (path, prompt) => segmentClip(path, prompt, samConfigFromEnv()),
+  count: async (item, framePaths) => {
+    try {
+      const answer = await askMuseSpark(crossCheckRequest(item, framePaths), museSparkConfigFromEnv());
+      return readCount(answer.text);
+    } catch (e) {
+      // A refusal, a cut-off or an empty answer is no count: the room stays Not seen
+      // yet. Only failing to reach Muse Spark is worth a retry.
+      if (e instanceof MuseSparkError && e.code !== "request_failed") return null;
+      throw e;
+    }
+  },
 });

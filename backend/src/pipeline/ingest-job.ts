@@ -11,6 +11,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { z } from "zod";
+import { framesOfRoom } from "./cross-check";
 import { IngestError, ingestClip } from "./ingest";
 import { planClip, type PlannedDetection } from "./plan";
 import type { Segmentation } from "./sam";
@@ -65,6 +66,7 @@ export interface IngestStore {
       captured_at: string | null;
       segments: { room_id: string | null; t_start: number; t_end: number; full_sweep: boolean }[];
       detections: SavedDetection[];
+      crossChecks: { room_id: string; item: ItemKind; count: number }[];
     },
   ): Promise<void>;
   markFailed(clipId: string): Promise<void>;
@@ -78,6 +80,11 @@ export interface IngestDeps {
   };
   /** SAM 3.1 on one clip for one prompt. */
   segment(clipPath: string, prompt: string): Promise<Segmentation>;
+  /**
+   * Muse Spark's own count of an item in these frames, or null when its answer is
+   * unusable. Throws when Muse Spark can't be reached.
+   */
+  count(item: ItemKind, framePaths: readonly string[]): Promise<number | null>;
 }
 
 const Payload = z.object({ clip_id: z.string().min(1) });
@@ -126,7 +133,7 @@ async function drawMask(d: PlannedDetection, width: number, height: number): Pro
 const evidenceKey = (kind: "frames" | "masks", ext: string) =>
   `siteproof/${kind}/${crypto.randomUUID().replaceAll("-", "")}.${ext}`;
 
-export function ingestClipJob({ store, files, segment }: IngestDeps) {
+export function ingestClipJob({ store, files, segment, count }: IngestDeps) {
   return {
     kind: "ingest_clip" as const,
 
@@ -181,11 +188,24 @@ export function ingestClipJob({ store, files, segment }: IngestDeps) {
           detections.push({ room_id: d.room_id, item: d.item, track_id: d.track_id, best_frame_key, mask_key });
         }
 
+        // The cross-check: Muse Spark counts each item in each placed room's own frames.
+        // An unusable answer saves nothing, and that room stays Not seen yet.
+        const crossChecks: { room_id: string; item: ItemKind; count: number }[] = [];
+        for (const room_id of new Set(plan.segments.flatMap((s) => (s.room_id ? [s.room_id] : [])))) {
+          const frames = framesOfRoom(ingested.frames, plan.segments.filter((s) => s.room_id === room_id));
+          for (const item of Object.keys(SAM_PROMPTS) as ItemKind[]) {
+            const n = await count(item, frames.map((f) => f.path)).catch(() => {
+              throw new ClipJobError("checker_unavailable", true);
+            });
+            if (n !== null) crossChecks.push({ room_id, item, count: n });
+          }
+        }
+
         // Ids and counts only: never a key or a URL.
         console.log(
           `ingest_clip ${clip.id}: ${plan.segments.length} segment(s), ${plan.segments.filter((s) => s.full_sweep).length} full sweep(s), ${detections.length} detection(s)`,
         );
-        await store.save(clip.id, { captured_at: ingested.captured_at, segments: plan.segments, detections });
+        await store.save(clip.id, { captured_at: ingested.captured_at, segments: plan.segments, detections, crossChecks });
       } finally {
         await rm(dir, { recursive: true, force: true });
       }
