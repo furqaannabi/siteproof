@@ -12,7 +12,7 @@ const rows: ReportRows = {
   rooms: [],
   documents: [],
   claims: [],
-  results: [],
+  crossChecks: [],
   detections: [],
   segments: [],
   gap_requests: [],

@@ -134,13 +134,15 @@ for (const p of plan) {
       quote_verified: true,
     });
     if (counted === null) {
-      results.push({ claim_id: claimId, counted: 0, outcome: "not_seen", room_covered: false, evidence: [] });
+      results.push({ claim_id: claimId, room_id: p.room, expected: planned, counted: 0, outcome: "not_seen", room_covered: false, evidence: [] });
       continue;
     }
     const found = detections(p.room, item, counted);
     allDetections.push(...found);
     results.push({
       claim_id: claimId,
+      room_id: p.room,
+      expected: planned,
       counted,
       outcome: counted >= planned ? "verified" : "short",
       room_covered: true,

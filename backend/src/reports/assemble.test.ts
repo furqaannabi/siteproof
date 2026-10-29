@@ -40,7 +40,7 @@ function rows(overrides: Partial<ReportRows> = {}): ReportRows {
       claim("c5", "boq", "k303"),
       claim("c6", "boq", null),
     ],
-    results: [],
+    crossChecks: [],
     detections: [],
     segments: [],
     gap_requests: [],
@@ -64,27 +64,42 @@ test("claims are this flat's: in its rooms, or unplaced on its own documents; ne
   expect(report.claims.map((c) => c.id)).toEqual(["c1", "c2", "c4"]);
 });
 
-test("results are only this flat's claims', with evidence as fresh links; a claim that can't be counted says so", () => {
-  const result = (claim_id: string) => ({
-    claim_id,
-    counted: 2,
-    outcome: "verified" as const,
-    room_covered: true,
-    evidence_keys: [`frames/${claim_id}.jpg`],
-    note: null,
-  });
+test("outcomes are judged on read for this flat's claims only, with evidence as fresh links; the rest say why not", () => {
+  const counted = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({
+      clip_id: "clip1",
+      room_id: "k302",
+      item: "window" as const,
+      track_id: String(i),
+      best_frame_key: `frames/${i}.jpg`,
+      mask_key: `masks/${i}.png`,
+    }));
   const report = assembleReport(
     rows({
-      claims: [...rows().claims, claim("c7", "dl302", "k302", "not_countable")],
-      results: [result("c1"), result("c3")],
+      claims: [claim("c1", "dl302", "k302"), claim("c3", "dl303", "k303"), claim("c4", "boq", "b302"), claim("c7", "dl302", "k302", "not_countable")],
+      segments: [{ clip_id: "clip1", room_id: "k302", t_start: 0, t_end: 9, full_sweep: true, captured_at: null }],
+      detections: counted(2),
+      crossChecks: [{ clip_id: "clip1", room_id: "k302", item: "window", count: 2 }],
     }),
     presign,
   );
 
+  // c3 is Flat 303's: never judged in Flat 302's report.
   expect(report.results).toEqual([
-    { claim_id: "c1", counted: 2, outcome: "verified", room_covered: true, evidence: ["https://r2.example/frames/c1.jpg?signed"] },
+    {
+      claim_id: "c1",
+      room_id: "k302",
+      expected: 2,
+      counted: 2,
+      outcome: "verified",
+      room_covered: true,
+      evidence: ["https://r2.example/frames/0.jpg?signed", "https://r2.example/frames/1.jpg?signed"],
+    },
   ]);
-  expect(report.not_checked).toEqual([{ claim_id: "c7", reason: "not_countable" }]);
+  expect(report.not_checked).toEqual([
+    { claim_id: "c4", reason: "plan" },
+    { claim_id: "c7", reason: "not_countable" },
+  ]);
 });
 
 test("detections, segments and gap requests are only this flat's rooms', and frames and masks are fresh links", () => {

@@ -191,13 +191,28 @@ export interface Detection {
 }
 
 /**
- * One claim's outcome, from deterministic comparison only.
+ * One claim's outcome in one room, from deterministic comparison only.
+ *
+ * A claim about a room has one Result. A claim about the whole flat ("Windows complete:
+ * 12") has one per room, each judged against that room's quantity in the BOQ, so a
+ * report can say "Bedroom 2 is Short by 2, the kitchen is Not seen yet".
  *
  * `counted` is the highest count from any single clip for that room and item.
  * `evidence` is never empty for a counted object: no evidence, no number.
  */
 export interface Result {
   claim_id: string;
+  /**
+   * The room judged. null only for a whole-flat claim the BOQ gives no per-room
+   * quantities for: then the flat's total is judged, and it can be Short only when
+   * every room of the flat is fully covered.
+   */
+  room_id: string | null;
+  /**
+   * What this room was judged against: the claim's quantity, or for a whole-flat claim
+   * the room's quantity in the BOQ. "Short by" is `expected - counted`.
+   */
+  expected: number;
   counted: number;
   outcome: Outcome;
   room_covered: boolean;
@@ -208,10 +223,11 @@ export interface Result {
 /**
  * Why a claim has no `Result`. Never shown as Not seen yet: no footage will clear it.
  * - `not_countable`: this version cannot count the item (plastering, tiling, paint).
+ * - `plan`: a line of the BOQ itself. The plan is a ceiling, never judged.
  * - `exceeds_plan`: the claim asks for more than the BOQ holds for that item and room;
  *   it goes to a person with both quotes side by side.
  */
-export type NotCheckedReason = "not_countable" | "exceeds_plan";
+export type NotCheckedReason = "not_countable" | "exceeds_plan" | "plan";
 
 export interface NotChecked {
   claim_id: string;

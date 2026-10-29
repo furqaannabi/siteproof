@@ -68,15 +68,13 @@ export const prismaGapRequestStore: GapRequestStore = {
     const { db } = await import("../db");
     const room = await db.room.findUnique({
       where: { id: roomId },
-      select: {
-        name: true,
-        flat: { select: { name: true } },
-        segments: { where: { full_sweep: true }, select: { id: true }, take: 1 },
-        claims: { where: { result: { outcome: "not_seen" } }, select: { id: true }, take: 1 },
-      },
+      select: { name: true, flat: { select: { name: true } } },
     });
     if (!room) return null;
-    return { room: room.name, flat: room.flat.name, notSeen: room.segments.length === 0 || room.claims.length > 0 };
+    // Outcomes are worked out on read by the comparison engine, not stored. Imported
+    // here, not at the top: the report loader imports this module.
+    const { roomIsNotSeen } = await import("../reports/load");
+    return { room: room.name, flat: room.flat.name, notSeen: await roomIsNotSeen(roomId) };
   },
 
   async liveRequest(roomId) {

@@ -67,8 +67,8 @@ export async function loadReportRows(flatId: string): Promise<ReportRows | null>
     where: { doc_id: { in: documents.map((d) => d.id) } },
     select: { id: true, doc_id: true, item: true, qty: true, unit: true, room_id: true, source_quote: true, quote_verified: true },
   });
-  const [results, detections, segments, gap_requests] = await Promise.all([
-    db.result.findMany({ where: { claim_id: { in: claims.map((c) => c.id) } } }),
+  const [crossChecks, detections, segments, gap_requests] = await Promise.all([
+    db.crossCheck.findMany({ where: { room_id: { in: roomIds } }, select: { clip_id: true, room_id: true, item: true, count: true } }),
     db.detection.findMany({
       where: { room_id: { in: roomIds } },
       select: { clip_id: true, room_id: true, item: true, track_id: true, best_frame_key: true, mask_key: true },
@@ -83,7 +83,7 @@ export async function loadReportRows(flatId: string): Promise<ReportRows | null>
     rooms: flat.rooms.map(toRoom),
     documents,
     claims,
-    results,
+    crossChecks,
     detections,
     segments: segments.map(toSegment),
     gap_requests,
@@ -139,4 +139,19 @@ export async function loadOverview(
     ),
     segments: segments.map(toSegment),
   };
+}
+
+/**
+ * Whether a room still needs footage: no full sweep of it yet, or a claim on it the
+ * engine judges Not seen yet. Worked out by the same engine as the report.
+ */
+export async function roomIsNotSeen(roomId: string): Promise<boolean> {
+  const { db } = await import("../db");
+  const room = await db.room.findUnique({ where: { id: roomId }, select: { flat_id: true } });
+  const rows = room ? await loadReportRows(room.flat_id) : null;
+  if (!rows) return false;
+  const { assembleReport } = await import("./assemble");
+  const report = assembleReport(rows, () => "");
+  const swept = rows.segments.some((s) => s.room_id === roomId && s.full_sweep);
+  return !swept || report.results.some((r) => r.room_id === roomId && r.outcome === "not_seen");
 }

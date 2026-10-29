@@ -16,8 +16,8 @@ Segment { clip_id, room_id|null, t_start, t_end, full_sweep: bool, captured_at|n
 ItemKind = "window" | "door"                                            // what v1 can count
 Claim   { id, doc_id, item: ItemKind|"not_countable", qty, unit|null, room_id|null, source_quote, quote_verified: bool }
 Detection { clip_id, room_id, item: ItemKind, track_id, best_frame_url, mask_url }
-Result  { claim_id, counted, outcome: "verified"|"short"|"not_seen", room_covered: bool,
-          evidence: [frame_url], note }
+Result  { claim_id, room_id|null, expected, counted, outcome: "verified"|"short"|"not_seen",
+          room_covered: bool, evidence: [frame_url], note }
 
 CreateProject     { name, builder, flats: [{ name, rooms: [{ name }] }] }   // POST /projects body
 CreatedProject    { project: Project, rooms: Room[] }                        // POST /projects reply
@@ -26,7 +26,7 @@ ClipUpload        { upload_url, ticket, expires_at }                         // 
 CompleteClip      { ticket }                                                 // POST /clips/complete body → Clip
 ProjectLinks      { builder_token, report_tokens: [{ flat_id, token }] }     // GET /projects/:id/links
 
-NotChecked      { claim_id, reason: "not_countable"|"exceeds_plan" }
+NotChecked      { claim_id, reason: "not_countable"|"exceeds_plan"|"plan" }
 GapRequest      { id, room_id, text, steps[], status: "open"|"sent"|"cleared" }
 QueryLetter     { id, claim_id, body,
                   citations: { invoice_claim_id, plan_claim_id|null, evidence: [frame_url] } }
@@ -82,7 +82,9 @@ Every request carries its key as `Authorization: Bearer <token>` ([ADR](decision
 - **`Claim.quote_verified`** is set by code, not by a model: it is true only when `source_quote` appears in the source document word for word. A claim with `quote_verified: false` is an unverified claim and is never shown as a number.
 - **`Detection.track_id`** is SAM's identity for one object within one clip. Objects are counted, not appearances.
 - **`Result.counted`** is the highest count from any single clip for that room and item. Within a full one-way sweep each run of consecutive frames is one object; elsewhere, SAM's distinct track ids. Merging the same object across clips is a stretch goal ([ADR](decisions/2026-10-29-how-a-count-is-made-and-judged.md)).
-- **`Result.outcome` is `"verified"` only when counted ≥ claimed**, exactly. `"short"` also needs the Muse Spark cross-check to agree with the count.
+- **One `Result` per claim and room.** A claim about a room has one. A whole-flat claim the BOQ splits by room has one per room, each against that room's planned quantity, in `expected`; "Short by" is `expected - counted`. One the BOQ can't split is judged as the flat's total, `room_id: null`. Results are worked out on read by the comparison engine, never stored.
+- **A BOQ line is `not_checked` with reason `plan`**: the plan is a ceiling, never judged.
+- **`Result.outcome` is `"verified"` only when counted ≥ expected**, exactly. Both `"verified"` and `"short"` need the Muse Spark cross-check to agree with the deciding count; `"short"` also needs that count to come from a full one-way sweep.
 - **`Result.outcome`** comes only from deterministic comparison. `"short"` is allowed only when `room_covered` is true; everything else is `"not_seen"`.
 - **`Result.evidence`** is never empty for a counted object. No evidence, no number.
 
@@ -110,4 +112,5 @@ Flag these to Furqaan rather than deciding them in code:
 | Builder routes need the project's builder link, `POST /projects` the setup key; `ProjectLinks` and `GET /projects/:id/links` added | 28 October 2026 | Furqaan |
 | The report becomes per flat and buyer-safe (`Report`, `GET /flats/:id/report`, `GET /reports/:token`), with `NotChecked`; `ProjectOverview` and `GET /projects/:id` for the builder; `GapRequest` and `QueryLetter` settled, from Apurva's proposal in `web/lib/types.ts` ([ADR](decisions/2026-10-28-the-report-is-per-flat-and-every-claim-is-judged-or-explained.md)) | 28 October 2026 | Furqaan |
 | `Segment.captured_at` and `ProjectOverview.segments` added, from [Apurva's proposal](decisions/2026-10-28-clip-placement-and-capture-time-proposed.md) (option A on both). The report link moves from the path to the `Authorization` header only: `GET /reports/:token` becomes `GET /report`; `GET /projects/:id/report` removed | 28 October 2026 | Furqaan |
+| `Result.room_id` and `Result.expected`: one Result per claim and room, computed on read. `NotCheckedReason` gains `plan` ([ADR](decisions/2026-10-29-results-per-room-computed-on-read.md)) | 29 October 2026 | Furqaan |
 | `Document.reason` added. `CreateProject` and `CreatedProject` for `POST /projects` ([ADR](decisions/2026-10-27-creating-a-project-returns-its-rooms-and-their-qr-codes.md)). Clips upload in two steps: `POST /clips` returns a link and a ticket, `POST /clips/complete` registers the clip ([ADR](decisions/2026-10-27-clips-upload-in-two-steps-with-a-signed-ticket.md)) | 28 October 2026 | Furqaan |

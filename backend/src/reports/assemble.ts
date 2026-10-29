@@ -6,6 +6,7 @@
  * loads it, so a loader that fetches too much still cannot leak another flat.
  * See docs/decisions/2026-10-28-the-report-is-per-flat-and-every-claim-is-judged-or-explained.md.
  */
+import { judge } from "../compare/judge";
 import type {
   Claim,
   Detection,
@@ -13,7 +14,6 @@ import type {
   Flat,
   GapRequest,
   NotChecked,
-  Outcome,
   Project,
   Report,
   Result,
@@ -29,14 +29,8 @@ export interface ReportRows {
   rooms: Room[];
   documents: Document[];
   claims: Claim[];
-  results: {
-    claim_id: string;
-    counted: number;
-    outcome: Outcome;
-    room_covered: boolean;
-    evidence_keys: string[];
-    note: string | null;
-  }[];
+  /** Muse Spark's counts, which the engine needs to agree before any outcome. */
+  crossChecks: { clip_id: string; room_id: string; item: "window" | "door"; count: number }[];
   detections: {
     clip_id: string;
     room_id: string;
@@ -62,25 +56,20 @@ export function assembleReport(rows: ReportRows, presign: (key: string) => strin
     (c) => documentIds.has(c.doc_id) && (c.room_id ? roomIds.has(c.room_id) : ownDocuments.has(c.doc_id)),
   );
 
-  const claimIds = new Set(claims.map((c) => c.id));
-  const results: Result[] = rows.results
-    .filter((r) => claimIds.has(r.claim_id))
-    .map((r) => ({
-      claim_id: r.claim_id,
-      counted: r.counted,
-      outcome: r.outcome,
-      room_covered: r.room_covered,
-      evidence: r.evidence_keys.map(presign),
-      ...(r.note ? { note: r.note } : {}),
-    }));
-
-  // Never left for the UI to infer from a missing Result: a claim this version cannot
-  // count is listed, and the UI shows it as not checked, never as Not seen yet.
-  const not_checked: NotChecked[] = claims
-    .filter((c) => c.item === "not_countable")
-    .map((c) => ({ claim_id: c.id, reason: "not_countable" }));
-
   const inFlat = (roomId: string | null) => roomId !== null && roomIds.has(roomId);
+
+  // Outcomes are worked out here, on read, by the comparison engine: deterministic,
+  // and never stale against the evidence. Every claim is judged or explained.
+  const judged = judge({
+    rooms: rows.rooms,
+    documents,
+    claims,
+    segments: rows.segments.filter((g) => inFlat(g.room_id)),
+    detections: rows.detections.filter((d) => inFlat(d.room_id)),
+    crossChecks: rows.crossChecks.filter((c) => inFlat(c.room_id)),
+  });
+  const results: Result[] = judged.results.map(({ evidence_keys, ...r }) => ({ ...r, evidence: evidence_keys.map(presign) }));
+  const not_checked: NotChecked[] = judged.not_checked;
   const detections: Detection[] = rows.detections
     .filter((d) => inFlat(d.room_id))
     .map((d) => ({

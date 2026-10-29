@@ -107,6 +107,7 @@ function citationCount(letter: QueryLetter) {
 const NOT_CHECKED: Record<NotCheckedReason, string> = {
   not_countable: "Not checked from footage in this version",
   exceeds_plan: "More than the bill of quantities holds. A person compares the two lines",
+  plan: "The plan from the bill of quantities: what each room is meant to have",
 };
 
 /** Detections grouped by the frame they're best seen in, so each frame shows every outline it holds. */

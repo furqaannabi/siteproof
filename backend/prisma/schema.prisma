@@ -43,12 +43,6 @@ enum ClaimItem {
   not_countable
 }
 
-enum Outcome {
-  verified
-  short
-  not_seen
-}
-
 enum JobStatus {
   queued
   running
@@ -91,11 +85,12 @@ model Room {
   /// What the printed tag decodes to. Unique, so a decoded tag names exactly one room.
   qr_code String @unique
 
-  flat       Flat        @relation(fields: [flat_id], references: [id], onDelete: Cascade)
+  flat         Flat         @relation(fields: [flat_id], references: [id], onDelete: Cascade)
   segments     Segment[]
   claims       Claim[]
   detections   Detection[]
   gap_requests GapRequest[]
+  cross_checks CrossCheck[]
 
   @@index([flat_id])
 }
@@ -110,9 +105,10 @@ model Clip {
   status      ClipStatus @default(uploaded)
   created_at  DateTime   @default(now())
 
-  project    Project     @relation(fields: [project_id], references: [id], onDelete: Cascade)
-  segments   Segment[]
-  detections Detection[]
+  project      Project      @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  segments     Segment[]
+  detections   Detection[]
+  cross_checks CrossCheck[]
 
   @@index([project_id])
 }
@@ -168,7 +164,6 @@ model Claim {
 
   document Document @relation(fields: [doc_id], references: [id], onDelete: Cascade)
   room     Room?    @relation(fields: [room_id], references: [id], onDelete: Cascade)
-  result   Result?
 
   @@index([doc_id])
   @@index([room_id])
@@ -192,20 +187,6 @@ model Detection {
   @@index([room_id, item])
 }
 
-/// One claim's outcome, from deterministic comparison only. A claim with no Result
-/// was not checked: not countable, or more than the BOQ holds.
-model Result {
-  claim_id      String   @id
-  counted       Int
-  outcome       Outcome
-  room_covered  Boolean
-  /// R2 object keys of the evidence frames; presigned into Result.evidence on read.
-  evidence_keys String[]
-  note          String?
-
-  claim Claim @relation(fields: [claim_id], references: [id], onDelete: Cascade)
-}
-
 /// Stored as open or sent; "cleared" is worked out on read, from a full one-way sweep
 /// of the room in a clip uploaded after the request.
 enum GapRequestStatus {
@@ -227,6 +208,22 @@ model GapRequest {
 
   room Room @relation(fields: [room_id], references: [id], onDelete: Cascade)
 
+  @@index([room_id])
+}
+
+/// Muse Spark's own count of an item in one clip's footage of one room. Internal to
+/// the comparison engine: it can only hold an outcome back, never produce one.
+model CrossCheck {
+  id      String   @id @default(uuid())
+  clip_id String
+  room_id String
+  item    ItemKind
+  count   Int
+
+  clip Clip @relation(fields: [clip_id], references: [id], onDelete: Cascade)
+  room Room @relation(fields: [room_id], references: [id], onDelete: Cascade)
+
+  @@unique([clip_id, room_id, item])
   @@index([room_id])
 }
 
