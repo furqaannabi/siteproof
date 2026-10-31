@@ -159,7 +159,10 @@
 .bill {
   padding: 20px 24px 22px;
   display: grid;
-  grid-template-columns: 1fr auto;
+  /* The figure takes the width it needs and never breaks; the lines beside it wrap. */
+  grid-template-columns: auto minmax(0, 1fr);
+  min-width: 0;
+  container-type: inline-size;
   gap: 4px 24px;
   align-items: end;
 }
@@ -211,6 +214,7 @@
   grid-template-columns: auto 1fr;
   align-items: baseline;
   column-gap: 14px;
+  white-space: nowrap;
 }
 
 .figN {
@@ -233,6 +237,7 @@
 .figLabel {
   grid-column: 1 / -1;
   margin-top: 8px;
+  white-space: normal;
   font-size: 14px;
   color: var(--ink-2);
 }
@@ -247,6 +252,15 @@
   font-weight: 600;
   color: var(--ink-2);
   text-align: right;
+}
+
+/* A narrow card, on a phone or half an A4 page: the lines go under the figure. */
+@container (max-width: 440px) {
+  .split {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+    text-align: left;
+  }
 }
 
 .splitShort {
@@ -781,6 +795,10 @@ td.num {
   .band,
   .plan3d {
     display: none;
+  }
+
+  .figN {
+    font-size: 60px;
   }
 
   .stamp {
