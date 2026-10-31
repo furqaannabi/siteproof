@@ -217,3 +217,11 @@ export const usingMock = process.env.NEXT_PUBLIC_DATA_SOURCE !== "api";
 export const data: DataSource = usingMock ? fromMock() : apiSource;
 
 export const DEMO_PROJECT_ID = "p-northfield";
+
+/**
+ * Where "Open the demo" goes. On the real API the demo is a real project, opened by its
+ * flat's report link (`/report#<token>`) set in NEXT_PUBLIC_DEMO_URL. A report link only
+ * reads one flat's report, so it's safe in the page; never put a builder link here: it
+ * would let anyone upload. In mock mode the demo is the in-browser Flat 302.
+ */
+export const DEMO_URL = process.env.NEXT_PUBLIC_DEMO_URL || (usingMock ? `/projects/${DEMO_PROJECT_ID}/report` : "/projects");

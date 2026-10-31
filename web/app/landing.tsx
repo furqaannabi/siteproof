@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { LogoMark } from "@/components/ui";
-import { DEMO_PROJECT_ID } from "@/lib/data";
+import { DEMO_URL } from "@/lib/data";
 import { BEATS, type SceneFrame } from "./landing-scene";
 import s from "./landing.module.css";
 
-const DEMO = `/projects/${DEMO_PROJECT_ID}/report`;
+const DEMO = DEMO_URL;
 
 const clamp = (x: number) => Math.min(1, Math.max(0, x));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
