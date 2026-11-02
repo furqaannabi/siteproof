@@ -76,7 +76,7 @@ These are the product. Do not re-open them, and do not write code that bends the
 | --- | --- |
 | **Models find, code decides** | SAM 3.1 counts. Muse Spark reads. The outcome comes only from deterministic comparison in TypeScript. No model call ever produces an outcome, a number shown to a buyer, or a bank-facing claim |
 | **Count objects, not appearances** | SAM's track ids are not trusted alone: it can give two look-alike objects one id across a gap. **Within a full one-way sweep, every run of consecutive frames is one object**, since the camera never pans back. Elsewhere, SAM's distinct ids. Across clips, a room's count is the **highest count from any single clip**. Merging objects across clips is a stretch goal, not an assumption ([ADR](docs/decisions/2026-10-29-how-a-count-is-made-and-judged.md)) |
-| **Coverage rule** | A room is fully covered only when one continuous clip starts at the room's QR tag and sweeps the whole room once in one direction, without panning back. Re-entries are merged by an edge-and-size heuristic. If the SAM count and the Muse Spark cross-check disagree, the room stays **Not seen yet** |
+| **Coverage rule** | A room is fully covered only when one continuous clip starts at the room's QR tag, sweeps the whole room once in one direction without panning back, and comes back round to the tag (out of view for at least 5 s, then seen again). Re-entries are merged by an edge-and-size heuristic. Muse Spark confirms each object SAM found from its outlined best frame: only confirmed objects count towards Verified, and a rejection can never make a room Short ([ADR](docs/decisions/2026-11-02-a-full-sweep-returns-to-its-tag-and-each-object-is-confirmed.md)) |
 | **Short is only for fully covered rooms** | Everything else is **Not seen yet**, with a precise request for footage. Never an accusation |
 | **No evidence, no number** | Every count links to its frames and masks. Model output that fails the schema counts as unverified. Every quote must match the document word for word |
 | **Unplaced segments are never a claim** | A segment with no room tag is stored, but never used for a per-room claim |
@@ -168,8 +168,8 @@ Its planning phase — confirm the interface, confirm which behaviours to test, 
 | Area | Must prove | Owner |
 | --- | --- | --- |
 | Comparison engine | Claimed vs counted vs plan, with tolerance. Verified / Short / Not seen yet for every combination. **Short never appears for a room that is not fully covered** | Furqaan |
-| Coverage rule | A one-way sweep from the tag counts as covered. A back-and-forth pan does not. No tag means unplaced, which is never a claim | Furqaan |
-| Counting | The highest count from any single clip per room. In a one-way sweep, one id seen in two runs counts two; a back-and-forth pan is never used for Short. SAM count vs Muse Spark cross-check disagreeing leaves the room Not seen yet. Verified is exact: counted ≥ claimed; one below in a covered room is Short by one | Furqaan |
+| Coverage rule | A one-way sweep from the tag that comes back round to it counts as covered. One that stops early, or a back-and-forth pan, does not. No tag means unplaced, which is never a claim | Furqaan |
+| Counting | The highest count from any single clip per room. In a one-way sweep, one id seen in two runs counts two; a back-and-forth pan is never used for Short. Verified counts only confirmed objects; Short counts SAM's, from a full sweep only. Verified is exact: counted ≥ claimed; one below in a covered room is Short by one | Furqaan |
 | Quote checker | A quote that is not in the document word for word fails. Whitespace and case handling is deliberate and tested. Schema-invalid extraction becomes an unverified claim, never a silent default | William |
 | Citation re-check | A query letter whose invoice line, plan clause or frame ID does not resolve is not shown | Furqaan + William |
 | Accuracy evaluation | SAM counts vs hand counts on 15–20 labelled clips, published in the README | William + Furqaan |
@@ -214,10 +214,10 @@ The day-by-day table in `docs/PRODUCT.md` is the order. Build so each step works
 | **Clip** | One uploaded video file, with its capture time from the file's metadata |
 | **Room tag** | The printed QR code at a room's doorway, stuck once per project |
 | **Segment** | The part of a clip that belongs to one room. A segment with no tag is **unplaced** |
-| **One-way sweep** | Starting at the tag and panning steadily in one direction, never back over anything already filmed |
+| **One-way sweep** | Starting at the tag and panning steadily in one direction, never back over anything already filmed, until the tag is back in view |
 | **Coverage** | Whether a room has one complete one-way sweep. Only a covered room can be Short |
 | **Coverage map** | What has and has not been seen, which is what makes a gap request exact |
-| **Detection** | One tracked object: its clip, room, item, track id, best frame and mask |
+| **Detection** | One tracked object: its clip, room, item, track id, best frame and mask, and whether Muse Spark confirmed it |
 | **Count** | The number of distinct objects seen for an item in a room |
 | **Re-entry merging** | Joining tracks that are the same object seen again after leaving frame |
 | **Result** | One claim's outcome: counted, Verified / Short / Not seen yet, whether the room was covered, and its evidence frames |

@@ -46,9 +46,9 @@ Inputs: clips · demand letter · BOQ
 | Step | What happens | Tech |
 | --- | --- | --- |
 | **1. Ingest** | Store each clip with its capture time from the file's metadata. Sample frames at 1–2 fps. Cap clip length to control cost | FFmpeg, S3/R2, jobs table |
-| **2. Locate** | Decode the QR room tags in frames to split each clip into room segments. Detect one-way sweeps (start at the tag, pan steadily in one direction, never back over anything already filmed). Segments with no tag are **unplaced**: stored, never used for a per-room claim | QR decoder, own code |
+| **2. Locate** | Decode the QR room tags in frames to split each clip into room segments. Detect one-way sweeps (start at the tag, pan steadily in one direction, never back over anything already filmed, and end back at the tag). Segments with no tag are **unplaced**: stored, never used for a per-room claim | QR decoder, own code |
 | **3. Read documents** | Muse Spark reads the demand letter or invoice and the full bill of quantities in one call (1M-token context). Out come structured line items: item, quantity, unit, room or stage, and the source line quoted word for word. Code checks every quote exists in the document | Muse Spark, schema validation |
-| **4. Count** | Each claimed item becomes a SAM 3.1 text prompt ("window frame", "door"). SAM's video tracks keep each object's identity within a clip, so a window passed three times counts once. Across clips, the room's count is the highest from any single clip | SAM 3.1 |
+| **4. Count** | Each claimed item becomes a SAM 3.1 text prompt ("window frame", "door"). SAM's video tracks keep each object's identity within a clip, so a window passed three times counts once. Across clips, the room's count is the highest from any single clip. Muse Spark then confirms each object from its outlined best frame | SAM 3.1, Muse Spark |
 | **5. Compare** | Deterministic code, no model: claimed vs counted vs plan, with a tolerance and the coverage rule. Each result carries its evidence: the best frame and mask for every counted object | TypeScript |
 | **6. Report** | Buyer/bank view: what is verified, with frames. Builder view: what is verified and exactly which shots would clear the rest. A real shortfall gets a polite, specific query letter citing the invoice line, plan clause and frames, with every citation re-checked by code. Exportable as a PDF | Next.js, Muse Spark, PDF export |
 | **7. Track over time** | Weekly footage builds a timeline per room, so nothing is billed twice, and hidden work (rebar before the pour) is recorded while it is still visible | Post-hackathon |
@@ -58,14 +58,14 @@ Inputs: clips · demand letter · BOQ
 | Outcome | When | Shown as |
 | --- | --- | --- |
 | **Verified** | The count meets the claim | Green, with the frame and outline for every counted object |
-| **Short** | Fewer seen than claimed, **and** the room is fully covered (one complete one-way sweep from the tag) | The gap, the frames, and a draft query letter |
+| **Short** | Fewer seen than claimed, **and** the room is fully covered (one complete one-way sweep from the tag, ending back at the tag) | The gap, the frames, and a draft query letter |
 | **Not seen yet** | The room is not covered well enough to judge | An exact request for a 5-second clip. Never an accusation |
 
 ## 7. Trust rules everyone codes to
 
 1. **Models find, code decides.** SAM counts and Muse Spark reads. The outcome comes only from deterministic comparison.
 2. **Count objects, not appearances.** SAM's track ids are not trusted alone: it can give two look-alike objects one id across a gap. Within a full one-way sweep, every run of consecutive frames is one object; elsewhere, SAM's distinct ids. Across clips, use the highest count from any single clip per room. Merging objects across clips is a stretch goal ([ADR](decisions/2026-10-29-how-a-count-is-made-and-judged.md)).
-3. **Coverage rule.** A room is fully covered only when one continuous clip starts at the room's QR tag and sweeps the whole room once in one direction, without panning back. SAM 3.1 only keeps an object's ID while it stays in frame, so panning back can mint a new ID and double-count. Re-entries are merged by an edge-and-size heuristic, and if the SAM count and a Muse Spark cross-check disagree, the room stays **Not seen yet**. **Short** is only allowed for fully covered rooms; everything else is **Not seen yet**, with a precise request for footage.
+3. **Coverage rule.** A room is fully covered only when one continuous clip starts at the room's QR tag, sweeps the whole room once in one direction without panning back, and comes back round to the tag (out of view for at least 5 s, then seen again). SAM 3.1 only keeps an object's ID while it stays in frame, so panning back can mint a new ID and double-count. Re-entries are merged by an edge-and-size heuristic. Muse Spark confirms each object SAM found from its outlined best frame: only confirmed objects count towards Verified, and a rejection can never make a room Short ([decided 2 Nov](decisions/2026-11-02-a-full-sweep-returns-to-its-tag-and-each-object-is-confirmed.md)). **Short** is only allowed for fully covered rooms; everything else is **Not seen yet**, with a precise request for footage.
 4. **No evidence, no number.** Every count links to frames and masks. Model output that fails the schema counts as unverified, and every quote must match the document word for word.
 
 **Positioning.** SiteProof supports payment decisions with evidence. It does not replace an engineer's inspection of hidden or structural work.
@@ -163,7 +163,7 @@ Indie entries are judged on creativity, technical ambition, and whether it works
 | --- | --- | --- |
 | **It works** | Live deployed URL with the demo project, working on mobile, no login needed to view the report | Apurva |
 | | The full demo story runs end to end on real footage, and bad input (blur, dark, no tag) gives clear errors, not crashes | Furqaan |
-| **Technical ambition** | SAM 3.1 counting with re-entry merging and a Muse Spark cross-check | Furqaan |
+| **Technical ambition** | SAM 3.1 counting with re-entry merging and Muse Spark confirming each object | Furqaan |
 | | Measured accuracy: SAM counts vs hand counts on 15–20 clips, published in the README | William + Furqaan |
 | | Every number backed by frames, and every citation checked by code | All |
 | **Creativity** | The "builder just forwards WhatsApp clips" story, and the gap request that clears "Not seen yet" live in the demo | Apurva |
