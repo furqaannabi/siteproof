@@ -65,6 +65,7 @@ export function detections(roomId: string, item: ItemKind, n: number, clipId = c
     track_id: `${key}-${item}-t${i + 1}`,
     best_frame_url: `/mock/frame-${key}.svg`,
     mask_url: `/mock/mask-${key}-${item}-${i + 1}.svg`,
+    confirmed: true,
   }));
 }
 

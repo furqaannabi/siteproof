@@ -12,7 +12,6 @@ const rows: ReportRows = {
   rooms: [],
   documents: [],
   claims: [],
-  crossChecks: [],
   detections: [],
   segments: [],
   gap_requests: [],

@@ -23,6 +23,8 @@ export interface PlanInput {
   tracks: Readonly<Record<ItemKind, readonly TrackedObject[]>>;
   /** The video's own frame rate, which SAM's frame numbers count in. */
   fps: number;
+  /** The decoded frame's size, as SAM's boxes are measured: to tell an object cut off by the edge. */
+  frameSize: { width: number; height: number };
 }
 
 export interface PlannedDetection {
@@ -60,7 +62,7 @@ function returnsToTag(segment: PlannedSegment, sightings: readonly TagSighting[]
   return times.some((t, i) => i > 0 && t - times[i - 1]! >= RETURN_GAP_S);
 }
 
-export function planClip({ planned, sightings, roomsByTag, shifts, tracks, fps }: PlanInput): ClipPlan {
+export function planClip({ planned, sightings, roomsByTag, shifts, tracks, fps, frameSize }: PlanInput): ClipPlan {
   const segments = planned.map((p) => {
     const room_id = p.qr_code ? (roomsByTag.get(p.qr_code) ?? null) : null;
     // A segment starts at its tag by construction. It covers the room only if the
@@ -81,7 +83,7 @@ export function planClip({ planned, sightings, roomsByTag, shifts, tracks, fps }
       for (const object of countObjects(tracks[item], segment, fps).objects) {
         const run = runsSoFar.get(object.track_id) ?? 0;
         runsSoFar.set(object.track_id, run + 1);
-        const best = bestSighting(object.sightings);
+        const best = bestSighting(object.sightings, frameSize);
         detections.push({
           room_id: segment.room_id,
           item,
@@ -101,10 +103,22 @@ const ITEMS: readonly ItemKind[] = ["window", "door"];
 
 const area = (b: Box) => (b.right - b.left) * (b.bottom - b.top);
 
-/** The sighting that best shows an object: SAM's most confident, then the largest. */
-function bestSighting(sightings: readonly Sighting[]): Sighting {
+/** Pixels a box must keep from every edge of the picture to count as whole. */
+const EDGE_PX = 4;
+
+/**
+ * The sighting that best shows an object: one with the whole object in the picture,
+ * then the largest, then SAM's most confident. The frame is the buyer's evidence and
+ * what Muse Spark is asked about: on 2 November SAM's most confident frames of two
+ * real doors were a close-up cut off at the top and an edge-on strip, and both were
+ * rejected as not a door hung in its frame.
+ */
+function bestSighting(sightings: readonly Sighting[], { width, height }: PlanInput["frameSize"]): Sighting {
+  const whole = (b: Box) => b.left >= EDGE_PX && b.top >= EDGE_PX && b.right <= width - EDGE_PX && b.bottom <= height - EDGE_PX;
+  const rank = (s: Sighting): [number, number, number] => [whole(s.box) ? 1 : 0, area(s.box), s.confidence ?? 0];
   return sightings.reduce((best, s) => {
-    const c = (s.confidence ?? 0) - (best.confidence ?? 0);
-    return c > 0 || (c === 0 && area(s.box) > area(best.box)) ? s : best;
+    const [a, b] = [rank(s), rank(best)];
+    const d = a.findIndex((v, i) => v !== b[i]);
+    return d !== -1 && a[d]! > b[d]! ? s : best;
   });
 }

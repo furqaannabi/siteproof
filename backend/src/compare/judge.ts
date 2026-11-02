@@ -4,7 +4,8 @@
  *
  * Run on read, from what is stored, so an outcome can never go stale or disagree with
  * the evidence behind it. See docs/decisions/2026-10-29-how-a-count-is-made-and-judged.md
- * and docs/decisions/2026-10-27-the-demand-letter-is-judged-and-the-boq-is-a-ceiling.md.
+ * docs/decisions/2026-10-27-the-demand-letter-is-judged-and-the-boq-is-a-ceiling.md and
+ * docs/decisions/2026-11-02-a-full-sweep-returns-to-its-tag-and-each-object-is-confirmed.md.
  */
 import type { Claim, DocumentKind, ItemKind, NotChecked, Outcome } from "@siteproof/contract";
 
@@ -15,10 +16,8 @@ export interface JudgeInput {
   claims: Claim[];
   /** Placed segments in the flat's rooms. */
   segments: { clip_id: string; room_id: string | null; full_sweep: boolean }[];
-  /** One per counted object. */
-  detections: { clip_id: string; room_id: string; item: ItemKind; best_frame_key: string }[];
-  /** Muse Spark's own count of an item in a clip's footage of a room. */
-  crossChecks: { clip_id: string; room_id: string; item: ItemKind; count: number }[];
+  /** One per object SAM counted; `confirmed` when Muse Spark said yes to its outlined frame. */
+  detections: { clip_id: string; room_id: string; item: ItemKind; best_frame_key: string; confirmed: boolean }[];
 }
 
 /** A Result, with its evidence still as storage keys. */
@@ -32,66 +31,72 @@ export interface JudgedResult {
   evidence_keys: string[];
 }
 
-/** The clip whose count decides a room, for one item, and whether it can be trusted. */
-function decidingClip(input: JudgeInput, room: string, item: ItemKind) {
-  const clips = [...new Set(input.segments.filter((s) => s.room_id === room).map((s) => s.clip_id))].map((clip) => {
-    const evidence_keys = input.detections
-      .filter((d) => d.clip_id === clip && d.room_id === room && d.item === item)
-      .map((d) => d.best_frame_key);
-    const sweep = input.segments.some((s) => s.clip_id === clip && s.room_id === room && s.full_sweep);
-    const check = input.crossChecks.find((c) => c.clip_id === clip && c.room_id === room && c.item === item);
-    // Confirmed only when Muse Spark counted the same: a model can hold an outcome
-    // back, never produce one.
-    return { count: evidence_keys.length, evidence_keys, sweep, confirmed: check?.count === evidence_keys.length };
+/**
+ * What each clip of a room saw of one item: SAM's count, how many of those objects
+ * Muse Spark confirmed, and whether the clip fully covered the room.
+ */
+function clipsOf(input: JudgeInput, room: string, item: ItemKind) {
+  return [...new Set(input.segments.filter((s) => s.room_id === room).map((s) => s.clip_id))].map((clip) => {
+    const objects = input.detections.filter((d) => d.clip_id === clip && d.room_id === room && d.item === item);
+    const confirmed = objects.filter((d) => d.confirmed);
+    return {
+      seen: objects.length,
+      confirmed: confirmed.length,
+      sweep: input.segments.some((s) => s.clip_id === clip && s.room_id === room && s.full_sweep),
+      seen_keys: objects.map((d) => d.best_frame_key),
+      confirmed_keys: confirmed.map((d) => d.best_frame_key),
+    };
   });
-
-  // The highest count from any single clip decides; on a tie, a confirmed sweep.
-  const rank = (c: (typeof clips)[number]) => c.count * 4 + (c.confirmed ? 2 : 0) + (c.sweep ? 1 : 0);
-  const deciding = clips.reduce<(typeof clips)[number] | null>((best, c) => (!best || rank(c) > rank(best) ? c : best), null);
-  return { deciding, covered: clips.some((c) => c.sweep) };
 }
 
-/** One room, one item, against one expected quantity. */
-function judgeRoom(input: JudgeInput, room: string, item: ItemKind, expected: number) {
-  const { deciding, covered } = decidingClip(input, room, item);
-  const counted = deciding?.count ?? 0;
+type ClipCount = ReturnType<typeof clipsOf>[number];
 
-  let outcome: Outcome = "not_seen";
-  if (deciding?.confirmed && counted >= expected) outcome = "verified";
-  // Short only for a room fully covered by the very sweep that counted it.
-  else if (deciding?.confirmed && deciding.sweep) outcome = "short";
-
-  return {
-    expected,
-    counted,
-    outcome,
-    room_covered: covered,
-    evidence_keys: deciding?.evidence_keys ?? [],
-  };
+/** The highest single clip by `by`; on a tie, a full sweep. Never a sum across clips. */
+function highest(clips: ClipCount[], by: "seen" | "confirmed"): ClipCount | null {
+  const rank = (c: ClipCount) => c[by] * 2 + (c.sweep ? 1 : 0);
+  return clips.reduce<ClipCount | null>((best, c) => (!best || rank(c) > rank(best) ? c : best), null);
 }
 
 /**
- * A whole-flat claim the BOQ can't split: the flat's total is judged. Only confirmed
- * room counts add up, and it is Short only when every room is fully covered by the
- * sweep that counted it.
+ * One room, one item, against one expected quantity.
+ *
+ * Verified counts only objects Muse Spark confirmed; Short counts SAM's objects, and
+ * only from a full sweep. So Muse Spark can hold a Verified back but can never make a
+ * room Short: a real door it wrongly rejects would otherwise be an accusation made by
+ * a model. See docs/decisions/2026-11-02-a-full-sweep-returns-to-its-tag-and-each-object-is-confirmed.md
+ */
+function judgeRoom(input: JudgeInput, room: string, item: ItemKind, expected: number) {
+  const clips = clipsOf(input, room, item);
+  const byConfirmed = highest(clips, "confirmed");
+  const bySeen = highest(clips, "seen");
+  const room_covered = clips.some((c) => c.sweep);
+
+  if (byConfirmed && byConfirmed.confirmed >= expected) {
+    return { expected, counted: byConfirmed.confirmed, outcome: "verified" as Outcome, room_covered, evidence_keys: byConfirmed.confirmed_keys };
+  }
+  // Short only for a room fully covered by the very sweep that counted it.
+  const outcome: Outcome = bySeen && bySeen.sweep && bySeen.seen < expected ? "short" : "not_seen";
+  return { expected, counted: bySeen?.seen ?? 0, outcome, room_covered, evidence_keys: bySeen?.seen_keys ?? [] };
+}
+
+/**
+ * A whole-flat claim the BOQ can't split: the flat's total is judged. Confirmed room
+ * counts add up to Verified; it is Short only when every room is fully covered by the
+ * sweep that counted it and SAM's total falls below the claim.
  */
 function judgeFlat(input: JudgeInput, item: ItemKind, expected: number) {
-  const rooms = input.rooms.map((r) => decidingClip(input, r.id, item).deciding);
-  const confirmed = rooms.filter((d) => d?.confirmed);
-  const counted = confirmed.reduce((sum, d) => sum + d!.count, 0);
-  const everyRoomSwept = rooms.every((d) => d?.confirmed && d.sweep);
+  const rooms = input.rooms.map((r) => clipsOf(input, r.id, item));
+  const confirmed = rooms.map((clips) => highest(clips, "confirmed")).filter((c): c is ClipCount => c !== null);
+  const seen = rooms.map((clips) => highest(clips, "seen"));
+  const confirmedTotal = confirmed.reduce((sum, c) => sum + c.confirmed, 0);
+  const seenTotal = seen.reduce((sum, c) => sum + (c?.seen ?? 0), 0);
+  const everyRoomSwept = seen.every((c) => c?.sweep);
 
-  let outcome: Outcome = "not_seen";
-  if (counted >= expected) outcome = "verified";
-  else if (everyRoomSwept) outcome = "short";
-
-  return {
-    expected,
-    counted,
-    outcome,
-    room_covered: everyRoomSwept,
-    evidence_keys: confirmed.flatMap((d) => d!.evidence_keys),
-  };
+  if (confirmedTotal >= expected) {
+    return { expected, counted: confirmedTotal, outcome: "verified" as Outcome, room_covered: everyRoomSwept, evidence_keys: confirmed.flatMap((c) => c.confirmed_keys) };
+  }
+  const outcome: Outcome = everyRoomSwept && seenTotal < expected ? "short" : "not_seen";
+  return { expected, counted: seenTotal, outcome, room_covered: everyRoomSwept, evidence_keys: seen.flatMap((c) => c?.seen_keys ?? []) };
 }
 
 export function judge(input: JudgeInput): { results: JudgedResult[]; not_checked: NotChecked[] } {

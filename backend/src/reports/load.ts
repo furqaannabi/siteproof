@@ -67,11 +67,10 @@ export async function loadReportRows(flatId: string): Promise<ReportRows | null>
     where: { doc_id: { in: documents.map((d) => d.id) } },
     select: { id: true, doc_id: true, item: true, qty: true, unit: true, room_id: true, source_quote: true, quote_verified: true },
   });
-  const [crossChecks, detections, segments, gap_requests] = await Promise.all([
-    db.crossCheck.findMany({ where: { room_id: { in: roomIds } }, select: { clip_id: true, room_id: true, item: true, count: true } }),
+  const [detections, segments, gap_requests] = await Promise.all([
     db.detection.findMany({
       where: { room_id: { in: roomIds } },
-      select: { clip_id: true, room_id: true, item: true, track_id: true, best_frame_key: true, mask_key: true },
+      select: { clip_id: true, room_id: true, item: true, track_id: true, best_frame_key: true, mask_key: true, confirmed: true },
     }),
     db.segment.findMany({ where: { room_id: { in: roomIds } }, select: SEGMENT, orderBy: { t_start: "asc" } }),
     gapRequestsOf(roomIds),
@@ -83,7 +82,6 @@ export async function loadReportRows(flatId: string): Promise<ReportRows | null>
     rooms: flat.rooms.map(toRoom),
     documents,
     claims,
-    crossChecks,
     detections,
     segments: segments.map(toSegment),
     gap_requests,

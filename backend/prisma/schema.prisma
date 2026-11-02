@@ -179,6 +179,8 @@ model Detection {
   /// R2 object keys; the contract's best_frame_url and mask_url are presigned from these.
   best_frame_key String
   mask_key       String
+  /// Muse Spark said yes to this object's outlined best frame. Only these count towards Verified.
+  confirmed      Boolean  @default(false)
 
   clip Clip @relation(fields: [clip_id], references: [id], onDelete: Cascade)
   room Room @relation(fields: [room_id], references: [id], onDelete: Cascade)

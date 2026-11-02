@@ -40,7 +40,6 @@ function rows(overrides: Partial<ReportRows> = {}): ReportRows {
       claim("c5", "boq", "k303"),
       claim("c6", "boq", null),
     ],
-    crossChecks: [],
     detections: [],
     segments: [],
     gap_requests: [],
@@ -73,13 +72,13 @@ test("outcomes are judged on read for this flat's claims only, with evidence as 
       track_id: String(i),
       best_frame_key: `frames/${i}.jpg`,
       mask_key: `masks/${i}.png`,
+      confirmed: true,
     }));
   const report = assembleReport(
     rows({
       claims: [claim("c1", "dl302", "k302"), claim("c3", "dl303", "k303"), claim("c4", "boq", "b302"), claim("c7", "dl302", "k302", "not_countable")],
       segments: [{ clip_id: "clip1", room_id: "k302", t_start: 0, t_end: 9, full_sweep: true, captured_at: null }],
       detections: counted(2),
-      crossChecks: [{ clip_id: "clip1", room_id: "k302", item: "window", count: 2 }],
     }),
     presign,
   );
@@ -110,6 +109,7 @@ test("detections, segments and gap requests are only this flat's rooms', and fra
     track_id: "0",
     best_frame_key: `frames/${room_id}.jpg`,
     mask_key: `masks/${room_id}.png`,
+    confirmed: true,
   });
   const segment = (room_id: string | null) => ({
     clip_id: "clip1",
@@ -138,6 +138,7 @@ test("detections, segments and gap requests are only this flat's rooms', and fra
       track_id: "0",
       best_frame_url: "https://r2.example/frames/k302.jpg?signed",
       mask_url: "https://r2.example/masks/k302.png?signed",
+      confirmed: true,
     },
   ]);
   // The unplaced segment is no flat's: it is in the builder's overview, never a report.

@@ -13,8 +13,15 @@ const claim = (id: string, room_id: string | null, qty: number, doc_id = "letter
   quote_verified: true,
 });
 
-const seen = (clip_id: string, room_id: string, n: number) =>
-  Array.from({ length: n }, (_, i) => ({ clip_id, room_id, item: "window" as const, best_frame_key: `${clip_id}/${room_id}/${i}.jpg` }));
+/** `n` windows SAM counted in one clip's footage of a room, the first `confirmed` of them confirmed by Muse Spark. */
+const seen = (clip_id: string, room_id: string, n: number, confirmed = n) =>
+  Array.from({ length: n }, (_, i) => ({
+    clip_id,
+    room_id,
+    item: "window" as const,
+    best_frame_key: `${clip_id}/${room_id}/${i}.jpg`,
+    confirmed: i < confirmed,
+  }));
 
 /** Bedroom 2 swept once from its tag by clip c1. */
 function input(overrides: Partial<JudgeInput> = {}): JudgeInput {
@@ -27,12 +34,11 @@ function input(overrides: Partial<JudgeInput> = {}): JudgeInput {
     claims: [claim("c", "bed2", 2)],
     segments: [{ clip_id: "c1", room_id: "bed2", full_sweep: true }],
     detections: seen("c1", "bed2", 2),
-    crossChecks: [{ clip_id: "c1", room_id: "bed2", item: "window", count: 2 }],
     ...overrides,
   };
 }
 
-test("a covered room whose count meets the claim, with the cross-check agreeing, is Verified, with its frames", () => {
+test("a covered room whose confirmed count meets the claim is Verified, with its frames", () => {
   const { results } = judge(input());
 
   expect(results).toEqual([
@@ -48,10 +54,8 @@ test("a covered room whose count meets the claim, with the cross-check agreeing,
   ]);
 });
 
-test("a covered room counting fewer than claimed, with the cross-check agreeing, is Short", () => {
-  const { results } = judge(
-    input({ detections: seen("c1", "bed2", 1), crossChecks: [{ clip_id: "c1", room_id: "bed2", item: "window", count: 1 }] }),
-  );
+test("a covered room where SAM counts fewer than claimed is Short", () => {
+  const { results } = judge(input({ detections: seen("c1", "bed2", 1) }));
 
   expect(results.map(({ outcome, expected, counted }) => ({ outcome, expected, counted }))).toEqual([
     { outcome: "short", expected: 2, counted: 1 },
@@ -63,30 +67,14 @@ test("Short never appears for a room that isn't fully covered: a pan, or no foot
     input({
       segments: [{ clip_id: "c1", room_id: "bed2", full_sweep: false }],
       detections: seen("c1", "bed2", 1),
-      crossChecks: [{ clip_id: "c1", room_id: "bed2", item: "window", count: 1 }],
     }),
   );
-  const unfilmed = judge(input({ segments: [], detections: [], crossChecks: [] }));
+  const unfilmed = judge(input({ segments: [], detections: [] }));
 
   expect(panned.results.map(({ outcome, room_covered }) => ({ outcome, room_covered }))).toEqual([
     { outcome: "not_seen", room_covered: false },
   ]);
   expect(unfilmed.results.map(({ outcome, counted }) => ({ outcome, counted }))).toEqual([{ outcome: "not_seen", counted: 0 }]);
-});
-
-test("when the cross-check disagrees, or never ran, the room stays Not seen yet: for Verified and for Short", () => {
-  const outcome = (detections: number, check: number | null) =>
-    judge(
-      input({
-        detections: seen("c1", "bed2", detections),
-        crossChecks: check === null ? [] : [{ clip_id: "c1", room_id: "bed2", item: "window", count: check }],
-      }),
-    ).results[0]!.outcome;
-
-  expect(outcome(2, 3)).toBe("not_seen"); // would be Verified
-  expect(outcome(1, 2)).toBe("not_seen"); // would be Short
-  expect(outcome(2, null)).toBe("not_seen");
-  expect(outcome(1, null)).toBe("not_seen");
 });
 
 test("across clips, the highest count from any single clip decides: never a sum", () => {
@@ -98,10 +86,6 @@ test("across clips, the highest count from any single clip decides: never a sum"
         { clip_id: "c2", room_id: "bed2", full_sweep: true },
       ],
       detections: [...seen("c1", "bed2", 2), ...seen("c2", "bed2", 3)],
-      crossChecks: [
-        { clip_id: "c1", room_id: "bed2", item: "window", count: 2 },
-        { clip_id: "c2", room_id: "bed2", item: "window", count: 3 },
-      ],
     }),
   );
 
@@ -131,7 +115,6 @@ test("plastering is not countable, a BOQ line is the plan, and a claim beyond th
 
 test("a whole-flat claim is judged room by room against the BOQ's quantity for each room", () => {
   // "Windows complete: 12"; the BOQ plans Bedroom 2: 4, Kitchen: 3, Bedroom 1: 5.
-  const check = (clip_id: string, room_id: string, count: number) => ({ clip_id, room_id, item: "window" as const, count });
   const { results } = judge(
     input({
       rooms: [{ id: "bed2" }, { id: "kitchen" }, { id: "bed1" }],
@@ -146,7 +129,6 @@ test("a whole-flat claim is judged room by room against the BOQ's quantity for e
         { clip_id: "c2", room_id: "bed1", full_sweep: true },
       ],
       detections: [...seen("c1", "bed2", 2), ...seen("c2", "bed1", 5)],
-      crossChecks: [check("c1", "bed2", 2), check("c2", "bed1", 5)],
     }),
   );
 
@@ -158,12 +140,11 @@ test("a whole-flat claim is judged room by room against the BOQ's quantity for e
 });
 
 test("a whole-flat claim beyond the flat's plan goes to a person; with no per-room plan, the flat's total is judged", () => {
-  const check = (clip_id: string, room_id: string, count: number) => ({ clip_id, room_id, item: "window" as const, count });
   const sweeps = [
     { clip_id: "c1", room_id: "bed2", full_sweep: true },
     { clip_id: "c2", room_id: "kitchen", full_sweep: true },
   ];
-  const counts = { detections: [...seen("c1", "bed2", 2), ...seen("c2", "kitchen", 1)], crossChecks: [check("c1", "bed2", 2), check("c2", "kitchen", 1)] };
+  const counts = { detections: [...seen("c1", "bed2", 2), ...seen("c2", "kitchen", 1)] };
 
   const beyond = judge(input({ claims: [claim("w", null, 9), claim("p", "bed2", 4, "boq"), claim("q", "kitchen", 3, "boq")], segments: sweeps, ...counts }));
   expect(beyond.not_checked).toContainEqual({ claim_id: "w", reason: "exceeds_plan" });
@@ -175,6 +156,57 @@ test("a whole-flat claim beyond the flat's plan goes to a person; with no per-ro
   ]);
 
   // The kitchen never swept: the flat isn't fully covered, so never Short.
-  const halfSwept = judge(input({ claims: [claim("w", null, 4)], segments: [sweeps[0]!], detections: seen("c1", "bed2", 2), crossChecks: [check("c1", "bed2", 2)] }));
+  const halfSwept = judge(input({ claims: [claim("w", null, 4)], segments: [sweeps[0]!], detections: seen("c1", "bed2", 2) }));
   expect(halfSwept.results.map((r) => r.outcome)).toEqual(["not_seen"]);
+});
+
+test("SAM seeing enough with fewer confirmed is Not seen yet, never Short: Muse Spark can't make an accusation", () => {
+  // Claim 2, both seen in a full sweep, one confirmed: "2 seen, 1 confirmed".
+  const { results } = judge(input({ detections: seen("c1", "bed2", 2, 1) }));
+
+  expect(results.map(({ outcome, counted, room_covered }) => ({ outcome, counted, room_covered }))).toEqual([
+    { outcome: "not_seen", counted: 2, room_covered: true },
+  ]);
+});
+
+test("Verified needs only enough confirmed objects, not a full sweep; Short still needs one", () => {
+  const partial = { segments: [{ clip_id: "c1", room_id: "bed2", full_sweep: false }] };
+
+  expect(judge(input({ ...partial, detections: seen("c1", "bed2", 2) })).results[0]!.outcome).toBe("verified");
+  expect(judge(input({ ...partial, detections: seen("c1", "bed2", 1) })).results[0]!.outcome).toBe("not_seen");
+});
+
+test("a Verified room's evidence is only its confirmed objects' frames", () => {
+  const { results } = judge(input({ claims: [claim("c", "bed2", 2)], detections: seen("c1", "bed2", 3, 2) }));
+
+  expect(results[0]!.outcome).toBe("verified");
+  expect(results[0]!.evidence_keys).toEqual(["c1/bed2/0.jpg", "c1/bed2/1.jpg"]);
+});
+
+test("Short is judged on the clip with the most SAM objects: a partial clip seeing more holds back a sweep's Short", () => {
+  const { results } = judge(
+    input({
+      segments: [
+        { clip_id: "c1", room_id: "bed2", full_sweep: true },
+        { clip_id: "c2", room_id: "bed2", full_sweep: false },
+      ],
+      detections: [...seen("c1", "bed2", 1), ...seen("c2", "bed2", 2, 0)],
+    }),
+  );
+
+  expect(results.map(({ outcome, counted }) => ({ outcome, counted }))).toEqual([{ outcome: "not_seen", counted: 2 }]);
+});
+
+test("a whole-flat claim adds confirmed counts for Verified, and a rejected object in a swept flat is never Short", () => {
+  const sweeps = [
+    { clip_id: "c1", room_id: "bed2", full_sweep: true },
+    { clip_id: "c2", room_id: "kitchen", full_sweep: true },
+  ];
+  const outcome = (bed2: [number, number], kitchen: [number, number]) =>
+    judge(input({ claims: [claim("w", null, 3)], segments: sweeps, detections: [...seen("c1", "bed2", ...bed2), ...seen("c2", "kitchen", ...kitchen)] }))
+      .results[0]!.outcome;
+
+  expect(outcome([2, 2], [1, 1])).toBe("verified");
+  expect(outcome([2, 2], [1, 0])).toBe("not_seen"); // 3 seen, 2 confirmed
+  expect(outcome([2, 2], [0, 0])).toBe("short"); // 2 seen in a fully swept flat
 });

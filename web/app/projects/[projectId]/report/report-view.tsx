@@ -142,6 +142,18 @@ function framesFor(report: Report, row: RoomRow): { frame: string; masks: Detect
   return [...frames].map(([frame, masks]) => ({ frame, masks }));
 }
 
+/**
+ * When SAM saw enough in one clip but Muse Spark confirmed fewer as fitted, the counts
+ * from the best clip for each, so a Not seen yet can say why. null otherwise.
+ */
+function heldBack(report: Report, row: RoomRow): { seen: number; confirmed: number } | null {
+  const found = report.detections.filter((d) => d.room_id === row.room.id && d.item === row.claim.item);
+  const clips = [...new Set(found.map((d) => d.clip_id))].map((clip) => found.filter((d) => d.clip_id === clip));
+  const seen = Math.max(0, ...clips.map((c) => c.length));
+  const confirmed = Math.max(0, ...clips.map((c) => c.filter((d) => d.confirmed).length));
+  return seen >= row.result.expected && confirmed < row.result.expected ? { seen, confirmed } : null;
+}
+
 export function ReportPage({ projectId }: { projectId: string }) {
   const project = useOverview(projectId);
   const flats = project.overview?.project.flats ?? [];
@@ -553,6 +565,7 @@ function Entry({ report, row, order }: { report: Report; row: RoomRow; order: nu
   const item = claim.item as ItemKind;
   const unseen = result.outcome === "not_seen";
   const frames = unseen ? [] : framesFor(report, row);
+  const held = heldBack(report, row);
   return (
     <tr>
       <td>
@@ -580,6 +593,11 @@ function Entry({ report, row, order }: { report: Report; row: RoomRow; order: nu
           {STAMP[result.outcome]}
         </span>
         {result.outcome === "short" && <span className={styles.gapNote}>{missingOf(row)} fewer than billed</span>}
+        {result.outcome === "not_seen" && held && (
+          <span className={styles.gapNote}>
+            {held.seen} seen, {held.confirmed} confirmed as fitted
+          </span>
+        )}
       </td>
       <td className={styles.evCell}>
         {frames.length === 0 ? (

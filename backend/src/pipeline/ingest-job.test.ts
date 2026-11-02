@@ -32,11 +32,11 @@ afterAll(async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
-function fakes(video: Uint8Array) {
+function fakes(video: Uint8Array, reachable = true) {
   const saved: Parameters<IngestStore["save"]>[1][] = [];
   const uploads: { key: string; bytes: Uint8Array; type: string }[] = [];
   const prompts: string[] = [];
-  const checked: { item: string; frames: number }[] = [];
+  const checked: { item: string; jpeg: boolean }[] = [];
   const store: IngestStore = {
     load: async (id) => ({ id, project_id: "prj", object_key: "siteproof/clips/abc.mp4", status: "uploaded" }),
     roomsByTag: async () => new Map([["SPKTCHN001", "room_kitchen"]]),
@@ -64,10 +64,12 @@ function fakes(video: Uint8Array) {
       prompts.push(prompt);
       return prompt === "window" ? window : { objects: [] };
     },
-    // Muse Spark agrees on the window; its door answer is unusable.
-    count: async (item, frames) => {
-      checked.push({ item, frames: frames.length });
-      return item === "window" ? 1 : null;
+    // Muse Spark says yes to the outlined window.
+    confirm: async (item, framePath) => {
+      if (!reachable) throw new Error("connection refused");
+      const bytes = new Uint8Array(await Bun.file(framePath).arrayBuffer());
+      checked.push({ item, jpeg: bytes[0] === 0xff && bytes[1] === 0xd8 });
+      return true;
     },
   });
   return { job, saved, uploads, prompts, checked };
@@ -82,15 +84,10 @@ test("a tagged one-way sweep is placed, covered and counted, with its evidence f
   expect(saved).toHaveLength(1);
   expect(saved[0]!.segments).toEqual([{ room_id: "room_kitchen", t_start: 0, t_end: expect.any(Number), full_sweep: true }]);
   expect(saved[0]!.detections).toEqual([
-    { room_id: "room_kitchen", item: "window", track_id: "0/0/0", best_frame_key: expect.stringMatching(/^siteproof\/frames\/[0-9a-f]{32}\.jpg$/), mask_key: expect.stringMatching(/^siteproof\/masks\/[0-9a-f]{32}\.png$/) },
+    { room_id: "room_kitchen", item: "window", track_id: "0/0/0", best_frame_key: expect.stringMatching(/^siteproof\/frames\/[0-9a-f]{32}\.jpg$/), mask_key: expect.stringMatching(/^siteproof\/masks\/[0-9a-f]{32}\.png$/), confirmed: true },
   ]);
-  // One cross-check per placed room and item, from that room's frames; an unusable
-  // answer saves none, so that item in that room stays Not seen yet.
-  expect(checked).toEqual([
-    { item: "window", frames: 12 },
-    { item: "door", frames: 12 },
-  ]);
-  expect(saved[0]!.crossChecks).toEqual([{ room_id: "room_kitchen", item: "window", count: 1 }]);
+  // One question per object SAM found, on its own outlined frame: none for doors.
+  expect(checked).toEqual([{ item: "window", jpeg: true }]);
   const [frame, mask] = uploads;
   expect([frame!.type, mask!.type]).toEqual(["image/jpeg", "image/png"]);
   expect(Array.from(frame!.bytes.subarray(0, 2))).toEqual([0xff, 0xd8]);
@@ -106,6 +103,13 @@ test("a clip that passes no room tag is stored as unplaced, and never sent to SA
   expect(checked).toEqual([]);
   expect(saved[0]!.segments.map((s) => [s.room_id, s.full_sweep])).toEqual([[null, false]]);
   expect(saved[0]!.detections).toEqual([]);
+});
+
+test("Muse Spark out of reach fails the clip for a retry: never saved as unconfirmed", async () => {
+  const { job, saved } = fakes(taggedSweep, false);
+
+  await expect(job.run({ clip_id: "clip_3" })).rejects.toMatchObject({ code: "checker_unavailable", retry: true });
+  expect(saved).toEqual([]);
 });
 
 test("a phone's capture time with an offset like +0530 is read, not lost", async () => {

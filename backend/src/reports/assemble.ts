@@ -29,8 +29,6 @@ export interface ReportRows {
   rooms: Room[];
   documents: Document[];
   claims: Claim[];
-  /** Muse Spark's counts, which the engine needs to agree before any outcome. */
-  crossChecks: { clip_id: string; room_id: string; item: "window" | "door"; count: number }[];
   detections: {
     clip_id: string;
     room_id: string;
@@ -38,6 +36,7 @@ export interface ReportRows {
     track_id: string;
     best_frame_key: string;
     mask_key: string;
+    confirmed: boolean;
   }[];
   segments: Segment[];
   gap_requests: GapRequest[];
@@ -66,7 +65,6 @@ export function assembleReport(rows: ReportRows, presign: (key: string) => strin
     claims,
     segments: rows.segments.filter((g) => inFlat(g.room_id)),
     detections: rows.detections.filter((d) => inFlat(d.room_id)),
-    crossChecks: rows.crossChecks.filter((c) => inFlat(c.room_id)),
   });
   const results: Result[] = judged.results.map(({ evidence_keys, ...r }) => ({ ...r, evidence: evidence_keys.map(presign) }));
   const not_checked: NotChecked[] = judged.not_checked;
@@ -79,6 +77,7 @@ export function assembleReport(rows: ReportRows, presign: (key: string) => strin
       track_id: d.track_id,
       best_frame_url: presign(d.best_frame_key),
       mask_url: presign(d.mask_key),
+      confirmed: d.confirmed,
     }));
 
   return {

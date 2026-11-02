@@ -29,6 +29,7 @@ function input(overrides: Partial<PlanInput> = {}): PlanInput {
     sightings: [{ t: 0, qr_code: KITCHEN }, { t: 2, qr_code: KITCHEN }, { t: 10, qr_code: KITCHEN }],
     tracks: { window: [track("0", [[10, 50]])], door: [] },
     fps: FPS,
+    frameSize: { width: 1920, height: 1080 },
     ...overrides,
   };
 }
@@ -87,4 +88,27 @@ test("each counted object becomes one detection, shown by the best frame of its 
     { room_id: "room_kitchen", item: "window", frame: 100 },
   ]);
   expect(new Set(plan.detections.map((d) => d.track_id)).size).toBe(3);
+});
+
+test("an object's best frame shows it whole: never cut off by the edge of the picture, then the largest view", () => {
+  const at = (frame: number, box: [number, number, number, number], confidence: number) => ({
+    frame,
+    box: { left: box[0], top: box[1], right: box[2], bottom: box[3] },
+    confidence,
+  });
+  // The Room Two door of 2 November: a close-up cut off at the top, SAM's most confident;
+  // an edge-on strip at the left edge; then the whole door, small and then larger.
+  const door: TrackedObject = {
+    track_id: "0",
+    sightings: [
+      at(20, [300, 0, 1100, 700], 0.97),
+      at(30, [0, 100, 90, 1000], 0.9),
+      at(40, [800, 150, 1000, 900], 0.7),
+      at(50, [700, 100, 1050, 1000], 0.6),
+    ],
+  };
+
+  const plan = planClip(input({ tracks: { window: [], door: [door] } }));
+
+  expect(plan.detections.map((d) => d.frame)).toEqual([50]);
 });

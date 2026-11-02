@@ -11,7 +11,6 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { z } from "zod";
-import { framesOfRoom } from "./cross-check";
 import { IngestError, ingestClip } from "./ingest";
 import { planClip, type PlannedDetection } from "./plan";
 import type { Segmentation } from "./sam";
@@ -52,6 +51,7 @@ export interface SavedDetection {
   track_id: string;
   best_frame_key: string;
   mask_key: string;
+  confirmed: boolean;
 }
 
 export interface IngestStore {
@@ -66,7 +66,6 @@ export interface IngestStore {
       captured_at: string | null;
       segments: { room_id: string | null; t_start: number; t_end: number; full_sweep: boolean }[];
       detections: SavedDetection[];
-      crossChecks: { room_id: string; item: ItemKind; count: number }[];
     },
   ): Promise<void>;
   markFailed(clipId: string): Promise<void>;
@@ -81,10 +80,10 @@ export interface IngestDeps {
   /** SAM 3.1 on one clip for one prompt. */
   segment(clipPath: string, prompt: string): Promise<Segmentation>;
   /**
-   * Muse Spark's own count of an item in these frames, or null when its answer is
-   * unusable. Throws when Muse Spark can't be reached.
+   * Muse Spark's answer to the item's fixed question about one outlined frame: true
+   * only for a clear yes. Throws when Muse Spark can't be reached.
    */
-  count(item: ItemKind, framePaths: readonly string[]): Promise<number | null>;
+  confirm(item: ItemKind, outlinedFramePath: string): Promise<boolean>;
 }
 
 const Payload = z.object({ clip_id: z.string().min(1) });
@@ -94,6 +93,13 @@ async function run(cmd: string[], stdin?: Uint8Array): Promise<Uint8Array> {
   const [out, code] = await Promise.all([new Response(proc.stdout).arrayBuffer(), proc.exited]);
   if (code !== 0) throw new Error(`${cmd[0]} exited ${code}`);
   return new Uint8Array(out);
+}
+
+/** A decoded frame's size, upright as ffmpeg turns it, as SAM's boxes and the evidence are measured. */
+async function sizeOf(image: string): Promise<{ width: number; height: number }> {
+  const probe = JSON.parse(new TextDecoder().decode(await run(["ffprobe", "-v", "error", "-print_format", "json", "-show_streams", image])));
+  const { width, height } = probe.streams[0] as { width: number; height: number };
+  return { width, height };
 }
 
 /** The frame SAM numbered `frame`, as a JPEG, and its size. */
@@ -109,6 +115,18 @@ async function cutFrame(clip: string, frame: number) {
   );
   const { width, height } = probe.streams[0] as { width: number; height: number };
   return { jpeg, width, height };
+}
+
+/** The frame with the object's box drawn on it in magenta, thick enough to see on a phone frame. */
+async function drawOutline(jpeg: Uint8Array, box: PlannedDetection["box"]): Promise<Uint8Array> {
+  const w = Math.max(1, box.right - box.left);
+  const h = Math.max(1, box.bottom - box.top);
+  return run(
+    ["ffmpeg", "-v", "error", "-f", "image2pipe", "-c:v", "mjpeg", "-i", "pipe:0",
+     "-vf", `drawbox=x=${box.left}:y=${box.top}:w=${w}:h=${h}:color=magenta:t=8`,
+     "-frames:v", "1", "-q:v", "3", "-f", "image2", "-c:v", "mjpeg", "-"],
+    jpeg,
+  );
 }
 
 /** The object's mask, white on black at the frame's own size, as a PNG. */
@@ -133,7 +151,7 @@ async function drawMask(d: PlannedDetection, width: number, height: number): Pro
 const evidenceKey = (kind: "frames" | "masks", ext: string) =>
   `siteproof/${kind}/${crypto.randomUUID().replaceAll("-", "")}.${ext}`;
 
-export function ingestClipJob({ store, files, segment, count }: IngestDeps) {
+export function ingestClipJob({ store, files, segment, confirm }: IngestDeps) {
   return {
     kind: "ingest_clip" as const,
 
@@ -163,7 +181,8 @@ export function ingestClipJob({ store, files, segment, count }: IngestDeps) {
         const steps = await panShifts(ingested.frames.map((f) => f.path));
         const shifts = steps.map((shift, i) => ({ t: ingested.frames[i + 1]!.t, shift }));
         const roomsByTag = await store.roomsByTag(clip.project_id);
-        const placed = planClip({ planned, sightings, roomsByTag, shifts, tracks: { window: [], door: [] }, fps: ingested.source_fps });
+        const frameSize = ingested.frames[0] ? await sizeOf(ingested.frames[0].path) : { width: 0, height: 0 };
+        const placed = planClip({ planned, sightings, roomsByTag, shifts, tracks: { window: [], door: [] }, fps: ingested.source_fps, frameSize });
 
         // SAM is paid per frame. Footage that passed no room tag of this project can
         // never back a claim, so it is not sent at all.
@@ -177,7 +196,7 @@ export function ingestClipJob({ store, files, segment, count }: IngestDeps) {
             ).objects;
           }
         }
-        const plan = planClip({ planned, sightings, roomsByTag, shifts, tracks, fps: ingested.source_fps });
+        const plan = planClip({ planned, sightings, roomsByTag, shifts, tracks, fps: ingested.source_fps, frameSize });
 
         const detections: SavedDetection[] = [];
         for (const d of plan.detections) {
@@ -186,27 +205,21 @@ export function ingestClipJob({ store, files, segment, count }: IngestDeps) {
           const mask_key = evidenceKey("masks", "png");
           await files.put(best_frame_key, jpeg, "image/jpeg");
           await files.put(mask_key, await drawMask(d, width, height), "image/png");
-          detections.push({ room_id: d.room_id, item: d.item, track_id: d.track_id, best_frame_key, mask_key });
-        }
-
-        // The cross-check: Muse Spark counts each item in each placed room's own frames.
-        // An unusable answer saves nothing, and that room stays Not seen yet.
-        const crossChecks: { room_id: string; item: ItemKind; count: number }[] = [];
-        for (const room_id of new Set(plan.segments.flatMap((s) => (s.room_id ? [s.room_id] : [])))) {
-          const frames = framesOfRoom(ingested.frames, plan.segments.filter((s) => s.room_id === room_id));
-          for (const item of Object.keys(SAM_PROMPTS) as ItemKind[]) {
-            const n = await count(item, frames.map((f) => f.path)).catch(() => {
-              throw new ClipJobError("checker_unavailable", true);
-            });
-            if (n !== null) crossChecks.push({ room_id, item, count: n });
-          }
+          // The per-object check: one fixed question about this object, on its own
+          // frame with SAM's box drawn on it. Only a clear yes confirms it.
+          const outlined = join(dir, `outlined-${detections.length}.jpg`);
+          await Bun.write(outlined, await drawOutline(jpeg, d.box));
+          const confirmed = await confirm(d.item, outlined).catch(() => {
+            throw new ClipJobError("checker_unavailable", true);
+          });
+          detections.push({ room_id: d.room_id, item: d.item, track_id: d.track_id, best_frame_key, mask_key, confirmed });
         }
 
         // Ids and counts only: never a key or a URL.
         console.log(
-          `ingest_clip ${clip.id}: ${plan.segments.length} segment(s), ${plan.segments.filter((s) => s.full_sweep).length} full sweep(s), ${detections.length} detection(s)`,
+          `ingest_clip ${clip.id}: ${plan.segments.length} segment(s), ${plan.segments.filter((s) => s.full_sweep).length} full sweep(s), ${detections.length} detection(s), ${detections.filter((d) => d.confirmed).length} confirmed`,
         );
-        await store.save(clip.id, { captured_at: ingested.captured_at, segments: plan.segments, detections, crossChecks });
+        await store.save(clip.id, { captured_at: ingested.captured_at, segments: plan.segments, detections });
       } finally {
         await rm(dir, { recursive: true, force: true });
       }

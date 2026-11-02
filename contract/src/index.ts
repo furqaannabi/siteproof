@@ -188,6 +188,12 @@ export interface Detection {
   track_id: string;
   best_frame_url: string;
   mask_url: string;
+  /**
+   * Muse Spark, shown this object's best frame with its outline, said yes to one fixed
+   * question ("Is the outlined object a door leaf hung in its frame?"). Only confirmed
+   * objects count towards Verified; Short counts every detection.
+   */
+  confirmed: boolean;
 }
 
 /**
