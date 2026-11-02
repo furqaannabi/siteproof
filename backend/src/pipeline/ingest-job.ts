@@ -25,7 +25,8 @@ import { decodeTags } from "./tags";
  */
 export const SAM_PROMPTS: Record<ItemKind, string> = { window: "window", door: "door" };
 
-const SAMPLE_FPS = 2;
+/** Tags and movement are read this often: at 2 fps a normal turn outran the movement check (2 November). */
+const SAMPLE_FPS = 4;
 
 /** Like the extract job's JobError: a code, and whether another attempt could differ. */
 export class ClipJobError extends Error {

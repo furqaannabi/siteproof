@@ -24,6 +24,29 @@ export function isOneWaySweep(shifts: readonly number[]): boolean {
   return shifts.every((s) => s * direction >= -JITTER_PX);
 }
 
+/**
+ * Backward movement allowed, as a share of the forward movement, for a turn round the
+ * room. A misread step, a wobble or a small step round an obstacle stays well under it
+ * (Room Two on 2 November: 3%); turning partway and panning back to the tag is near half.
+ */
+const MAX_BACK_SHARE = 0.1;
+
+/**
+ * Whether the camera turned round the room: almost all the movement in one direction.
+ * Coverage reads this, with the tag seen again after the turn, so a single misread step
+ * no longer undoes a good clip. Counting still needs `isOneWaySweep`, which allows no
+ * pan back at all. See docs/decisions/2026-11-02-a-turn-round-the-room-allows-a-misread-step.md.
+ */
+export function turnsOneWay(shifts: readonly number[]): boolean {
+  if (shifts.length < MIN_STEPS) return false;
+  const travel = shifts.reduce((a, b) => a + b, 0);
+  if (Math.abs(travel) < MIN_TRAVEL_PX) return false;
+  const direction = Math.sign(travel);
+  const forward = shifts.reduce((sum, s) => sum + Math.max(0, s * direction), 0);
+  const back = shifts.reduce((sum, s) => sum + Math.max(0, -s * direction), 0);
+  return back <= forward * MAX_BACK_SHARE;
+}
+
 const PROFILE_W = 160;
 const PROFILE_H = 90;
 /** The largest step looked for between two frames: a quarter of the frame. */

@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { isOneWaySweep } from "./sweep";
+import { isOneWaySweep, turnsOneWay } from "./sweep";
 
 // Shifts between consecutive sampled frames, in pixels of a 160-wide profile:
 // positive when the camera turned right, negative when it turned left.
@@ -58,4 +58,22 @@ test("the camera's movement is measured from the frames, in the right direction"
   for (const s of right) expect(Math.abs(s - 16)).toBeLessThanOrEqual(2);
   expect(back.map(Math.sign)).toEqual([1, 1, -1, -1]);
   expect(isOneWaySweep(back)).toBe(false);
+});
+
+test("a room is turned round when almost all the movement goes one way: a misread step or a wobble doesn't undo it", () => {
+  // Room Two, 2 November, at 4 fps: one small step back leaving the tag, wobbles on the tag at the end.
+  const turn = [5, 9, -5, 22, 30, 28, 31, 30, 27, 33, 29, 30, -1, 30, 32, 28, 31, 29, 30, -2, -2, -4];
+  expect(turnsOneWay(turn)).toBe(true);
+  expect(isOneWaySweep(turn)).toBe(false);
+  // A fast turn misread once: one step reads backwards between two forwards.
+  expect(turnsOneWay([30, 30, 30, -36, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30])).toBe(true);
+});
+
+test("turning partway and panning back to the tag is not a turn round the room", () => {
+  // A quarter turn out and back: the tag comes back into view, but most of the room was never filmed.
+  expect(turnsOneWay([20, 20, 20, 20, 20, -20, -20, -20, -20, -20])).toBe(false);
+  // Back far more than a misread: over a tenth of the forward movement.
+  expect(turnsOneWay([30, 30, 30, 30, 30, 30, 30, 30, 30, 30, -20, -20])).toBe(false);
+  expect(turnsOneWay([1, -1, 0, 2, -2, 0])).toBe(false);
+  expect(turnsOneWay([14, 12])).toBe(false);
 });

@@ -10,7 +10,7 @@ import type { ItemKind } from "@siteproof/contract";
 import type { PlannedSegment, TagSighting } from "./segments";
 import { countObjects } from "./count";
 import type { Box, Sighting, TrackedObject } from "./sam";
-import { isOneWaySweep } from "./sweep";
+import { isOneWaySweep, turnsOneWay } from "./sweep";
 
 export interface PlanInput {
   planned: readonly PlannedSegment[];
@@ -66,12 +66,13 @@ export function planClip({ planned, sightings, roomsByTag, shifts, tracks, fps, 
   const segments = planned.map((p) => {
     const room_id = p.qr_code ? (roomsByTag.get(p.qr_code) ?? null) : null;
     // A segment starts at its tag by construction. It covers the room only if the
-    // camera pans one way through it and comes back round to the tag: a clip that
-    // stops partway never looked at the rest of the room, and a Short from it would
-    // be an accusation about walls it never filmed. An unplaced segment covers no room.
+    // camera turns one way through it and comes back round to the tag: a clip that
+    // stops partway, or pans back to the tag, never looked at the rest of the room,
+    // and a Short from it would be an accusation about walls it never filmed. An
+    // unplaced segment covers no room.
     const steps = shifts.filter((s) => s.t > p.t_start && s.t <= p.t_end).map((s) => s.shift);
-    const full_sweep = room_id !== null && isOneWaySweep(steps) && returnsToTag(p, sightings);
-    return { room_id, t_start: p.t_start, t_end: p.t_end, full_sweep };
+    const full_sweep = room_id !== null && turnsOneWay(steps) && returnsToTag(p, sightings);
+    return { room_id, t_start: p.t_start, t_end: p.t_end, full_sweep, strictlyOneWay: isOneWaySweep(steps) };
   });
 
   const detections: PlannedDetection[] = [];
@@ -80,7 +81,10 @@ export function planClip({ planned, sightings, roomsByTag, shifts, tracks, fps, 
     if (segment.room_id === null) return;
     for (const item of ITEMS) {
       const runsSoFar = new Map<string, number>();
-      for (const object of countObjects(tracks[item], segment, fps).objects) {
+      // Every run is an object only where the camera never went back at all: a step
+      // back can show an object twice, so a covered turn with one counts SAM's ids.
+      const window = { ...segment, full_sweep: segment.full_sweep && segment.strictlyOneWay };
+      for (const object of countObjects(tracks[item], window, fps).objects) {
         const run = runsSoFar.get(object.track_id) ?? 0;
         runsSoFar.set(object.track_id, run + 1);
         const best = bestSighting(object.sightings, frameSize);
@@ -96,7 +100,7 @@ export function planClip({ planned, sightings, roomsByTag, shifts, tracks, fps, 
     }
   });
 
-  return { segments, detections };
+  return { segments: segments.map(({ strictlyOneWay: _, ...s }) => s), detections };
 }
 
 const ITEMS: readonly ItemKind[] = ["window", "door"];

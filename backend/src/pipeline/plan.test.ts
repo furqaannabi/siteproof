@@ -112,3 +112,17 @@ test("an object's best frame shows it whole: never cut off by the edge of the pi
 
   expect(plan.detections.map((d) => d.frame)).toEqual([50]);
 });
+
+test("a turn with a small step back covers the room, but its objects are counted by SAM's ids, never by runs", () => {
+  // One step back of 10 against 300 forward: covered. Window track 0 is seen in two runs.
+  const wobble = panRight.map((s, i) => ({ ...s, shift: i === 8 ? -10 : 15 }));
+  const tracks = { window: [track("0", [[30, 62], [140, 238]])], door: [] };
+
+  const strict = planClip(input({ tracks }));
+  const wobbly = planClip(input({ tracks, shifts: wobble }));
+
+  expect(strict.segments[0]!.full_sweep).toBe(true);
+  expect(strict.detections).toHaveLength(2);
+  expect(wobbly.segments[0]!.full_sweep).toBe(true);
+  expect(wobbly.detections).toHaveLength(1);
+});
