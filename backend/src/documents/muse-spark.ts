@@ -98,6 +98,7 @@ export async function askMuseSpark(request: ExtractionRequest, config: MuseSpark
       ],
       text: { format: { type: "json_schema", name: "siteproof_claims", schema: request.responseSchema, strict: true } },
       max_output_tokens: MAX_OUTPUT_TOKENS,
+      ...(request.temperature === undefined ? {} : { temperature: request.temperature }),
     }),
   });
   if (!res.ok) throw new MuseSparkError("request_failed", `Muse Spark request failed with HTTP ${res.status}`, res.status);

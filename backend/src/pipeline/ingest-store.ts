@@ -6,7 +6,7 @@
 import { r2Files } from "../r2";
 import { ingestClipJob, type IngestStore } from "./ingest-job";
 import { askMuseSpark, MuseSparkError, museSparkConfigFromEnv } from "../documents/muse-spark";
-import { confirmRequest, readConfirmed } from "./confirm";
+import { bothSayYes, confirmRequest, readConfirmed } from "./confirm";
 import { samConfigFromEnv, samSegmenter } from "./sam";
 
 /**
@@ -62,15 +62,16 @@ export const ingestClip = ingestClipJob({
   store: prismaIngestStore,
   files: r2Files,
   segment: samSegmenter(samConfigFromEnv),
-  confirm: async (item, outlinedFramePath) => {
-    try {
-      const answer = await askMuseSpark(confirmRequest(item, outlinedFramePath), museSparkConfigFromEnv());
-      return readConfirmed(answer.text);
-    } catch (e) {
-      // A refusal, a cut-off or an empty answer is no yes: the object stays
-      // unconfirmed. Only failing to reach Muse Spark is worth a retry.
-      if (e instanceof MuseSparkError && e.code !== "request_failed") return false;
-      throw e;
-    }
-  },
+  confirm: (item, outlinedFramePath) =>
+    bothSayYes(async () => {
+      try {
+        const answer = await askMuseSpark(confirmRequest(item, outlinedFramePath), museSparkConfigFromEnv());
+        return readConfirmed(answer.text);
+      } catch (e) {
+        // A refusal, a cut-off or an empty answer is no yes: the object stays
+        // unconfirmed. Only failing to reach Muse Spark is worth a retry.
+        if (e instanceof MuseSparkError && e.code !== "request_failed") return false;
+        throw e;
+      }
+    }),
 });

@@ -64,6 +64,8 @@ export interface ExtractionRequest {
   pageImages: readonly string[];
   /** The JSON schema the answer is held to, in Muse Spark's strict mode. */
   responseSchema: object;
+  /** Sampling temperature. Unset leaves Muse Spark's default. */
+  temperature?: number;
 }
 
 const nullable = (type: "integer" | "string") => ({ anyOf: [{ type }, { type: "null" }] });

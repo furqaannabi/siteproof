@@ -26,6 +26,17 @@ export function readConfirmed(text: string): boolean {
   }
 }
 
+/**
+ * Asks the same question twice at once; true only if both answers are a clear yes.
+ * A borderline object can get a yes on one run and a no on the next (a glass panel
+ * beside a shop door, 2 November): it stays unconfirmed, which can only hold a
+ * Verified back. Muse Spark out of reach is an error, never a no.
+ */
+export async function bothSayYes(ask: () => Promise<boolean>): Promise<boolean> {
+  const answers = await Promise.all([ask(), ask()]);
+  return answers.every(Boolean);
+}
+
 /** The request for one object's outlined frame, in Muse Spark's strict JSON mode. */
 export function confirmRequest(item: ItemKind, outlinedFrame: string): ExtractionRequest {
   return {
@@ -36,6 +47,8 @@ export function confirmRequest(item: ItemKind, outlinedFrame: string): Extractio
       `Answer {"answer": "yes"} or {"answer": "no"} and nothing else.`,
     ].join(" "),
     pageImages: [outlinedFrame],
+    // As steady an answer as the model gives: the same frame should get the same answer.
+    temperature: 0,
     responseSchema: {
       type: "object",
       properties: { answer: { type: "string", enum: ["yes", "no"] } },
