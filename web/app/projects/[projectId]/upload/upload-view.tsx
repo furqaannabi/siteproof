@@ -71,8 +71,34 @@ function UploadView({ report, onSettled }: { report: ProjectOverview; onSettled:
       <main className={styles.main}>
         <div>
           <h1 className={styles.title}>Upload</h1>
-          <p className={styles.lede}>Send the clips you already have, in any order. Nothing needs to be filmed specially. Each clip is placed by the room tags it passes.</p>
+          <p className={styles.lede}>Send the clips you already have, in any order. Each clip is placed by the room tags it passes. To check a room fully, film it like this:</p>
         </div>
+
+        <section className={styles.guide} aria-labelledby="guide-title">
+          <h2 id="guide-title" className={styles.guideTitle}>
+            Film a room so it can be fully checked
+          </h2>
+          <ol>
+            <li>
+              <GuidePic step={1} />
+              <span>
+                <b>Start on the room tag</b>Inside the room, with the tag in frame.
+              </span>
+            </li>
+            <li>
+              <GuidePic step={2} />
+              <span>
+                <b>Turn slowly, one way</b>All the way round the room.
+              </span>
+            </li>
+            <li>
+              <GuidePic step={3} />
+              <span>
+                <b>Stop at the tag</b>When it&apos;s back in view. A clip that stops early, or turns back to the tag, can&apos;t show the whole room.
+              </span>
+            </li>
+          </ol>
+        </section>
 
         <div className={styles.trays}>
           <section className={styles.tray} aria-labelledby="clips-title">
@@ -179,32 +205,6 @@ function UploadView({ report, onSettled }: { report: ProjectOverview; onSettled:
             )}
           </section>
         </div>
-
-        <section className={styles.guide} aria-labelledby="guide-title">
-          <h2 id="guide-title" className={styles.guideTitle}>
-            Film a room so it can be fully checked
-          </h2>
-          <ol>
-            <li>
-              <GuidePic step={1} />
-              <span>
-                <b>Start on the room tag</b>Inside the room, with the tag in frame.
-              </span>
-            </li>
-            <li>
-              <GuidePic step={2} />
-              <span>
-                <b>Turn slowly, one way</b>All the way round the room.
-              </span>
-            </li>
-            <li>
-              <GuidePic step={3} />
-              <span>
-                <b>Stop at the tag</b>When it&apos;s back in view. A clip that stops early or pans back can&apos;t show the whole room.
-              </span>
-            </li>
-          </ol>
-        </section>
 
         <div className={ui.row}>
           <Link href={`/projects/${project.id}/report`} className={ui.primaryButton}>
