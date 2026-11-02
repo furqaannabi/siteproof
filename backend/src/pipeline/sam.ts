@@ -12,7 +12,20 @@ import { z } from "zod";
 export interface SamConfig {
   apiKey: string;
   baseUrl: string;
+  /** How long SAM's reply may go silent before the call fails. Tests shorten it. */
+  idleTimeoutMs?: number;
 }
+
+/*
+ * Without limits a stalled call hangs the job for good: on 2 November a 62 MB clip
+ * held one connection open for over ten minutes with nothing coming back. Measured
+ * the same day: a 12.5 MB clip uploaded in 31 s (about 0.4 MB/s) and SAM's reply
+ * never went quiet for more than 9 s. The limits allow for half that upload speed
+ * and twenty times that silence.
+ */
+const UPLOAD_BASE_MS = 60_000;
+const UPLOAD_MS_PER_MB = 5_000;
+const IDLE_TIMEOUT_MS = 180_000;
 
 /** Read from backend/.env. Never logged. */
 export function samConfigFromEnv(): SamConfig {
@@ -57,7 +70,7 @@ export interface Segmentation {
  */
 export class SamError extends Error {
   constructor(
-    readonly code: "upload_failed" | "request_failed" | "incomplete" | "unreadable",
+    readonly code: "upload_failed" | "request_failed" | "timed_out" | "incomplete" | "unreadable",
     message: string,
   ) {
     super(message);
@@ -115,10 +128,17 @@ async function uploadClip(clip: string, { apiKey, baseUrl }: SamConfig): Promise
   form.set("purpose", "user_data");
   form.set("file", Bun.file(clip), basename(clip));
 
+  const limitMs = UPLOAD_BASE_MS + (Bun.file(clip).size / 1e6) * UPLOAD_MS_PER_MB;
   const res = await fetch(`${baseUrl}/files`, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}` },
     body: form,
+    signal: AbortSignal.timeout(limitMs),
+  }).catch((e) => {
+    if (e instanceof DOMException && e.name === "TimeoutError") {
+      throw new SamError("timed_out", `clip upload took longer than ${Math.round(limitMs / 1000)} s`);
+    }
+    throw e;
   });
   if (!res.ok) throw new SamError("upload_failed", `clip upload failed with HTTP ${res.status}`);
   const parsed = UploadedFile.safeParse(await res.json().catch(() => null));
@@ -126,11 +146,14 @@ async function uploadClip(clip: string, { apiKey, baseUrl }: SamConfig): Promise
   return parsed.data.id;
 }
 
-/** Server-sent events, one parsed JSON object per `data:` block. */
-async function* serverSentEvents(body: ReadableStream<Uint8Array>): AsyncIterable<{ readonly type: string }> {
+/**
+ * Server-sent events, one parsed JSON object per `data:` block. `chunks` resets the
+ * idle timer on every chunk it hands over.
+ */
+async function* serverSentEvents(chunks: AsyncIterable<Uint8Array>): AsyncIterable<{ readonly type: string }> {
   const decoder = new TextDecoder();
   let buffer = "";
-  for await (const chunk of body) {
+  for await (const chunk of chunks) {
     buffer += decoder.decode(chunk, { stream: true }).replaceAll("\r\n", "\n");
     let end: number;
     while ((end = buffer.indexOf("\n\n")) !== -1) {
@@ -151,28 +174,76 @@ async function* serverSentEvents(body: ReadableStream<Uint8Array>): AsyncIterabl
  * through one clip.
  */
 export async function segmentClip(clip: string, prompt: string, config: SamConfig): Promise<Segmentation> {
-  const fileId = await uploadClip(clip, config);
+  return segmentUploaded(await uploadClip(clip, config), prompt, config);
+}
 
-  const res = await fetch(`${config.baseUrl}/responses`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${config.apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: SAM_MODEL,
-      input: [
-        {
-          type: "message",
-          role: "user",
-          content: [
-            { type: "input_text", text: prompt },
-            { type: "input_video", file_id: fileId },
-          ],
-        },
-      ],
-      stream: true,
-      metadata: { include_confidence: "true" },
-    }),
-  });
-  if (!res.ok || !res.body) throw new SamError("request_failed", `SAM request failed with HTTP ${res.status}`);
+/**
+ * `segmentClip` for a job that asks for several items in the same clip: the clip is
+ * uploaded once and every prompt reuses it, instead of one upload per item. Only the
+ * last clip is remembered, and a failed upload is not, so a retry uploads afresh.
+ * The config is read on every call, as `segmentClip` callers do.
+ */
+export function samSegmenter(config: () => SamConfig): (clip: string, prompt: string) => Promise<Segmentation> {
+  let last: { clip: string; fileId: Promise<string> } | undefined;
+  return async (clip, prompt) => {
+    if (last?.clip !== clip) last = { clip, fileId: uploadClip(clip, config()) };
+    const upload = last;
+    const fileId = await upload.fileId.catch((e) => {
+      if (last === upload) last = undefined;
+      throw e;
+    });
+    return segmentUploaded(fileId, prompt, config());
+  };
+}
 
-  return readSegmentation(serverSentEvents(res.body));
+/** Ask SAM 3.1 about a clip already uploaded through the Files API. */
+async function segmentUploaded(fileId: string, prompt: string, config: SamConfig): Promise<Segmentation> {
+  // One timer for the whole reply, restarted by every chunk: silence for longer than
+  // the limit aborts the request, and the read fails rather than waiting for ever.
+  const idleMs = config.idleTimeoutMs ?? IDLE_TIMEOUT_MS;
+  const abort = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const rearm = () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => abort.abort(), idleMs);
+  };
+  const timedOut = (e: unknown) => {
+    if (abort.signal.aborted) throw new SamError("timed_out", `SAM sent nothing for ${Math.round(idleMs / 1000)} s`);
+    throw e;
+  };
+  async function* watched(body: ReadableStream<Uint8Array>) {
+    for await (const chunk of body) {
+      rearm();
+      yield chunk;
+    }
+  }
+
+  rearm();
+  try {
+    const res = await fetch(`${config.baseUrl}/responses`, {
+      method: "POST",
+      signal: abort.signal,
+      headers: { Authorization: `Bearer ${config.apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: SAM_MODEL,
+        input: [
+          {
+            type: "message",
+            role: "user",
+            content: [
+              { type: "input_text", text: prompt },
+              { type: "input_video", file_id: fileId },
+            ],
+          },
+        ],
+        stream: true,
+        metadata: { include_confidence: "true" },
+      }),
+    }).catch(timedOut);
+    if (!res.ok || !res.body) throw new SamError("request_failed", `SAM request failed with HTTP ${res.status}`);
+
+    return await readSegmentation(serverSentEvents(watched(res.body))).catch(timedOut);
+  } finally {
+    clearTimeout(timer);
+  }
 }

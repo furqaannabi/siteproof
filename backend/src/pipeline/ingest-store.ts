@@ -7,7 +7,7 @@ import { r2Files } from "../r2";
 import { ingestClipJob, type IngestStore } from "./ingest-job";
 import { askMuseSpark, MuseSparkError, museSparkConfigFromEnv } from "../documents/muse-spark";
 import { crossCheckRequest, readCount } from "./cross-check";
-import { samConfigFromEnv, segmentClip } from "./sam";
+import { samConfigFromEnv, samSegmenter } from "./sam";
 
 /**
  * A capture time from the file's metadata as a Date, or null. Phones write offsets
@@ -61,7 +61,7 @@ export const prismaIngestStore: IngestStore = {
 export const ingestClip = ingestClipJob({
   store: prismaIngestStore,
   files: r2Files,
-  segment: (path, prompt) => segmentClip(path, prompt, samConfigFromEnv()),
+  segment: samSegmenter(samConfigFromEnv),
   count: async (item, framePaths) => {
     try {
       const answer = await askMuseSpark(crossCheckRequest(item, framePaths), museSparkConfigFromEnv());
