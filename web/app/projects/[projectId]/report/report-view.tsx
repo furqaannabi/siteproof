@@ -281,6 +281,8 @@ const missingOf = (r: RoomRow) => r.result.expected - r.result.counted;
 interface Bill {
   item: ItemKind;
   claim: Claim | undefined;
+  /** The letter's room-by-room lines for this item, when it bills each room rather than the whole flat. */
+  lines: Claim[];
   seen: number;
   short: RoomRow[];
   notSeen: RoomRow[];
@@ -288,10 +290,15 @@ interface Bill {
 
 /** What the demand letter billed for one item, against what was counted in the rooms that were judged. */
 function billFor(report: Report, rows: RoomRow[], item: ItemKind, letterId: string | undefined): Bill {
-  const mine = rows.filter((r) => r.claim.item === item);
+  const claim = report.claims.find((c) => c.doc_id === letterId && c.item === item && c.room_id === null);
+  // A letter can bill room by room ("Room Two: windows complete: 1") instead of the whole flat:
+  // then its headline is those lines added up, and only their rows, never an invoice's.
+  const lines = claim ? [] : report.claims.filter((c) => c.doc_id === letterId && c.item === item && c.room_id !== null && c.quote_verified);
+  const mine = rows.filter((r) => r.claim.item === item && (lines.length === 0 || lines.some((l) => l.id === r.judged.id)));
   return {
     item,
-    claim: report.claims.find((c) => c.doc_id === letterId && c.item === item && c.room_id === null),
+    claim,
+    lines,
     // Objects counted with frames, in rooms that were judged, never more than the plan holds.
     seen: mine.filter((r) => r.result.outcome !== "not_seen").reduce((n, r) => n + Math.min(r.result.counted, r.result.expected), 0),
     short: mine.filter((r) => r.result.outcome === "short"),
@@ -482,6 +489,36 @@ function BillPanel({ bill }: { bill: Bill }) {
     },
   ].filter((x): x is { short: boolean; text: string } => Boolean(x));
 
+  if (!bill.claim && bill.lines.length > 0) {
+    const billed = bill.lines.reduce((n, l) => n + l.qty, 0);
+    return (
+      <div className={styles.bill}>
+        <h2 className={styles.billHead}>
+          Demand letter, room by room
+          <span className={styles.chk}>
+            <Icon of={ICON.seal} size={15} />
+            {bill.lines.length === 1 ? "quote checked" : `${bill.lines.length} quotes checked`}
+          </span>
+        </h2>
+        <p className={styles.fig}>
+          <span className={styles.figN}>{bill.seen}</span>
+          <span className={styles.figOf}>of {billed}</span>
+          <span className={styles.figLabel}>{ITEM_PLURAL[bill.item]} seen and counted, with frames</span>
+        </p>
+        <p className={styles.split}>
+          {where.length === 0 ? (
+            <span>Every {ITEM_SINGULAR[bill.item]} billed was counted.</span>
+          ) : (
+            where.map((w) => (
+              <span key={w.text} className={w.short ? styles.splitShort : undefined}>
+                {w.text}
+              </span>
+            ))
+          )}
+        </p>
+      </div>
+    );
+  }
   if (!bill.claim?.quote_verified) {
     return (
       <div className={styles.bill}>
