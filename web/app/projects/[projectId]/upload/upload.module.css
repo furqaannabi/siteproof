@@ -89,6 +89,15 @@
   gap: 12px;
 }
 
+/* Clips pile up over a project's life: the list scrolls on its own and the documents stay in reach. */
+.strip {
+  max-height: min(32rem, 60vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Room for focus rings and the scrollbar, so neither clips a card's edge. */
+  padding: 2px 6px 2px 2px;
+}
+
 .film {
   position: relative;
   display: grid;
