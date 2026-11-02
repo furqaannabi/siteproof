@@ -2,6 +2,10 @@
   "clips": [
     { "file": "c01.mp4", "kind": "messy", "counts": { "window": 0, "door": 0 } },
     { "file": "c02.mp4", "kind": "sweep", "room": "Living Room", "counts": { "window": 2, "door": 1 } },
-    { "file": "c03.mp4", "kind": "sweep", "room": "Living Room", "counts": { "window": 2, "door": 1 } }
+    { "file": "c03.mp4", "kind": "sweep", "room": "Living Room", "counts": { "window": 2, "door": 1 } },
+    { "file": "c04.mp4", "kind": "messy", "counts": { "window": 4, "door": 6 } },
+    { "file": "c05.mp4", "kind": "pan", "counts": { "window": 4, "door": 0 } },
+    { "file": "c06.mp4", "kind": "messy", "counts": { "window": 0, "door": 0 } },
+    { "file": "c07.mp4", "kind": "sweep", "room": "Bedroom", "counts": { "window": 3, "door": 2 } }
   ]
 }
