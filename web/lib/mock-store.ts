@@ -317,7 +317,7 @@ export const mockSource = {
       id: crypto.randomUUID(),
       room_id: roomId,
       text: `Need 5 s of Flat ${flat?.name ?? ""} ${lower}, one slow sweep from its room tag`,
-      steps: [`Start with the ${lower}'s room tag in view, at the door.`, "Turn slowly one way until you have seen every wall.", "Stop there. Don't pan back."],
+      steps: [`Start with the ${lower}'s room tag in view, on the wall by the door.`, "Turn slowly one way, all the way round the room.", "Stop when the room tag is back in view. Don't pan back."],
       status: "sent",
     };
     p.gap_requests.push(gap);

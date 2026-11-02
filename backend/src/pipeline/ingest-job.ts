@@ -158,11 +158,12 @@ export function ingestClipJob({ store, files, segment, count }: IngestDeps) {
           throw e instanceof IngestError ? new ClipJobError(`clip_${e.code}`, false) : e;
         });
 
-        const planned = segmentsFromTags(await decodeTags(ingested.frames), ingested.duration_s);
+        const sightings = await decodeTags(ingested.frames);
+        const planned = segmentsFromTags(sightings, ingested.duration_s);
         const steps = await panShifts(ingested.frames.map((f) => f.path));
         const shifts = steps.map((shift, i) => ({ t: ingested.frames[i + 1]!.t, shift }));
         const roomsByTag = await store.roomsByTag(clip.project_id);
-        const placed = planClip({ planned, roomsByTag, shifts, tracks: { window: [], door: [] }, fps: ingested.source_fps });
+        const placed = planClip({ planned, sightings, roomsByTag, shifts, tracks: { window: [], door: [] }, fps: ingested.source_fps });
 
         // SAM is paid per frame. Footage that passed no room tag of this project can
         // never back a claim, so it is not sent at all.
@@ -176,7 +177,7 @@ export function ingestClipJob({ store, files, segment, count }: IngestDeps) {
             ).objects;
           }
         }
-        const plan = planClip({ planned, roomsByTag, shifts, tracks, fps: ingested.source_fps });
+        const plan = planClip({ planned, sightings, roomsByTag, shifts, tracks, fps: ingested.source_fps });
 
         const detections: SavedDetection[] = [];
         for (const d of plan.detections) {

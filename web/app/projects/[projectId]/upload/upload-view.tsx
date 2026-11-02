@@ -188,19 +188,19 @@ function UploadView({ report, onSettled }: { report: ProjectOverview; onSettled:
             <li>
               <GuidePic step={1} />
               <span>
-                <b>Start at the room tag</b>In the doorway, with the tag in frame.
+                <b>Start on the room tag</b>Inside the room, with the tag in frame.
               </span>
             </li>
             <li>
               <GuidePic step={2} />
               <span>
-                <b>Pan slowly, one way</b>Round the whole room once.
+                <b>Turn slowly, one way</b>All the way round the room.
               </span>
             </li>
             <li>
               <GuidePic step={3} />
               <span>
-                <b>Don&apos;t pan back</b>A clip that does still counts, but the room may stay Not seen yet.
+                <b>Stop at the tag</b>When it&apos;s back in view. A clip that stops early or pans back can&apos;t show the whole room.
               </span>
             </li>
           </ol>

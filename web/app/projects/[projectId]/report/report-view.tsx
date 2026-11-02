@@ -298,8 +298,8 @@ export function coverage(segments: Segment[]) {
   if (segments.length > 0)
     return {
       covered: false,
-      text: "Partly filmed · the clip didn't start at the room tag",
-      when: "Needs one sweep from the tag",
+      text: "Partly filmed · the clip didn't come back round to the room tag",
+      when: "Needs one full turn from the tag",
     };
   return {
     covered: false,
@@ -712,7 +712,7 @@ function GapPanel({ report, room, view, onChange }: { report: Report; room: Room
           ))}
         </ol>
       ) : (
-        <p className={styles.panelNote}>Start at the {room.name.toLowerCase()} room tag and pan slowly one way. Don&apos;t pan back.</p>
+        <p className={styles.panelNote}>Start on the {room.name.toLowerCase()} room tag and turn slowly one way, all the way round. Stop when the tag is back in view.</p>
       )}
       {view === "builder" ? (
         gap ? (

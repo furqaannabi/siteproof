@@ -20,9 +20,9 @@ const MAX_STEP_CHARS = 140;
 export function fixedSteps(room: string): string[] {
   const lower = room.toLowerCase();
   return [
-    `Start with the ${lower}'s room tag in view, at the door.`,
-    "Turn slowly one way until you have seen every wall.",
-    "Stop there. Don't pan back.",
+    `Start with the ${lower}'s room tag in view, on the wall by the door.`,
+    "Turn slowly one way, all the way round the room.",
+    "Stop when the room tag is back in view. Don't pan back.",
   ];
 }
 
@@ -64,7 +64,7 @@ function prompt(room: string): string {
   return [
     "Write the filming steps for a builder's site supervisor, who will read them on a phone on a construction site.",
     "They need to film one short clip of one room so its installed windows and doors can be counted.",
-    "The clip must start at the printed room tag on the doorway and pan slowly in one direction across the whole room, never back over anything already filmed.",
+    "The clip must start on the printed room tag on the wall by the door, turn slowly in one direction all the way round the room, and stop when the room tag is back in view. It must never pan back over anything already filmed.",
     "Write two to four steps, each one short plain sentence. No numbers or digits, no measurements, no claims about what is or isn't installed.",
     `The room is named: ${JSON.stringify(room)}`,
   ].join("\n");

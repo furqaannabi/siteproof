@@ -5,7 +5,8 @@ import { join } from "node:path";
 import { ingestClipJob, type IngestStore } from "./ingest-job";
 import type { Segmentation } from "./sam";
 
-// Generated video only: a textured wall, a steady pan, and a printed tag fixture.
+// Generated video only: a textured wall, a steady pan, and a printed tag fixture. The
+// tagged clip shows the tag for its first 1.5 s and again from 6.5 s: all the way round.
 const TAG = join(import.meta.dir, "../../fixtures/tags/SPKTCHN001.png");
 let dir: string;
 let taggedSweep: Uint8Array;
@@ -20,8 +21,8 @@ beforeAll(async () => {
   dir = await mkdtemp(join(tmpdir(), "siteproof-ingest-job-"));
   const wall = join(dir, "wall.png");
   await ffmpeg("-f", "lavfi", "-i", "nullsrc=s=160x36,format=gray,geq=lum='random(1)*255'", "-frames:v", "1", "-vf", "scale=1600:360:flags=bicubic", wall);
-  const pan = ["-loop", "1", "-framerate", "24", "-t", "6", "-i", wall];
-  await ffmpeg(...pan, "-i", TAG, "-filter_complex", "[0]crop=640:360:'t*120':0[v];[1]scale=150:150[q];[v][q]overlay=20:100:enable='lt(t,1.5)'", "-c:v", "libx264", "-pix_fmt", "yuv420p", join(dir, "tagged.mp4"));
+  const pan = ["-loop", "1", "-framerate", "24", "-t", "8", "-i", wall];
+  await ffmpeg(...pan, "-i", TAG, "-filter_complex", "[0]crop=640:360:'t*120':0[v];[1]scale=150:150[q];[v][q]overlay=20:100:enable='lt(t,1.5)+gt(t,6.5)'", "-c:v", "libx264", "-pix_fmt", "yuv420p", join(dir, "tagged.mp4"));
   await ffmpeg(...pan, "-vf", "crop=640:360:'t*120':0", "-c:v", "libx264", "-pix_fmt", "yuv420p", join(dir, "untagged.mp4"));
   taggedSweep = new Uint8Array(await Bun.file(join(dir, "tagged.mp4")).arrayBuffer());
   untagged = new Uint8Array(await Bun.file(join(dir, "untagged.mp4")).arrayBuffer());

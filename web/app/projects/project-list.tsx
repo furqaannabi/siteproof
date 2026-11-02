@@ -74,7 +74,7 @@ function todosFor({ report, summary, oneOfMany }: Loaded): Todo[] {
       kind: "not_seen",
       where: `${flat} · ${room.name} · Not seen yet`,
       title: gap?.text ?? `5 s of the ${room.name.toLowerCase()} clears it`,
-      detail: gap?.status === "sent" ? "Sent to the site. Waiting for the clip." : "One sweep from its room tag clears it.",
+      detail: gap?.status === "sent" ? "Sent to the site. Waiting for the clip." : "One full turn from its room tag clears it.",
       href: reportAt(room.id),
       action: gap?.status === "sent" ? "See the room" : "Ask the site",
     });

@@ -730,7 +730,7 @@ function Diary({
                     </span>
                   )}
                   <span className={styles.note}>
-                    {s.full_sweep ? `One complete sweep from the room tag, ${seconds(s.t_start)}–${seconds(s.t_end)}` : "Partly filmed: it didn't start at the room tag"}
+                    {s.full_sweep ? `One complete sweep from the room tag, ${seconds(s.t_start)}–${seconds(s.t_end)}` : "Partly filmed: it didn't come back round to the room tag"}
                   </span>
                 </div>
               );

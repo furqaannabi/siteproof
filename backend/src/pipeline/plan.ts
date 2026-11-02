@@ -7,13 +7,15 @@
  */
 import type { SegmentationMask } from "@meta-sam/parser";
 import type { ItemKind } from "@siteproof/contract";
-import type { PlannedSegment } from "./segments";
+import type { PlannedSegment, TagSighting } from "./segments";
 import { countObjects } from "./count";
 import type { Box, Sighting, TrackedObject } from "./sam";
 import { isOneWaySweep } from "./sweep";
 
 export interface PlanInput {
   planned: readonly PlannedSegment[];
+  /** Every room tag decoded from the sampled frames, as the segments were built from. */
+  sightings: readonly TagSighting[];
   /** This project's rooms by their tag code. */
   roomsByTag: ReadonlyMap<string, string>;
   /** The camera's sideways step ending at each sampled frame's time. */
@@ -40,13 +42,34 @@ export interface ClipPlan {
   detections: PlannedDetection[];
 }
 
-export function planClip({ planned, roomsByTag, shifts, tracks, fps }: PlanInput): ClipPlan {
+/**
+ * Out of view for at least this long, then seen again: the camera turned all the way
+ * round the room. Less is a wobble off the tag and back.
+ */
+const RETURN_GAP_S = 5;
+
+/**
+ * Whether the segment's own tag leaves the view and comes back. The segment starts at
+ * its tag by construction, so a gap between two sightings of it is the turn between.
+ */
+function returnsToTag(segment: PlannedSegment, sightings: readonly TagSighting[]): boolean {
+  const times = sightings
+    .filter((s) => s.qr_code === segment.qr_code && s.t >= segment.t_start && s.t <= segment.t_end)
+    .map((s) => s.t)
+    .sort((a, b) => a - b);
+  return times.some((t, i) => i > 0 && t - times[i - 1]! >= RETURN_GAP_S);
+}
+
+export function planClip({ planned, sightings, roomsByTag, shifts, tracks, fps }: PlanInput): ClipPlan {
   const segments = planned.map((p) => {
     const room_id = p.qr_code ? (roomsByTag.get(p.qr_code) ?? null) : null;
-    // A segment starts at its tag by construction; it covers the room only if the
-    // camera then pans one way through it. An unplaced segment covers no room.
+    // A segment starts at its tag by construction. It covers the room only if the
+    // camera pans one way through it and comes back round to the tag: a clip that
+    // stops partway never looked at the rest of the room, and a Short from it would
+    // be an accusation about walls it never filmed. An unplaced segment covers no room.
     const steps = shifts.filter((s) => s.t > p.t_start && s.t <= p.t_end).map((s) => s.shift);
-    return { room_id, t_start: p.t_start, t_end: p.t_end, full_sweep: room_id !== null && isOneWaySweep(steps) };
+    const full_sweep = room_id !== null && isOneWaySweep(steps) && returnsToTag(p, sightings);
+    return { room_id, t_start: p.t_start, t_end: p.t_end, full_sweep };
   });
 
   const detections: PlannedDetection[] = [];

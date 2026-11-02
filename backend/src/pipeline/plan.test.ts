@@ -25,6 +25,8 @@ function input(overrides: Partial<PlanInput> = {}): PlanInput {
     planned: [{ qr_code: KITCHEN, t_start: 0, t_end: 10 }],
     roomsByTag: new Map([[KITCHEN, "room_kitchen"]]),
     shifts: panRight,
+    // The tag at the start, then again after a full turn.
+    sightings: [{ t: 0, qr_code: KITCHEN }, { t: 2, qr_code: KITCHEN }, { t: 10, qr_code: KITCHEN }],
     tracks: { window: [track("0", [[10, 50]])], door: [] },
     fps: FPS,
     ...overrides,
@@ -47,6 +49,20 @@ test("a placed segment is a full sweep only if the camera pans one way through i
 
   expect(planClip(input({ planned: twoParts })).segments.map((s) => s.full_sweep)).toEqual([false, true]);
   expect(planClip(input({ shifts: backAndForth })).segments[0]!.full_sweep).toBe(false);
+});
+
+test("a sweep covers its room only if the camera comes back round to the tag, at least 5 s later", () => {
+  const seen = (...times: number[]) => times.map((t) => ({ t, qr_code: KITCHEN }));
+
+  // Started on the tag and turned part of the way: the 2 November false Short.
+  expect(planClip(input({ sightings: seen(0, 0.5, 1) })).segments[0]!.full_sweep).toBe(false);
+  // Off the tag and straight back is a wobble, not a turn round the room.
+  expect(planClip(input({ sightings: seen(0, 0.5, 3.5) })).segments[0]!.full_sweep).toBe(false);
+  // Out of view for 5.5 s, then the tag again: all the way round.
+  expect(planClip(input({ sightings: seen(0, 0.5, 6) })).segments[0]!.full_sweep).toBe(true);
+  // Another room's tag coming into view is not this room's tag coming back.
+  const other = [...seen(0, 0.5), { t: 8, qr_code: "SPBDRM0001" }];
+  expect(planClip(input({ sightings: other })).segments[0]!.full_sweep).toBe(false);
 });
 
 test("each counted object becomes one detection, shown by the best frame of its own run", () => {
