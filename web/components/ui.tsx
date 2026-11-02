@@ -565,7 +565,8 @@ export function describeError(error: unknown): { title: string; body: string; re
 
 export function captureTime(iso: string | null) {
   if (!iso) return "capture time unknown";
-  return new Date(iso).toLocaleString("en-IN", {
+  // The site's own time, named, so a viewer in another time zone doesn't misread it.
+  const when = new Date(iso).toLocaleString("en-IN", {
     day: "numeric",
     month: "short",
     hour: "2-digit",
@@ -573,6 +574,7 @@ export function captureTime(iso: string | null) {
     hour12: false,
     timeZone: "Asia/Kolkata",
   });
+  return `${when} IST`;
 }
 
 export { styles as ui };
