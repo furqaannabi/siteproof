@@ -889,12 +889,27 @@
     display: none;
   }
 
+  /* Plain white paper in any theme, and no screen spacing around the sheet: two
+     tags only fit down an A4 page with nothing above or below them. */
+  :global(html:has(body[data-printing="tags"])),
+  :global(body[data-printing="tags"]) {
+    background: #fff;
+    padding: 0;
+  }
+
+  :global(body[data-printing="tags"]) .main,
+  :global(body[data-printing="tags"]) .lower,
+  :global(body[data-printing="tags"]) .tagSheet {
+    padding: 0;
+    gap: 0;
+  }
+
   /* Each QR prints 100 mm wide, so a phone filming from 1 to 2 m sees every square
      as several pixels: one tag across an A4 page, two down it. */
   .tags {
     grid-template-columns: repeat(auto-fill, 112mm);
     justify-content: center;
-    gap: 8mm;
+    gap: 6mm;
   }
 
   .tags .qr {
@@ -903,7 +918,7 @@
   }
 
   .tags .tag {
-    padding: 6mm;
+    padding: 5mm;
   }
 
   .tag {
