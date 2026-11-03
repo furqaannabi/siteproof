@@ -148,6 +148,9 @@ function AppNav({ place }: { place: NavPlace }) {
   // the same "We couldn't find this project".
   const opens = place.projectId && projects.some((p) => p.id === place.projectId);
   const bottom = opens ? [...projectLinks(place.projectId!), { ...APP_LINKS[0], label: "Projects" }] : APP_LINKS;
+  // The current project starts open and the rest closed, until the builder opens or closes one.
+  const [toggled, setToggled] = useState<Record<string, boolean>>({});
+  const isOpen = (id: string) => toggled[id] ?? id === place.projectId;
   return (
     <>
       <aside className={styles.sidebar}>
@@ -157,13 +160,24 @@ function AppNav({ place }: { place: NavPlace }) {
           {projects.length > 0 && <span className={styles.sideLabel}>Projects</span>}
           {projects.map((p) => (
             <div key={p.id} className={styles.sideGroup}>
-              <Link href={`/projects/${p.id}`} className={styles.sideProject} data-here={p.id === place.projectId || undefined}>
-                <ChevronDown size={16} aria-hidden="true" />
-                <span>{p.name}</span>
-              </Link>
-              {projectLinks(p.id).map((l) => (
-                <NavItem key={l.key} link={l} active={p.id === place.projectId && l.key === place.current} />
-              ))}
+              <div className={styles.sideHead}>
+                <button
+                  type="button"
+                  className={styles.sideToggle}
+                  aria-expanded={isOpen(p.id)}
+                  aria-label={`${isOpen(p.id) ? "Hide" : "Show"} ${p.name}'s pages`}
+                  onClick={() => setToggled((t) => ({ ...t, [p.id]: !isOpen(p.id) }))}
+                >
+                  <ChevronDown size={16} aria-hidden="true" />
+                </button>
+                <Link href={`/projects/${p.id}`} className={styles.sideProject} data-here={p.id === place.projectId || undefined}>
+                  <span>{p.name}</span>
+                </Link>
+              </div>
+              {isOpen(p.id) &&
+                projectLinks(p.id).map((l) => (
+                  <NavItem key={l.key} link={l} active={p.id === place.projectId && l.key === place.current} />
+                ))}
             </div>
           ))}
           <NavItem link={APP_LINKS[1]} active={place.current === "new"} />

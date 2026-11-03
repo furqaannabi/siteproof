@@ -266,12 +266,42 @@
     margin-bottom: 14px;
   }
 
+  .sideHead {
+    display: flex;
+    align-items: center;
+  }
+
+  /* Opens and closes the project's pages; the name beside it opens the project. */
+  .sideToggle {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 40px;
+    margin-left: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: rgba(233, 241, 236, 0.82);
+    cursor: pointer;
+  }
+
+  .sideToggle svg {
+    transition: transform 0.15s ease;
+  }
+
+  .sideToggle[aria-expanded="false"] svg {
+    transform: rotate(-90deg);
+  }
+
   .sideProject {
+    flex: 1;
     display: flex;
     align-items: center;
     gap: 8px;
     min-height: 40px;
-    padding: 0 14px;
+    padding: 0 14px 0 4px;
     border-radius: 8px;
     color: rgba(233, 241, 236, 0.82);
     font-weight: 600;
@@ -1019,7 +1049,8 @@
 }
 
 @media (min-width: 960px) and (hover: hover) {
-  .sideProject:hover {
+  .sideProject:hover,
+  .sideToggle:hover {
     background: rgba(233, 241, 236, 0.1);
     color: #ffffff;
   }
