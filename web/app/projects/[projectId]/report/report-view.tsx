@@ -837,8 +837,9 @@ function Flat3D({ rows }: { rows: RoomRow[] }) {
   const [selectedId, setSelectedId] = useState<string | undefined>();
   // three.js is fetched and a WebGL context made only once someone opens this.
   const [open, setOpen] = useState(false);
+  // A room billed in both the demand letter and an invoice is still one room in the model.
   const rooms3d: Room3D[] = rows
-    .filter((r) => r.claim.item === item)
+    .filter((r, i) => r.claim.item === item && rows.findIndex((o) => o.claim.item === item && o.room.id === r.room.id) === i)
     .map((r) => ({
       id: r.room.id,
       name: r.room.name,
@@ -854,6 +855,7 @@ function Flat3D({ rows }: { rows: RoomRow[] }) {
           <ItemSwitch item={item} onChange={setItem} />
           <Plan3D
             rooms={rooms3d}
+            item={item}
             selectedId={selectedId}
             onSelect={(id) => {
               setSelectedId(id);

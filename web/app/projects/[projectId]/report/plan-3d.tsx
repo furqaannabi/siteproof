@@ -1,6 +1,6 @@
 "use client";
 
-import type { Outcome } from "@siteproof/contract";
+import type { ItemKind, Outcome } from "@siteproof/contract";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -20,13 +20,14 @@ export interface Room3D {
  * The rooms as a 3D model. Loaded only when someone opens the 3D view.
  *
  * Nothing here is measured. SiteProof knows each room's claim and count, not its
- * size or where a window sits, so the rooms are laid out automatically (the same
- * arrangement as the 2D plan) and window markers are spaced evenly round each room.
- * A counted window is a solid frame; the rest are plain markers. No marker ever says
+ * size or where a window or door sits, so the rooms are laid out automatically (the
+ * same arrangement as the 2D plan) and markers are spaced evenly round each room, shaped
+ * as the item: a window raised off the floor, a door standing on it. A counted one is a
+ * solid frame; the rest are plain markers. No marker ever says
  * "missing here": the floor colour carries the outcome, and the evidence panel carries
  * the frames.
  */
-export default function Plan3D({ rooms, selectedId, onSelect }: { rooms: Room3D[]; selectedId: string | undefined; onSelect: (id: string) => void }) {
+export default function Plan3D({ rooms, item, selectedId, onSelect }: { rooms: Room3D[]; item: ItemKind; selectedId: string | undefined; onSelect: (id: string) => void }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const labelsRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<SceneHandle | null>(null);
@@ -57,14 +58,14 @@ export default function Plan3D({ rooms, selectedId, onSelect }: { rooms: Room3D[
   }, [onSelect]);
 
   // The scene is rebuilt when the rooms or their quantities change (another item, another project).
-  const layoutKey = rooms.map((r) => `${r.id}:${r.qty}`).join("|");
+  const layoutKey = `${item}|` + rooms.map((r) => `${r.id}:${r.qty}`).join("|");
   useEffect(() => {
     const stage = stageRef.current;
     const labels = labelsRef.current;
     if (!stage || !labels) return;
     let handle: SceneHandle;
     try {
-      handle = buildScene(stage, labels, rooms, (id) => onSelectRef.current(id));
+      handle = buildScene(stage, labels, rooms, item, (id) => onSelectRef.current(id));
     } catch {
       // No WebGL (old phone, blocked GPU): say so; the 2D plan still works.
       queueMicrotask(() => setFailed(true));
@@ -105,7 +106,7 @@ export default function Plan3D({ rooms, selectedId, onSelect }: { rooms: Room3D[
         </span>
         <span>
           <i className={styles.swCounted} />
-          Window counted
+          {item === "door" ? "Door" : "Window"} counted
         </span>
         <span>
           <i className={styles.swMarker} />
@@ -139,12 +140,18 @@ const CELL_W = 3.2;
 const CELL_D = 2.6;
 const WALL_H = 2.4;
 
+/** Each item's marker: its height, the height of its centre, and its widest. */
+const SHAPE: Record<ItemKind, { h: number; y: number; maxW: number }> = {
+  window: { h: 1.1, y: 1.45, maxW: 1.1 },
+  door: { h: 2.05, y: 1.025, maxW: 0.9 },
+};
+
 /**
  * Evenly spaced points along a room's outside walls, inset from the corners. Windows
  * sit in outside walls, and a marker on a shared wall would look as if it belonged to
  * the room next door. A room with no outside wall in the layout uses all four.
  */
-function markerSpots(rect: Rect, n: number, bounds: Rect) {
+function markerSpots(rect: Rect, n: number, bounds: Rect, maxW: number) {
   const inset = 0.35;
   const near = (a: number, b: number) => Math.abs(a - b) < 1e-6;
   const all = [
@@ -155,7 +162,7 @@ function markerSpots(rect: Rect, n: number, bounds: Rect) {
   ];
   const sides = all.some((x) => x.outside) ? all.filter((x) => x.outside) : all;
   const total = sides.reduce((s, x) => s + x.len, 0);
-  const width = Math.min(1.1, (total / Math.max(n, 1)) * 0.55);
+  const width = Math.min(maxW, (total / Math.max(n, 1)) * 0.55);
   return Array.from({ length: n }, (_, i) => {
     let t = ((i + 0.5) / n) * total;
     for (const side of sides) {
@@ -204,7 +211,8 @@ function hatchTexture() {
   return t;
 }
 
-function buildScene(stage: HTMLDivElement, labelLayer: HTMLDivElement, rooms: Room3D[], onPick: (id: string) => void): SceneHandle {
+function buildScene(stage: HTMLDivElement, labelLayer: HTMLDivElement, rooms: Room3D[], item: ItemKind, onPick: (id: string) => void): SceneHandle {
+  const shape = SHAPE[item];
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -319,10 +327,10 @@ function buildScene(stage: HTMLDivElement, labelLayer: HTMLDivElement, rooms: Ro
       scene.add(edge);
     }
 
-    const markers = markerSpots(r, room.qty, bounds).map((spot) => {
-      const geo = track(new THREE.BoxGeometry(spot.width, 1.1, 0.14));
+    const markers = markerSpots(r, room.qty, bounds, shape.maxW).map((spot) => {
+      const geo = track(new THREE.BoxGeometry(spot.width, shape.h, 0.14));
       const solid = new THREE.Mesh(geo, basic({ color: COLORS.counted }));
-      solid.position.set(spot.x, 1.45, spot.z);
+      solid.position.set(spot.x, shape.y, spot.z);
       solid.rotation.y = spot.rot;
       scene.add(solid);
       const edges = track(new THREE.EdgesGeometry(geo));
